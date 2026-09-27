@@ -1,0 +1,142 @@
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 30px 0 0;
+  color: var(--muted);
+  font:
+    11px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+.back-link:hover {
+  color: var(--accent);
+}
+.animal-hero {
+  display: grid;
+  grid-template-columns: 1.06fr 1fr;
+  gap: clamp(34px, 5vw, 74px);
+  align-items: center;
+  padding: 42px 3.5% 56px;
+}
+.animal-photo {
+  position: relative;
+}
+.animal-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.06 / 1;
+  object-fit: cover;
+  background: var(--panel);
+}
+.animal-intro h1 {
+  margin: 22px 0 12px;
+}
+.animal-breed-line {
+  margin: 0;
+  font:
+    20px 'Fraunces',
+    serif;
+}
+.animal-facts {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font:
+    11px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.animal-intro blockquote {
+  margin-top: 30px;
+}
+.animal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+.animal-added {
+  margin-top: 20px;
+}
+.wiki-link {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--line);
+}
+.wiki-link:hover {
+  background: var(--panel);
+  color: var(--accent);
+}
+.animal-specs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.spec {
+  background: var(--panel);
+  color: var(--fg);
+  padding: 24px 26px 26px;
+}
+.spec svg {
+  color: var(--accent);
+}
+.spec span {
+  display: block;
+  margin-top: 15px;
+  color: var(--muted);
+  font:
+    10px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.spec strong {
+  display: block;
+  margin-top: 8px;
+  font:
+    24px 'Fraunces',
+    serif;
+  letter-spacing: -0.03em;
+}
+.animal-story {
+  margin-top: 12px;
+  padding: 30px 29px 34px;
+  background: var(--accent);
+  color: var(--ink);
+}
+.animal-story h2 {
+  margin: 26px 0 12px;
+  font:
+    500 clamp(26px, 3.4vw, 40px)/1.05 'Fraunces',
+    serif;
+  letter-spacing: -0.05em;
+}
+.animal-story p {
+  max-width: 760px;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+@media (max-width: 760px) {
+  .animal-hero {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    padding: 30px 5px 40px;
+  }
+  .animal-specs {
+    grid-template-columns: 1fr;
+  }
+  .animal-story {
+    padding: 24px 20px 26px;
+  }
+  .animal-story p {
+    font-size: 16px;
+  }
+  .animal-intro h1 {
+    font-size: clamp(50px, 15vw, 72px);
+  }
+}

@@ -1,0 +1,52 @@
+# Зависимости
+node_modules/
+.pnp
+.pnp.js
+
+# Сборка
+dist/
+dist-ssr/
+build/
+*.local
+
+# Артефакты TypeScript
+*.tsbuildinfo
+
+# Кэш инструментов
+.vite/
+.eslintcache
+.prettiercache
+*.stylelintcache
+
+# Логи
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Окружение и секреты
+.env
+.env.*
+!.env.example
+
+# Покрытие тестами
+coverage/
+.nyc_output/
+
+# Редакторы и IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ОС
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini

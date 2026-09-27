@@ -1,0 +1,242 @@
+.training-head {
+  padding: 62px 3.5% 38px;
+}
+.training-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.stat {
+  background: var(--panel);
+  color: var(--fg);
+  padding: 22px 25px 24px;
+}
+.stat span {
+  display: block;
+  color: var(--muted);
+  font:
+    10px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.stat strong {
+  display: block;
+  margin-top: 9px;
+  font:
+    32px 'Fraunces',
+    serif;
+  letter-spacing: -0.04em;
+}
+.stat strong.stat-date {
+  font-size: 22px;
+  text-transform: capitalize;
+  letter-spacing: 0;
+}
+
+.today-training {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 22px 26px;
+  background: var(--accent);
+  color: var(--ink);
+}
+.training-today-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  background: var(--ink);
+  color: var(--accent);
+}
+.today-training h2 {
+  margin: 7px 0 4px;
+  font:
+    500 25px 'Fraunces',
+    serif;
+  letter-spacing: -0.04em;
+}
+.today-training p {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.72;
+}
+.today-training .training-toggle {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--accent);
+  margin-left: auto;
+  white-space: nowrap;
+}
+.today-training .training-toggle.is-done {
+  background: transparent;
+  color: var(--ink);
+}
+.today-training .training-toggle.is-done:hover {
+  background: var(--ink);
+  color: var(--accent);
+}
+
+.calendar {
+  margin-top: 12px;
+  background: var(--panel);
+  color: var(--fg);
+  padding: 28px 29px 30px;
+}
+.calendar-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 21px;
+}
+.calendar-bar h2 {
+  margin: 0;
+  font:
+    500 30px 'Fraunces',
+    serif;
+  letter-spacing: -0.04em;
+  text-transform: capitalize;
+}
+.calendar-nav {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+.calendar-nav:hover {
+  background: var(--accent);
+  color: var(--ink);
+}
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.calendar-week span {
+  text-align: center;
+  color: var(--muted);
+  font:
+    9px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 5px 0;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.calendar-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  font:
+    15px 'DM Mono',
+    monospace;
+}
+.calendar-cell:hover:not(:disabled):not(.is-empty) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.calendar-cell.is-empty {
+  border-color: transparent;
+  background: transparent;
+  cursor: default;
+}
+.calendar-cell.is-today {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.calendar-cell.is-done {
+  background: var(--accent);
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.calendar-cell.is-done svg {
+  position: absolute;
+  bottom: 4px;
+  right: 5px;
+}
+.calendar-cell:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.calendar-cell:disabled.is-done {
+  opacity: 0.45;
+}
+.calendar-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 17px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.copy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin-top: 12px;
+  padding: 22px 28px;
+  background: var(--coral);
+  color: var(--ink);
+}
+.copy-row p {
+  margin: 7px 0 0;
+  max-width: 460px;
+  font-size: 12px;
+  line-height: 1.55;
+  opacity: 0.78;
+}
+.copy-row .copy-button {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--coral);
+}
+
+@media (max-width: 760px) {
+  .training-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .today-training {
+    flex-wrap: wrap;
+    padding: 20px;
+  }
+  .today-training .training-toggle {
+    margin-left: 0;
+  }
+  .calendar {
+    padding: 22px 18px 26px;
+  }
+  .calendar-cell {
+    min-height: 44px;
+  }
+  .copy-row {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+  .copy-row .copy-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
