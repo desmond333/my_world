@@ -88,6 +88,8 @@
 
 footer {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid var(--line);
@@ -104,6 +106,26 @@ footer {
   display: flex;
   align-items: center;
   gap: 7px;
+}
+
+.creator-note {
+  flex-basis: 100%;
+  margin-top: 4px;
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+}
+.creator-note:hover {
+  opacity: 1;
+}
+.creator-note a {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--line);
+  padding-bottom: 1px;
+}
+.creator-note a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
 .card-kicker,
@@ -284,12 +306,16 @@ footer {
 
 @media (max-width: 760px) {
   .page-shell {
-    padding: 19px 20px 25px;
+    padding: max(19px, env(safe-area-inset-top)) 20px calc(25px + env(safe-area-inset-bottom));
   }
   .topbar {
     align-items: flex-start;
     gap: 15px;
     flex-wrap: wrap;
+  }
+  .brand {
+    min-height: 44px;
+    padding: 8px 0;
   }
   .header-actions {
     gap: 12px;
@@ -298,8 +324,8 @@ footer {
     width: 100%;
   }
   .settings-button {
-    min-height: 36px;
-    padding: 0 10px;
+    min-height: 44px;
+    padding: 0 14px;
   }
   .settings-button span {
     display: none;
@@ -307,16 +333,27 @@ footer {
   .main-nav {
     order: 3;
     width: 100%;
+    min-width: 0;
     justify-content: flex-start;
     border-top: 1px solid var(--line);
     padding-top: 9px;
     margin-top: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .main-nav::-webkit-scrollbar {
+    display: none;
   }
   .main-nav a {
+    flex: 0 0 auto;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
     padding: 8px 10px;
   }
   .add-button {
     width: 100%;
+    min-height: 46px;
   }
   .training-toggle {
     flex: 1;
@@ -326,5 +363,155 @@ footer {
     gap: 17px;
     align-items: flex-start;
     flex-direction: column;
+    font-size: 11px;
   }
+  .back-link,
+  .creator-back {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .creator-note a {
+    display: inline-block;
+    padding: 10px 0;
+  }
+  button,
+  summary,
+  .list-tab,
+  .section-tab,
+  .entry-kinds .mini-button {
+    min-height: 40px;
+  }
+  body summary {
+    min-height: 44px;
+  }
+  body .card-kicker,
+  body .stat span,
+  body .calendar-week span,
+  body .switch-row .switch-text small,
+  body .list-summary,
+  body .list-count,
+  body .photo-tag,
+  body .weather-now,
+  body .two-day-name,
+  body .two-day-note,
+  body .section-tab-hint,
+  body .finance-balance-total,
+  body .calendar-picker-date,
+  body .training-total,
+  body .lottery-odds dt,
+  body .lottery-stat-label,
+  body .lottery-variant-hint,
+  body .lottery-expect,
+  body .finance-year-name,
+  body .finance-month-split dt,
+  body .finance-month-head dt,
+  body .finance-month-head h3 em,
+  body .animal-specs .spec span,
+  body .finance-entry-kind,
+  body .finance-entry-note,
+  body .finance-rate-unit,
+  body .point-done-title,
+  body .point-kind,
+  body .status-row dt,
+  body .month-row dt,
+  body .row-meta,
+  body .filter-field span,
+  body .list-tab,
+  body .training-expect,
+  body .animal-label span,
+  body .weather-meta span,
+  body .holiday-card > span,
+  body .lottery-wheel-core,
+  body .status-card-label,
+  body .setting-field legend,
+  body .setting-field span,
+  body .birthday-label,
+  body .birthday-add label > span,
+  body .list-heading span,
+  body .list-heading small,
+  body .theme-season-note,
+  body .desktop-hint {
+    font-size: 11px;
+  }
+  body .mini-button,
+  body .drag-handle {
+    min-width: 44px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  .section-tabs {
+    scroll-snap-type: x proximity;
+  }
+  .section-tab {
+    scroll-snap-align: start;
+  }
+}
+
+.switch-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid #15171744;
+  cursor: pointer;
+}
+.switch-row .switch-text {
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.switch-row .switch-text small {
+  font:
+    10px 'DM Mono',
+    monospace;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  opacity: 0.62;
+  font-weight: 400;
+}
+.switch-row input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 25px;
+  border-radius: 999px;
+  background: #15171755;
+  border: 1px solid #15171744;
+  transition: background 0.18s ease;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #f5efe4;
+  transition: transform 0.18s ease;
+}
+.switch-row input:checked + .switch {
+  background: var(--coral);
+}
+.switch-row input:checked + .switch::after {
+  transform: translateX(17px);
+  background: var(--ink);
+}
+.switch-row input:focus-visible + .switch {
+  outline: 2px solid #e57450;
+  outline-offset: 3px;
 }

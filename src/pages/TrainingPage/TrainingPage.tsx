@@ -1,73 +1,81 @@
 import { useMemo, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
-import { CalendarDays, Check, ChevronLeft, ChevronRight, ClipboardCopy, Dumbbell, Flame, Heart } from 'lucide-react'
+import { Bike, ChevronLeft, ChevronRight, ClipboardCopy, Dumbbell, Flame, Plus, Settings2, Trash2, Check } from 'lucide-react'
 import { findCity } from '../../data'
-import { copyToClipboard, monthMatrix, monthTitle, trainingReport, trainingStats } from '../../lib'
-import { getDateForTimezone, useDailyStore, useFavoritesStore, useTrainingStore } from '../../store'
+import { useCopyFeedback } from '../../hooks'
+import {
+  activeSports,
+  daySports,
+  formatShortDate,
+  monthMatrix,
+  monthTitle,
+  sportColor,
+  sportTotals,
+  SPORT_COLORS,
+  trainingReport,
+  trainingStats,
+} from '../../lib'
+import { getDateForTimezone, useDailyStore, useTrainingStore } from '../../store'
 import type { MonthCursor } from './types'
 import './TrainingPage.css'
 
 const weekDays = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
 
-const COPY_FEEDBACK_MS = 2200
+const sportIcon = (id: string) => {
+  if (id === 'skate') return <Bike size={15} />
+  if (id === 'bike') return <Bike size={15} />
+  return <Dumbbell size={15} />
+}
 
 export const TrainingPage = () => {
   const cityId = useDailyStore((state) => state.cityId)
   const city = findCity(cityId)
   const today = getDateForTimezone(city.timezone)
   const days = useTrainingStore((state) => state.days)
-  const toggleDay = useTrainingStore((state) => state.toggleDay)
-  const favorites = useFavoritesStore((state) => state.favorites)
-  const trainingCount = Object.keys(days).length
+  const sports = useTrainingStore((state) => state.sports)
+  const toggleSport = useTrainingStore((state) => state.toggleSport)
+  const setSportEnabled = useTrainingStore((state) => state.setSportEnabled)
+  const addSport = useTrainingStore((state) => state.addSport)
+  const removeSport = useTrainingStore((state) => state.removeSport)
+  const { copied, copyFailed, copy } = useCopyFeedback()
 
   const [cursor, setCursor] = useState<MonthCursor>(() => {
     const [year, month] = today.split('-').map(Number)
     return { year, month: month - 1 }
   })
-  const [copied, setCopied] = useState(false)
-  const [copyFailed, setCopyFailed] = useState(false)
+  const [picked, setPicked] = useState('')
+  const [name, setName] = useState('')
+  const [color, setColor] = useState(SPORT_COLORS[0])
 
   const cells = useMemo(() => monthMatrix(cursor.year, cursor.month), [cursor])
   const stats = trainingStats(days, today)
+  const totals = sportTotals(days, sports).filter((item) => item.count > 0)
+  const enabled = activeSports(sports)
+  const todayKinds = daySports(days, today)
+
   const shift = (delta: number) =>
     setCursor(({ year, month }) => {
       const next = new Date(Date.UTC(year, month + delta, 1))
       return { year: next.getUTCFullYear(), month: next.getUTCMonth() }
     })
 
-  const copyReport = async () => {
-    const ok = await copyToClipboard(trainingReport(days, today, city.name))
-    setCopyFailed(!ok)
-    setCopied(ok)
-    window.setTimeout(() => {
-      setCopied(false)
-      setCopyFailed(false)
-    }, COPY_FEEDBACK_MS)
+  const copyReport = () => copy(trainingReport(days, today, city.name, sports))
+
+  const submitSport = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!name.trim()) return
+    addSport(name, color)
+    setName('')
   }
 
-  return (
-    <main className="page-shell">
-      <header className="topbar">
-        <Link className="brand" to="/" aria-label="Животное дня">
-          <span className="brand-mark">
-            <Heart size={17} fill="currentColor" />
-          </span>
-          <span>животное дня</span>
-        </Link>
-        <div className="header-actions">
-          <nav className="main-nav" aria-label="Основная навигация">
-            <NavLink to="/">Сегодня</NavLink>
-            <NavLink to="/training">Тренировки{trainingCount ? ` · ${trainingCount}` : ''}</NavLink>
-            <NavLink to="/favorites">Избранное{favorites.length ? ` · ${favorites.length}` : ''}</NavLink>
-          </nav>
-        </div>
-      </header>
+  const sportLabel = (id: string) => sports.find((sport) => sport.id === id)?.label ?? id
 
+  return (
+    <div className="training-page">
       <section className="training-head">
         <p className="eyebrow">
           <Dumbbell size={15} /> локальный календарь
         </p>
-        <h1>Силовые тренировки</h1>
+        <h1>Тренировки</h1>
         <p className="intro">Отмечаешь день — и он остаётся здесь навсегда. Даты считаются по времени {city.name}.</p>
       </section>
 
@@ -92,20 +100,103 @@ export const TrainingPage = () => {
         </div>
       </section>
 
+      {totals.length > 0 && (
+        <section className="training-totals" aria-label="Тренировки по видам">
+          {totals.map(({ sport, count }) => (
+            <span className="training-total" key={sport.id}>
+              <i style={{ background: sport.color }} />
+              {sport.label} <strong>{count}</strong>
+            </span>
+          ))}
+        </section>
+      )}
+
       <section className="today-training" aria-live="polite">
-        <div className="training-today-icon">{days[today] ? <Check size={22} /> : <Dumbbell size={22} />}</div>
+        <div className="training-today-icon">{todayKinds.length ? <Check size={22} /> : <Dumbbell size={22} />}</div>
         <div>
           <div className="card-kicker">сегодня</div>
-          <h2>{days[today] ? 'Силовая была' : 'Силовой не было'}</h2>
+          <h2>{todayKinds.length ? todayKinds.map(sportLabel).join(' + ') : 'Тренировок не было'}</h2>
           <p>
             {stats.streak > 0
               ? `Подряд уже ${stats.streak} ${stats.streak === 1 ? 'день' : stats.streak < 5 ? 'дня' : 'дней'}.`
               : 'Отметь день, и появится отметка в календаре.'}
           </p>
         </div>
-        <button className={`training-toggle${days[today] ? ' is-done' : ''}`} onClick={() => toggleDay(today)}>
-          {days[today] ? 'Отменить отметку' : 'Отметить тренировку'}
-        </button>
+        <div className="today-sports">
+          {enabled.map((sport) => {
+            const on = todayKinds.includes(sport.id)
+            return (
+              <button
+                key={sport.id}
+                className={`sport-button${on ? ' is-on' : ''}`}
+                style={on ? { background: sport.color, borderColor: sport.color, color: '#151717' } : { borderColor: sport.color }}
+                onClick={() => toggleSport(today, sport.id)}
+                aria-pressed={on}
+              >
+                {sportIcon(sport.id)} {sport.label}
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="training-settings">
+        <div className="training-settings-head">
+          <div className="card-kicker">
+            <Settings2 size={14} /> настройки
+          </div>
+          <h2>Виды тренировок</h2>
+          <p>Включи то, чем реально занимаешься. Каждому виду — свой цвет, и в дне с несколькими видами календарь покажет их сразу.</p>
+        </div>
+
+        <div className="sport-settings">
+          {sports.map((sport) => (
+            <div className="sport-setting" key={sport.id}>
+              <label className="switch-row">
+                <span className="switch-text">
+                  <span className="sport-name">
+                    <i style={{ background: sport.color }} />
+                    {sport.label}
+                  </span>
+                  {sport.custom && <small>свой вид</small>}
+                </span>
+                <input type="checkbox" checked={sport.enabled} onChange={() => setSportEnabled(sport.id, !sport.enabled)} />
+                <i className="switch" aria-hidden="true" />
+              </label>
+              {sport.custom && (
+                <button className="sport-remove" onClick={() => removeSport(sport.id)} aria-label={`Удалить ${sport.label}`}>
+                  <Trash2 size={15} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <form className="sport-add" onSubmit={submitSport}>
+          <input
+            type="text"
+            value={name}
+            placeholder="Свой спорт, например плавание"
+            onChange={(event) => setName(event.target.value)}
+            maxLength={24}
+          />
+          <div className="sport-palette">
+            {SPORT_COLORS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`sport-swatch${color === item ? ' is-on' : ''}`}
+                style={{ background: item }}
+                onClick={() => setColor(item)}
+                aria-label={`Цвет ${item}`}
+                aria-pressed={color === item}
+              />
+            ))}
+          </div>
+          <button className="add-button" type="submit" disabled={!name.trim()}>
+            <Plus size={16} /> Добавить
+          </button>
+        </form>
       </section>
 
       <section className="calendar" aria-label="Календарь тренировок">
@@ -126,23 +217,52 @@ export const TrainingPage = () => {
         <div className="calendar-grid">
           {cells.map((cell, index) => {
             if (!cell) return <span className="calendar-cell is-empty" key={`empty-${index}`} />
-            const done = Boolean(days[cell.key])
+            const kinds = daySports(days, cell.key)
             const future = cell.key > today
             return (
               <button
-                className={`calendar-cell${done ? ' is-done' : ''}${cell.key === today ? ' is-today' : ''}`}
+                className={`calendar-cell${kinds.length ? ' is-done' : ''}${cell.key === today ? ' is-today' : ''}${
+                  picked === cell.key ? ' is-picked' : ''
+                }`}
                 key={cell.key}
-                onClick={() => !future && toggleDay(cell.key)}
+                onClick={() => !future && setPicked(picked === cell.key ? '' : cell.key)}
                 disabled={future}
-                aria-pressed={done}
-                aria-label={`${cell.day} — ${done ? 'тренировка отмечена' : 'тренировки не было'}`}
+                aria-pressed={kinds.length > 0}
+                aria-label={`${cell.day} — ${kinds.length ? kinds.map(sportLabel).join(', ') : 'тренировки не было'}`}
               >
                 <span>{cell.day}</span>
-                {done && <Check size={12} strokeWidth={3} />}
+                {kinds.length > 0 && (
+                  <span className="calendar-colors">
+                    {kinds.map((id) => (
+                      <i key={id} style={{ background: sportColor(sports, id) }} />
+                    ))}
+                  </span>
+                )}
               </button>
             )
           })}
         </div>
+        {picked && (
+          <div className="calendar-picker">
+            <span className="calendar-picker-date">{formatShortDate(picked)}</span>
+            <div className="calendar-picker-sports">
+              {sports.map((sport) => {
+                const on = daySports(days, picked).includes(sport.id)
+                return (
+                  <button
+                    key={sport.id}
+                    className={`sport-chip${on ? ' is-on' : ''}`}
+                    style={on ? { background: sport.color, borderColor: sport.color, color: '#151717' } : { borderColor: sport.color }}
+                    onClick={() => toggleSport(picked, sport.id)}
+                    aria-pressed={on}
+                  >
+                    {sportIcon(sport.id)} {sport.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
         <p className="calendar-note">
           <Flame size={14} /> Будущие дни не отмечаются: календарь помнит только то, что уже было.
         </p>
@@ -157,13 +277,6 @@ export const TrainingPage = () => {
           <ClipboardCopy size={15} /> {copyFailed ? 'Не получилось' : copied ? 'Скопировано' : 'Копировать'}
         </button>
       </section>
-
-      <footer>
-        <span>отметки хранятся на этом устройстве</span>
-        <span className="footer-note">
-          <CalendarDays size={14} /> календарь можно выключить в настройках
-        </span>
-      </footer>
-    </main>
+    </div>
   )
 }

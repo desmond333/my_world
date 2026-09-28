@@ -1,5 +1,5 @@
-import type { Animal, BlockKey, Blocks, City } from '../data'
-import type { AnimalScope, Birthday, Favorite, ThemeMode } from '../data/types'
+import type { Animal, BlockKey, Blocks, City, CollectionItem, CollectionListKey } from '../data'
+import type { AnimalScope, Birthday, Favorite, ThemeMode, TrainingSport } from '../data/types'
 
 export type DailyState = {
   date: string
@@ -9,17 +9,24 @@ export type DailyState = {
   scope: AnimalScope
   themeMode: ThemeMode
   blocks: Blocks
+  extraTab: boolean
   chooseForToday: (date: string, scope: AnimalScope) => void
   setCity: (city: City) => void
   setScope: (scope: AnimalScope) => void
   setThemeMode: (mode: ThemeMode) => void
   toggleBlock: (key: BlockKey) => void
+  toggleExtraTab: () => void
 }
 
 export type TrainingState = {
-  days: Record<string, string>
-  setDay: (date: string, done: boolean) => void
-  toggleDay: (date: string) => void
+  days: Record<string, string[]>
+  sports: TrainingSport[]
+  setDay: (date: string, kinds: string[]) => void
+  toggleSport: (date: string, sportId: string) => void
+  setSportEnabled: (id: string, enabled: boolean) => void
+  addSport: (label: string, color: string) => void
+  removeSport: (id: string) => void
+  resetTraining: () => void
 }
 
 export type BirthdayState = {
@@ -35,4 +42,14 @@ export type FavoritesState = {
   isFavorite: (id: string) => boolean
   addFavorite: (animal: Animal) => void
   removeFavorite: (id: string) => void
+}
+
+export type CollectionState = {
+  wishlist: CollectionItem[]
+  watched: CollectionItem[]
+  isIn: (list: CollectionListKey, id: string) => boolean
+  add: (list: CollectionListKey, item: CollectionItem) => void
+  remove: (list: CollectionListKey, id: string) => void
+  move: (id: string, to: CollectionListKey) => void
+  reorder: (list: CollectionListKey, orderedIds: string[]) => void
 }

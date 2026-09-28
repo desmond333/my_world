@@ -2,21 +2,30 @@ import { animalSeeds } from '../data'
 import type { Animal, AnimalFacts, AnimalSeed } from '../data/types'
 
 const WIKI_API = 'https://ru.wikipedia.org/api/rest_v1/page/summary/'
+const IMAGE_WIDTH = 1280
+
+type WikiImage = { source?: string }
 
 type WikiSummary = {
   title?: string
   description?: string
   extract?: string
-  thumbnail?: { source?: string }
-  originalimage?: { source?: string }
+  thumbnail?: WikiImage
+  originalimage?: WikiImage
   content_urls?: { desktop?: { page?: string } }
 }
 
-const COMBINING_MARKS = /[̀-ͯ]/g
+const COMBINING_MARKS = /[\u0300-\u036f]/g
 
 const clean = (text: string) => text.replace(COMBINING_MARKS, '').replace(/\s+/g, ' ').trim()
 
-const widen = (source: string) => source.replace(/\/\d+px-/, '/1280px-')
+const resize = (source: string, width: number) => source.replace(/\/\d+px-/, `/${width}px-`)
+
+const pickImage = (data: WikiSummary) => {
+  const thumbnail = data.thumbnail?.source ?? ''
+  if (thumbnail) return resize(thumbnail, IMAGE_WIDTH)
+  return data.originalimage?.source ?? ''
+}
 
 const wikiUrl = (seed: AnimalSeed) => `https://ru.wikipedia.org/wiki/${seed.wikipedia}`
 
@@ -27,7 +36,7 @@ export const fetchAnimalFacts = async (seed: AnimalSeed, signal?: AbortSignal): 
   const lead = clean(data.extract ?? '')
   const caption = clean(data.description ?? '')
   const description = lead || (caption ? `${caption[0].toUpperCase()}${caption.slice(1)}.` : '')
-  const picture = widen(data.originalimage?.source ?? data.thumbnail?.source ?? '')
+  const picture = pickImage(data)
   return {
     image: picture || seed.image,
     description: description || seed.description,

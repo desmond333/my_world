@@ -8,11 +8,13 @@ export const SettingsPanel = ({
   themeMode,
   blocks,
   season,
+  extraTab,
   onClose,
   onCity,
   onScope,
   onTheme,
   onToggleBlock,
+  onToggleExtraTab,
   onOpenBirthday,
 }: SettingsPanelProps) => (
   <section className="settings-panel" id="settings-panel" aria-label="Настройки">
@@ -63,6 +65,19 @@ export const SettingsPanel = ({
         ))}
       </div>
       <small className="theme-season-note">Выключи всё — и останется только сам день.</small>
+    </fieldset>
+    <fieldset className="setting-field blocks-field">
+      <legend>Вкладки</legend>
+      <div className="block-toggles">
+        <label className="switch-row">
+          <span className="switch-text">
+            Дополнительно
+            <small>поиск фильмов и свои списки</small>
+          </span>
+          <input type="checkbox" checked={extraTab} onChange={onToggleExtraTab} />
+          <i className="switch" aria-hidden="true" />
+        </label>
+      </div>
     </fieldset>
     <fieldset className="setting-field theme-field">
       <legend>Настроение темы</legend>

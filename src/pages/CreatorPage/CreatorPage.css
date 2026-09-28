@@ -1,0 +1,65 @@
+.creator-head {
+  padding: 40px 3.5% 10px;
+}
+.creator-head h1 {
+  margin: 24px 0 20px;
+}
+.creator-head .intro {
+  max-width: 520px;
+}
+
+.creator-card {
+  margin: 30px 0 14px;
+  padding: 40px 34px 42px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.creator-text {
+  max-width: 560px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.creator-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.creator-telegram {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+}
+.creator-note-line {
+  margin: 30px 0 0;
+  color: var(--muted);
+  font:
+    11px 'DM Mono',
+    monospace;
+  letter-spacing: 0.06em;
+}
+
+.creator-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.creator-back:hover {
+  color: var(--fg);
+}
+
+@media (max-width: 760px) {
+  .creator-head {
+    padding: 30px 0 8px;
+  }
+  .creator-card {
+    padding: 28px 20px 30px;
+  }
+}

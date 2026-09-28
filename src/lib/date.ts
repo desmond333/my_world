@@ -23,6 +23,15 @@ export const formatShortDate = (date: string) =>
     timeZone: 'UTC',
   }).format(new Date(`${date}T12:00:00Z`))
 
+export const formatAddedAt = (iso: string) =>
+  new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso))
+
 export const dayName = (date: string, index: number) => {
   if (index === 0) return 'Сегодня'
   if (index === 1) return 'Завтра'
@@ -34,12 +43,30 @@ export const dayMonth = (date: string) =>
 
 export const dateKey = (date: Date) => date.toISOString().slice(0, 10)
 
+export const sortByNewestKey = (first: string, second: string) => (first < second ? 1 : first > second ? -1 : 0)
+
+export const seedFromDate = (date: string) => date.split('-').reduce((sum, value) => sum + Number(value), 0)
+
 export const monthTitle = (year: number, month: number) =>
   new Intl.DateTimeFormat('ru-RU', {
     month: 'long',
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(Date.UTC(year, month, 1)))
+
+export const monthKey = (date: Date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+
+export const monthKeyParts = (key: string) => {
+  const [year, month] = key.split('-').map(Number)
+  return { year: year ?? 0, month: month ?? 0 }
+}
+
+export const monthName = (key: string) => {
+  const { year, month } = monthKeyParts(key)
+  return year && month ? monthTitle(year, month - 1).replace(' г.', '') : key
+}
+
+export const monthShort = (key: string) => monthName(key).slice(0, 3)
 
 export const monthMatrix = (year: number, month: number) => {
   const offset = (new Date(Date.UTC(year, month, 1)).getUTCDay() + 6) % 7

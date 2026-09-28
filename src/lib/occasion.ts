@@ -1,6 +1,5 @@
 import { everydayOccasions, themedDays, wishes } from '../data'
-
-const seedFromDate = (date: string) => date.split('-').reduce((sum, value) => sum + Number(value), 0)
+import { seedFromDate } from './date'
 
 export const getWish = (date: string) => wishes[seedFromDate(date) % wishes.length]
 

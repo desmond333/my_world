@@ -9,4 +9,4 @@ export const blockOptions: { key: BlockKey; label: string; hint: string }[] = [
   { key: 'training', label: 'Силовая тренировка', hint: 'отметка и календарь, по умолчанию выключено' },
 ]
 
-export const defaultBlocks: Blocks = { animal: true, today: true, weather: true, wish: true, occasion: true, training: false }
+export const defaultBlocks: Blocks = { animal: true, today: true, weather: true, wish: true, occasion: true, training: true }

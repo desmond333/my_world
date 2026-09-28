@@ -17,7 +17,7 @@ export const TrainingCard = ({ trainedToday, copied, copyFailed, onToggle, onCop
         <button className={`training-toggle${trainedToday ? ' is-done' : ''}`} onClick={onToggle}>
           {trainedToday ? 'Тренировка была' : 'Отметить'}
         </button>
-        <Link className="more-button" to="/training">
+        <Link className="more-button" to="/extra/training">
           календарь
         </Link>
         <button className="more-button" onClick={onCopy}>

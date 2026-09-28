@@ -1,14 +1,6 @@
 import type { Animal, Favorite } from '../data'
 import { findAnimal } from './animal'
-
-const formatAddedAt = (iso: string) =>
-  new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(iso))
+import { formatAddedAt } from './date'
 
 export const favoritesReport = (animals: Animal[], favorites: Favorite[]) => {
   const lines = [`Мои любимцы — ${favorites.length}`, '']
@@ -24,5 +16,3 @@ export const favoritesReport = (animals: Animal[], favorites: Favorite[]) => {
   })
   return lines.join('\n')
 }
-
-export { formatAddedAt }

@@ -1,3 +1,5 @@
 export * from './animals'
 export * from './holidays'
+export * from './rates'
+export * from './tmdb'
 export * from './weather'

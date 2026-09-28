@@ -1,8 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { defaultBlocks } from '../data'
+import { seedFromDate } from '../lib/date'
 import { useAnimalsStore } from './animalsStore'
 import type { DailyState } from './types'
+
+const HOME_SCOPE_OFFSET = 17
 
 export const getDateForTimezone = (timezone: string) =>
   new Intl.DateTimeFormat('en-CA', {
@@ -22,12 +25,13 @@ export const useDailyStore = create<DailyState>()(
       scope: 'all',
       themeMode: 'dark',
       blocks: defaultBlocks,
+      extraTab: false,
       chooseForToday: (date, scope) =>
         set((state) => {
           if (state.date === date && state.scope === scope) return state
           const all = useAnimalsStore.getState().animals
           const available = scope === 'home' ? all.filter((animal) => animal.category === 'home') : all
-          const seed = date.split('-').reduce((sum, value) => sum + Number(value), 0) + (scope === 'home' ? 17 : 0)
+          const seed = seedFromDate(date) + (scope === 'home' ? HOME_SCOPE_OFFSET : 0)
           if (!available.length) return { date, scope, animalIndex: 0, recent: state.recent }
           let index = seed % available.length
           if (available.length > 1) {
@@ -48,6 +52,7 @@ export const useDailyStore = create<DailyState>()(
           const blocks = { ...defaultBlocks, ...state.blocks }
           return { blocks: { ...blocks, [key]: !blocks[key] } }
         }),
+      toggleExtraTab: () => set((state) => ({ extraTab: !state.extraTab })),
     }),
     { name: 'animal-of-the-day' },
   ),

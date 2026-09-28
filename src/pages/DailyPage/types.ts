@@ -1,16 +1,11 @@
 import type { Animal, AnimalScope, BlockKey, Blocks, City, ThemeMode } from '../../data'
-import type { DayForecast, Weather } from '../../services'
-import type { Holiday } from '../../services/holidays'
+import type { DayForecast, Holiday, Weather } from '../../services'
 
 export type Occasion = { title: string; isThemed: boolean }
-
-export { type Holiday }
 
 export type TopbarProps = {
   city: City
   now: Date
-  trainingCount: number
-  favoritesCount: number
   settingsOpen: boolean
   onToggleSettings: () => void
 }
@@ -21,11 +16,13 @@ export type SettingsPanelProps = {
   themeMode: ThemeMode
   blocks: Blocks
   season: string
+  extraTab: boolean
   onClose: () => void
   onCity: (city: City) => void
   onScope: (scope: AnimalScope) => void
   onTheme: (mode: ThemeMode) => void
   onToggleBlock: (key: BlockKey) => void
+  onToggleExtraTab: () => void
   onOpenBirthday: () => void
 }
 
@@ -38,7 +35,6 @@ export type HeroSectionProps = {
 export type BreedCardProps = { animal: Animal }
 
 export type TodayCardProps = {
-  now: Date
   timezone: string
   zone: string
   season: string

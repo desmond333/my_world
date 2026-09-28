@@ -1,8 +1,10 @@
-import { Link, NavLink, useParams } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, Heart, MapPin, Scale, Sparkles, Star, Timer } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom'
+import { ArrowLeft, ExternalLink, MapPin, Scale, Sparkles, Star, Timer } from 'lucide-react'
+import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
 import { findAnimal, formatAddedAt } from '../../lib'
 import { useAnimalsStore, useFavoritesStore } from '../../store'
 import './AnimalPage.css'
+import { CreatorNote } from '../../components/CreatorNote/CreatorNote'
 
 export const AnimalPage = () => {
   const { id = '' } = useParams()
@@ -32,20 +34,7 @@ export const AnimalPage = () => {
 
   return (
     <main className="page-shell">
-      <header className="topbar">
-        <Link className="brand" to="/" aria-label="Животное дня">
-          <span className="brand-mark">
-            <Heart size={17} fill="currentColor" />
-          </span>
-          <span>животное дня</span>
-        </Link>
-        <div className="header-actions">
-          <nav className="main-nav" aria-label="Основная навигация">
-            <NavLink to="/">Сегодня</NavLink>
-            <NavLink to="/favorites">Избранное{favorites.length ? ` · ${favorites.length}` : ''}</NavLink>
-          </nav>
-        </div>
-      </header>
+      <AppTopbar />
 
       <Link className="back-link" to="/favorites">
         <ArrowLeft size={15} /> назад в избранное
@@ -113,6 +102,7 @@ export const AnimalPage = () => {
         <span className="footer-note">
           <ExternalLink size={14} /> источник — википедия
         </span>
+        <CreatorNote />
       </footer>
     </main>
   )

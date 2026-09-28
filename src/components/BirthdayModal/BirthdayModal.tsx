@@ -7,11 +7,16 @@ import type { BirthdayModalProps, SortedBirthday } from './types'
 import './BirthdayModal.css'
 
 export const BirthdayModal = ({ onClose }: BirthdayModalProps) => {
-  const { ownBirthday, birthdays, setOwnBirthday, addBirthday, removeBirthday } = useBirthdayStore()
+  const ownBirthday = useBirthdayStore((state) => state.ownBirthday)
+  const birthdays = useBirthdayStore((state) => state.birthdays)
+  const setOwnBirthday = useBirthdayStore((state) => state.setOwnBirthday)
+  const addBirthday = useBirthdayStore((state) => state.addBirthday)
+  const removeBirthday = useBirthdayStore((state) => state.removeBirthday)
+  const cityId = useDailyStore((state) => state.cityId)
   const [name, setName] = useState('')
   const [date, setDate] = useState('')
   const [formError, setFormError] = useState('')
-  const timezone = findCity(useDailyStore.getState().cityId).timezone
+  const timezone = findCity(cityId).timezone
   const sortedBirthdays = useMemo<SortedBirthday[]>(() => {
     const today = new Date()
     return birthdays

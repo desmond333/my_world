@@ -1,45 +1,23 @@
-import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
-import { ArrowUpRight, ClipboardCopy, Heart, Star, Trash2 } from 'lucide-react'
-import { copyToClipboard, favoritesReport, formatAddedAt } from '../../lib'
+import { Link } from 'react-router-dom'
+import { ArrowUpRight, ClipboardCopy, Star, Trash2 } from 'lucide-react'
+import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
+import { useCopyFeedback } from '../../hooks'
+import { favoritesReport, formatAddedAt } from '../../lib'
 import { useAnimalsStore, useFavoritesStore } from '../../store'
 import './FavoritesPage.css'
-
-const COPY_FEEDBACK_MS = 2200
+import { CreatorNote } from '../../components/CreatorNote/CreatorNote'
 
 export const FavoritesPage = () => {
   const favorites = useFavoritesStore((state) => state.favorites)
   const removeFavorite = useFavoritesStore((state) => state.removeFavorite)
   const animals = useAnimalsStore((state) => state.animals)
-  const [copied, setCopied] = useState(false)
-  const [copyFailed, setCopyFailed] = useState(false)
+  const { copied, copyFailed, copy } = useCopyFeedback()
 
-  const copyFavorites = async () => {
-    const ok = await copyToClipboard(favoritesReport(animals, favorites))
-    setCopyFailed(!ok)
-    setCopied(ok)
-    window.setTimeout(() => {
-      setCopied(false)
-      setCopyFailed(false)
-    }, COPY_FEEDBACK_MS)
-  }
+  const copyFavorites = () => copy(favoritesReport(animals, favorites))
 
   return (
     <main className="page-shell">
-      <header className="topbar">
-        <Link className="brand" to="/" aria-label="Животное дня">
-          <span className="brand-mark">
-            <Heart size={17} fill="currentColor" />
-          </span>
-          <span>животное дня</span>
-        </Link>
-        <div className="header-actions">
-          <nav className="main-nav" aria-label="Основная навигация">
-            <NavLink to="/">Сегодня</NavLink>
-            <NavLink to="/favorites">Избранное{favorites.length ? ` · ${favorites.length}` : ''}</NavLink>
-          </nav>
-        </div>
-      </header>
+      <AppTopbar />
 
       <section className="favorites-head">
         <p className="eyebrow">
@@ -99,6 +77,7 @@ export const FavoritesPage = () => {
         <span className="footer-note">
           <Star size={14} /> можно удалить в любой момент
         </span>
+        <CreatorNote />
       </footer>
     </main>
   )
