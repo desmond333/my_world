@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import type { Currency } from '../../../data'
-import { FINANCE_LABELS, formatConverted, formatMoney, monthName, monthTotal, withCount } from '../../../lib'
+import { financeKindLabel, formatConverted, formatMoney, monthName, monthTotal } from '../../../lib'
+import { countText, useTranslation } from '../../../lib/i18n'
 import { useFinanceStore } from '../../../store'
 import { EntryForm } from './EntryForm'
 
@@ -13,6 +14,7 @@ export type MonthCardProps = {
 }
 
 export const MonthCard = ({ month, currency, rates, current }: MonthCardProps) => {
+  const { lang, t, locale } = useTranslation()
   const entries = useFinanceStore((state) => state.entries)
   const removeEntry = useFinanceStore((state) => state.removeEntry)
   const [adding, setAdding] = useState(false)
@@ -26,20 +28,20 @@ export const MonthCard = ({ month, currency, rates, current }: MonthCardProps) =
     <article className={`finance-month${current ? ' is-current' : ''}`}>
       <header className="finance-month-head">
         <h3>
-          {monthName(month)}
-          {current && <em>текущий</em>}
+          {monthName(month, locale)}
+          {current && <em>{t('finance.month.current')}</em>}
         </h3>
-        <p className="finance-month-total">{formatMoney(total.total, currency)}</p>
+        <p className="finance-month-total">{formatMoney(total.total, currency, lang)}</p>
       </header>
 
       <dl className="finance-month-split">
         <div>
-          <dt>Зарплата</dt>
-          <dd>{formatMoney(total.salary, currency)}</dd>
+          <dt>{t('finance.month.salary')}</dt>
+          <dd>{formatMoney(total.salary, currency, lang)}</dd>
         </div>
         <div>
-          <dt>Разовое</dt>
-          <dd>{formatMoney(total.oneoff, currency)}</dd>
+          <dt>{t('finance.month.oneoff')}</dt>
+          <dd>{formatMoney(total.oneoff, currency, lang)}</dd>
         </div>
       </dl>
 
@@ -48,10 +50,10 @@ export const MonthCard = ({ month, currency, rates, current }: MonthCardProps) =
           {own.map((entry) => (
             <li className="finance-entry" key={entry.id}>
               <div className="finance-entry-main">
-                <span className="finance-entry-kind">{FINANCE_LABELS[entry.kind]}</span>
+                <span className="finance-entry-kind">{financeKindLabel(entry.kind, lang)}</span>
                 <span className="finance-entry-amount">
-                  {formatMoney(entry.amount, entry.currency)}
-                  {entry.currency !== currency && <em>≈ {formatConverted(entry.amount, entry.currency, currency, rates)}</em>}
+                  {formatMoney(entry.amount, entry.currency, lang)}
+                  {entry.currency !== currency && <em>≈ {formatConverted(entry.amount, entry.currency, currency, rates, lang)}</em>}
                 </span>
                 {entry.note && <span className="finance-entry-note">{entry.note}</span>}
               </div>
@@ -59,25 +61,27 @@ export const MonthCard = ({ month, currency, rates, current }: MonthCardProps) =
                 <button
                   type="button"
                   className="icon-button"
-                  title="Изменить"
+                  title={t('finance.entry.edit')}
                   onClick={() => {
                     setAdding(false)
                     setEditId(entry.id)
                   }}
                 >
                   <Pencil size={15} />
-                  <span className="visually-hidden">Изменить поступление: {entry.note || FINANCE_LABELS[entry.kind]}</span>
+                  <span className="visually-hidden">
+                    {t('finance.entry.editAria', undefined, { name: entry.note || financeKindLabel(entry.kind, lang) })}
+                  </span>
                 </button>
-                <button type="button" className="icon-button" title="Удалить" onClick={() => removeEntry(entry.id)}>
+                <button type="button" className="icon-button" title={t('finance.entry.delete')} onClick={() => removeEntry(entry.id)}>
                   <Trash2 size={15} />
-                  <span className="visually-hidden">Удалить поступление</span>
+                  <span className="visually-hidden">{t('finance.entry.deleteAria')}</span>
                 </button>
               </div>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="finance-empty">Поступлений пока нет.</p>
+        <p className="finance-empty">{t('finance.month.empty')}</p>
       )}
 
       {editing ? (
@@ -93,11 +97,11 @@ export const MonthCard = ({ month, currency, rates, current }: MonthCardProps) =
         <EntryForm month={month} entry={null} onDone={() => setAdding(false)} />
       ) : (
         <button type="button" className="mini-button" onClick={() => setAdding(true)}>
-          <Plus size={15} /> Добавить поступление
+          <Plus size={15} /> {t('finance.month.addEntry')}
         </button>
       )}
 
-      {total.count > 0 && <p className="finance-month-count">{withCount(total.count, ['запись', 'записи', 'записей'])}</p>}
+      {total.count > 0 && <p className="finance-month-count">{countText('finance.month.count', total.count, lang)}</p>}
     </article>
   )
 }

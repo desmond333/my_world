@@ -21,7 +21,7 @@ export const TrainingCard = ({ trainedToday, copied, copyFailed, onToggle, onCop
             {t('trainingCard.calendar')}
           </Link>
           <button className="more-button" onClick={onCopy}>
-            <ClipboardCopy size={14} />             {copyFailed ? t('common.copyFailed') : copied ? t('common.copied') : t('common.copy')}
+            <ClipboardCopy size={14} /> {copyFailed ? t('common.copyFailed') : copied ? t('common.copied') : t('common.copy')}
           </button>
         </div>
       </div>

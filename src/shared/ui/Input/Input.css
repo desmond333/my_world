@@ -1,0 +1,73 @@
+.ui-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.ui-input-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.ui-input-container {
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 0 12px;
+  gap: 8px;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.ui-input-container:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.ui-input-container--error {
+  border-color: var(--coral) !important;
+}
+
+.ui-input-container--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-input-field {
+  width: 100%;
+  min-height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.ui-input-field::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.ui-input-icon {
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ui-input-error {
+  font-size: 12px;
+  color: var(--coral);
+  margin: 0;
+}
+
+.ui-input-helper {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}

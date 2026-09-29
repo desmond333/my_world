@@ -13,6 +13,7 @@ import {
   Volume2,
   Zap,
 } from 'lucide-react'
+import { useTranslation } from '../../../../lib/i18n'
 import { FlashcardCard } from './FlashcardCard'
 import { ListeningCard } from './ListeningCard'
 import { QuizCard } from './QuizCard'
@@ -33,6 +34,7 @@ export type LanguageTrainerProps = {
 }
 
 export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, onSpeak, playingId, onExit }: LanguageTrainerProps) => {
+  const { t } = useTranslation()
   const session = useTrainerSession({ items, storageKeyPrefix })
 
   const {
@@ -70,7 +72,6 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
     isSessionFinished,
   } = session
 
-  // Auto-play audio when card changes if autoPlay is enabled
   useEffect(() => {
     if (autoPlay && currentItem && (mode === 'flashcard' || mode === 'quiz')) {
       onSpeak(currentItem, audioRate)
@@ -82,8 +83,7 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
 
   return (
     <div className="language-trainer-root" aria-label={title}>
-      {/* Top Trainer Mode Navigation */}
-      <div className="trainer-modes-nav" role="tablist" aria-label="Режимы тренировки">
+      <div className="trainer-modes-nav" role="tablist" aria-label={t('lang.trainer.aria')}>
         <button
           type="button"
           role="tab"
@@ -92,7 +92,7 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
           onClick={() => setMode('flashcard')}
         >
           <Layers size={17} />
-          <span>🗂️ Карточки</span>
+          <span>{t('lang.trainer.flashcards')}</span>
         </button>
 
         <button
@@ -103,7 +103,7 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
           onClick={() => setMode('quiz')}
         >
           <HelpCircle size={17} />
-          <span>🎯 4-Квиз</span>
+          <span>{t('lang.trainer.quiz')}</span>
         </button>
 
         <button
@@ -114,7 +114,7 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
           onClick={() => setMode('listening')}
         >
           <Headphones size={17} />
-          <span>🎧 Аудирование</span>
+          <span>{t('lang.trainer.listening')}</span>
         </button>
 
         <button
@@ -125,18 +125,16 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
           onClick={() => setMode('sprint')}
         >
           <Zap size={17} />
-          <span>⚡ Спринт (45с)</span>
+          <span>{t('lang.trainer.sprint')}</span>
         </button>
       </div>
 
-      {/* Control & Settings Toolbar */}
       {mode !== 'sprint' && (
         <div className="trainer-controls-panel">
           <div className="trainer-controls-row">
-            {/* Category Select */}
             <div className="trainer-control-group">
               <label htmlFor="trainer-cat-select" className="trainer-control-label">
-                <ListFilter size={14} /> Тема:
+                <ListFilter size={14} /> {t('lang.trainer.topic')}
               </label>
               <select
                 id="trainer-cat-select"
@@ -144,7 +142,7 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
               >
-                <option value="all">Все темы ({items.length})</option>
+                <option value="all">{t('lang.trainer.topicAll', undefined, { count: items.length })}</option>
                 {categories
                   .filter((c) => c.id !== 'all')
                   .map((c) => (
@@ -155,40 +153,38 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
               </select>
             </div>
 
-            {/* Direction Toggle */}
             <div className="trainer-control-group">
               <span className="trainer-control-label">
-                <ArrowLeftRight size={14} /> Направление:
+                <ArrowLeftRight size={14} /> {t('lang.trainer.direction')}
               </span>
               <div className="trainer-pill-group">
                 <button
                   type="button"
                   className={`trainer-pill ${direction === 'direct' ? 'active' : ''}`}
                   onClick={() => setDirection('direct')}
-                  title="С изучаемого языка на русский"
+                  title={t('lang.trainer.directionDirectTitle')}
                 >
-                  Слово ➔ RU
+                  {t('lang.trainer.directionDirect')}
                 </button>
                 <button
                   type="button"
                   className={`trainer-pill ${direction === 'reverse' ? 'active' : ''}`}
                   onClick={() => setDirection('reverse')}
-                  title="С русского на изучаемый язык"
+                  title={t('lang.trainer.directionReverseTitle')}
                 >
-                  RU ➔ Слово
+                  {t('lang.trainer.directionReverse')}
                 </button>
                 <button
                   type="button"
                   className={`trainer-pill ${direction === 'mixed' ? 'active' : ''}`}
                   onClick={() => setDirection('mixed')}
-                  title="Случайная смена направления"
+                  title={t('lang.trainer.directionMixedTitle')}
                 >
-                  Микс 🔀
+                  {t('lang.trainer.directionMixed')}
                 </button>
               </div>
             </div>
 
-            {/* Quick Filters */}
             <div className="trainer-control-group">
               <div className="trainer-pill-group">
                 <button
@@ -198,9 +194,9 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
                     setOnlyUnlearned((v) => !v)
                     setOnlyMistakes(false)
                   }}
-                  title="Только слова, которые ещё не выучены"
+                  title={t('lang.trainer.onlyUnlearnedTitle')}
                 >
-                  Только невыученные
+                  {t('lang.trainer.onlyUnlearned')}
                 </button>
 
                 {stats.mistakeIds.length > 0 && (
@@ -212,7 +208,7 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
                       setOnlyUnlearned(false)
                     }}
                   >
-                    Ошибки ({stats.mistakeIds.length})
+                    {t('lang.trainer.mistakes', undefined, { count: stats.mistakeIds.length })}
                   </button>
                 )}
 
@@ -220,32 +216,31 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
                   type="button"
                   className={`trainer-pill ${isShuffle ? 'active' : ''}`}
                   onClick={() => setIsShuffle((v) => !v)}
-                  title="Перемешать порядок карточек"
+                  title={t('lang.trainer.shuffleTitle')}
                 >
-                  <Shuffle size={14} /> Перемешать
+                  <Shuffle size={14} /> {t('lang.trainer.shuffle')}
                 </button>
               </div>
             </div>
 
-            {/* Audio Options */}
             <div className="trainer-control-group">
               <div className="trainer-pill-group">
                 <button
                   type="button"
                   className={`trainer-pill ${audioRate === 0.8 ? 'active' : ''}`}
                   onClick={() => setAudioRate((r) => (r === 1.0 ? 0.8 : 1.0))}
-                  title="Скорость воспроизведения"
+                  title={t('lang.trainer.speed')}
                 >
-                  <Gauge size={14} /> {audioRate === 0.8 ? '0.8x (Медленно)' : '1.0x (Норма)'}
+                  <Gauge size={14} /> {audioRate === 0.8 ? t('lang.trainer.speedSlow') : t('lang.trainer.speedNormal')}
                 </button>
 
                 <button
                   type="button"
                   className={`trainer-pill ${autoPlay ? 'active' : ''}`}
                   onClick={() => setAutoPlay((v) => !v)}
-                  title="Автоматически произносить при смене карточки"
+                  title={t('lang.trainer.autoTitle')}
                 >
-                  <Volume2 size={14} /> {autoPlay ? 'Автоозвучка: Вкл' : 'Автоозвучка: Выкл'}
+                  <Volume2 size={14} /> {autoPlay ? t('lang.trainer.autoOn') : t('lang.trainer.autoOff')}
                 </button>
               </div>
             </div>
@@ -253,12 +248,11 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
         </div>
       )}
 
-      {/* Progress & Live Streak Bar */}
       {mode !== 'sprint' && !isSessionFinished && (
         <div className="trainer-progress-header">
           <div className="trainer-progress-left">
             <span className="trainer-step-indicator">
-              Карточка <strong>{currentIndex + 1}</strong> из {queue.length}
+              {t('lang.trainer.card', undefined, { current: currentIndex + 1, total: queue.length })}
             </span>
             <div className="trainer-progress-track">
               <div className="trainer-progress-fill" style={{ width: `${progressPct}%` }} />
@@ -267,25 +261,29 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
 
           <div className="trainer-progress-right">
             {stats.currentStreak >= 2 && (
-              <div className="trainer-streak-badge" title="Серия правильных ответов подряд">
+              <div className="trainer-streak-badge" title={t('lang.trainer.streakTitle')}>
                 <Flame size={17} className="flame-glow" />
-                <span>{stats.currentStreak} подряд!</span>
+                <span>{t('lang.trainer.streak', undefined, { count: stats.currentStreak })}</span>
               </div>
             )}
 
-            <div className="trainer-mastered-counter" title="Всего выучено слов в этом словаре">
+            <div className="trainer-mastered-counter" title={t('lang.trainer.learnedTitle')}>
               <Check size={15} />
-              <span>{learnedIds.length} выучено</span>
+              <span>{t('lang.trainer.learned', undefined, { count: learnedIds.length })}</span>
             </div>
 
-            <button type="button" className="trainer-restart-mini-btn" onClick={() => restartSession(false)} title="Начать сессию заново">
+            <button
+              type="button"
+              className="trainer-restart-mini-btn"
+              onClick={() => restartSession(false)}
+              title={t('lang.trainer.restartTitle')}
+            >
               <RotateCcw size={15} />
             </button>
           </div>
         </div>
       )}
 
-      {/* Active Workout View */}
       <div className="trainer-viewport">
         {isSessionFinished ? (
           <TrainerSummary
@@ -299,7 +297,7 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
           <SprintGame items={items} storageKeyPrefix={storageKeyPrefix} onSpeak={onSpeak} onExit={() => setMode('flashcard')} />
         ) : !currentItem ? (
           <div className="trainer-empty-state">
-            <p>Нет карточек по выбранным фильтрам.</p>
+            <p>{t('lang.trainer.empty')}</p>
             <button
               type="button"
               className="trainer-btn trainer-btn--mastered"
@@ -309,7 +307,7 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
                 setOnlyMistakes(false)
               }}
             >
-              Сбросить фильтры
+              {t('lang.trainer.resetFilters')}
             </button>
           </div>
         ) : mode === 'flashcard' ? (
@@ -351,12 +349,11 @@ export const LanguageTrainer = ({ items, categories, storageKeyPrefix, title, on
         )}
       </div>
 
-      {/* Keyboard Shortcuts Hint (Desktop) */}
       {mode === 'flashcard' && !isSessionFinished && (
         <div className="trainer-keyboard-hints" aria-hidden="true">
-          <span>Подсказки клавиш:</span>
-          <kbd>Пробел</kbd> — Перевернуть карточку • <kbd>1</kbd> или <kbd>←</kbd> — Не помню • <kbd>2</kbd> или <kbd>→</kbd> — Знаю •{' '}
-          <kbd>R</kbd> — Озвучить
+          <span>{t('lang.trainer.keys')}</span>
+          <kbd>{t('lang.trainer.keySpace')}</kbd> — {t('lang.trainer.actionFlip')} • <kbd>1</kbd> / <kbd>←</kbd> — {t('lang.trainer.keyNo')}{' '}
+          • <kbd>2</kbd> / <kbd>→</kbd> — {t('lang.trainer.keyYes')} • <kbd>R</kbd> — {t('lang.trainer.keySpeak')}
         </div>
       )}
     </div>

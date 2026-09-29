@@ -1,0 +1,54 @@
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  line-height: 1.2;
+}
+
+.ui-badge--sm {
+  font-size: 10px;
+  padding: 2px 6px;
+}
+
+.ui-badge--default {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg);
+  border-color: var(--line);
+}
+
+.ui-badge--accent {
+  background: var(--accent);
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.ui-badge--coral {
+  background: rgba(229, 116, 80, 0.2);
+  color: var(--coral);
+  border-color: rgba(229, 116, 80, 0.35);
+}
+
+.ui-badge--muted {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+}
+
+.ui-badge--success {
+  background: rgba(80, 200, 120, 0.15);
+  color: #50c878;
+  border-color: rgba(80, 200, 120, 0.3);
+}
+
+.ui-badge--outline {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--line);
+}

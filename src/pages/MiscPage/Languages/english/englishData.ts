@@ -21,7 +21,6 @@ export const ENGLISH_CATEGORIES: { id: string; label: string; hint: string }[] =
 ]
 
 export const ENGLISH_WORDS: EnglishWord[] = [
-  // --- СЛОВА-СВЯЗКИ (TRANSITION WORDS) ---
   {
     id: 'albeit',
     term: 'Albeit',
@@ -158,7 +157,6 @@ export const ENGLISH_WORDS: EnglishWord[] = [
     exampleRu: 'Мы хотели бесшовную синхронизацию в реальном времени, и с этой целью полностью переписали WebSocket-слой.',
   },
 
-  // --- АМЕРИКАНСКИЙ YOUTUBE И ПОДКАСТЫ ---
   {
     id: 'double-down',
     term: 'To double down',
@@ -306,7 +304,6 @@ export const ENGLISH_WORDS: EnglishWord[] = [
     exampleRu: 'Подписка на софт абсолютно бесплатна, но с важной оговоркой: все загруженные файлы становятся публичными.',
   },
 
-  // --- ОФИЦИАЛЬНАЯ АМЕРИКАНСКАЯ ПРЕССА (WSJ, NYT, BLOOMBERG) ---
   {
     id: 'ubiquitous',
     term: 'Ubiquitous',
@@ -468,7 +465,6 @@ export const ENGLISH_WORDS: EnglishWord[] = [
     exampleRu: 'Решение суда против монополии магазинов приложений назвали историческим переломным моментом для независимых разработчиков.',
   },
 
-  // --- БИЗНЕС, СТАРТАПЫ & ТЕХНОЛОГИИ (SILICON VALLEY) ---
   {
     id: 'pivot',
     term: 'Pivot',

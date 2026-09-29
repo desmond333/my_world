@@ -7,7 +7,7 @@ import { EnglishReadingView } from './EnglishReadingView'
 import { LanguageTrainer, type TrainerItem } from '../trainer'
 
 export const EnglishTab = () => {
-  const { lang, t } = useTranslation()
+  const { t } = useTranslation()
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [mode, setMode] = useState<'list' | 'trainer' | 'reading'>('list')
@@ -78,45 +78,38 @@ export const EnglishTab = () => {
 
   return (
     <div className="english-tab">
-      {/* Description Banner */}
       <div className="english-hero-banner">
         <div className="english-hero-content">
           <div className="english-hero-pill">
             <Sparkles size={14} />
             <span>Advanced American English</span>
           </div>
-          <h3>{lang === 'ru' ? 'Английский для YouTube и американской прессы' : 'English for YouTube & US Press'}</h3>
-          <p>
-            {lang === 'ru'
-              ? 'Слова и обороты, которые американские авторы используют в видео-эссе, подкастах и статьях The Wall Street Journal, а также аутентичные тексты для практики чтения.'
-              : 'Phrases and vocabulary used in American video essays, top podcasts, Wall Street Journal articles, and authentic reading texts.'}
-          </p>
+          <h3>{t('lang.en.heroTitle')}</h3>
+          <p>{t('lang.en.heroDesc')}</p>
         </div>
       </div>
 
-      {/* Mode & Category Bar */}
       <div className="english-toolbar">
-        <div className="english-mode-switch" role="group" aria-label="Режим обучения">
+        <div className="english-mode-switch" role="group" aria-label={t('lang.mode.aria')}>
           <button type="button" className={`english-mode-btn ${mode === 'list' ? 'active' : ''}`} onClick={() => setMode('list')}>
             <BookOpen size={16} />
             <span className="mode-btn-full">{t('langPage.allCards')}</span>
-            <span className="mode-btn-short">{lang === 'ru' ? 'Словарь' : 'Cards'}</span>
+            <span className="mode-btn-short">{t('lang.mode.dictionaryShort')}</span>
             <span className="mode-badge">{filteredWords.length}</span>
           </button>
           <button type="button" className={`english-mode-btn ${mode === 'trainer' ? 'active' : ''}`} onClick={() => setMode('trainer')}>
             <GraduationCap size={16} />
             <span className="mode-btn-full">{t('langPage.flashcards')}</span>
-            <span className="mode-btn-short">{lang === 'ru' ? 'Тренажёр' : 'Trainer'}</span>
+            <span className="mode-btn-short">{t('lang.mode.trainerShort')}</span>
           </button>
           <button type="button" className={`english-mode-btn ${mode === 'reading' ? 'active' : ''}`} onClick={() => setMode('reading')}>
             <Newspaper size={16} />
-            <span className="mode-btn-full">{lang === 'ru' ? 'Тексты для чтения' : 'Reading Practice'}</span>
-            <span className="mode-btn-short">{lang === 'ru' ? 'Чтение' : 'Reading'}</span>
+            <span className="mode-btn-full">{t('lang.mode.readingFull')}</span>
+            <span className="mode-btn-short">{t('lang.mode.readingShort')}</span>
             <span className="mode-badge">3</span>
           </button>
         </div>
 
-        {/* Search (only for vocabulary cards) */}
         {mode === 'list' && (
           <div className="english-search-wrap">
             <Search size={16} className="english-search-icon" />
@@ -136,7 +129,6 @@ export const EnglishTab = () => {
         )}
       </div>
 
-      {/* Category Filter Chips (only for vocabulary list) */}
       {mode === 'list' && (
         <div className="english-categories">
           {ENGLISH_CATEGORIES.map((cat) => (
@@ -153,7 +145,6 @@ export const EnglishTab = () => {
         </div>
       )}
 
-      {/* Trainer Mode — New unified trainer */}
       {mode === 'trainer' && (
         <LanguageTrainer
           items={trainerItems}
@@ -166,7 +157,6 @@ export const EnglishTab = () => {
         />
       )}
 
-      {/* Vocabulary List Mode */}
       {mode === 'list' && (
         <div className="english-words-grid">
           {filteredWords.length === 0 ? (
@@ -193,8 +183,8 @@ export const EnglishTab = () => {
                         type="button"
                         className={`english-icon-btn ${playingId === word.id ? 'playing' : ''}`}
                         onClick={() => speakTerm(word)}
-                        title="Произношение (US)"
-                        aria-label="Произношение"
+                        title={t('lang.speak.title')}
+                        aria-label={t('lang.speak.aria')}
                       >
                         <Volume2 size={16} />
                       </button>
@@ -202,8 +192,8 @@ export const EnglishTab = () => {
                         type="button"
                         className="english-icon-btn"
                         onClick={() => handleCopyWord(word)}
-                        title="Скопировать"
-                        aria-label="Скопировать"
+                        title={t('lang.copy.title')}
+                        aria-label={t('lang.copy')}
                       >
                         {isCopied ? <Check size={16} color="var(--accent)" /> : <Copy size={16} />}
                       </button>
@@ -234,7 +224,6 @@ export const EnglishTab = () => {
         </div>
       )}
 
-      {/* Reading Practice Mode */}
       {mode === 'reading' && <EnglishReadingView />}
     </div>
   )

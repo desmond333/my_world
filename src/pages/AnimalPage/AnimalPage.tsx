@@ -2,11 +2,13 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ExternalLink, MapPin, Scale, Sparkles, Star, Timer } from 'lucide-react'
 import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
 import { findAnimal, formatAddedAt } from '../../lib'
+import { useTranslation } from '../../lib/i18n'
 import { useAnimalsStore, useFavoritesStore } from '../../store'
 import './AnimalPage.css'
 import { CreatorNote } from '../../components/CreatorNote/CreatorNote'
 
 export const AnimalPage = () => {
+  const { t, locale } = useTranslation()
   const { id = '' } = useParams()
   const animals = useAnimalsStore((state) => state.animals)
   const favorites = useFavoritesStore((state) => state.favorites)
@@ -20,10 +22,10 @@ export const AnimalPage = () => {
     return (
       <main className="page-shell">
         <section className="favorites-empty">
-          <h2>Не нашли такого животного</h2>
-          <p>Похоже, ссылка устарела. Зато на главной всегда есть новое знакомство.</p>
+          <h2>{t('animalPage.notFound')}</h2>
+          <p>{t('animalPage.notFoundNote')}</p>
           <Link className="add-button" to="/">
-            На главную
+            {t('common.home')}
           </Link>
         </section>
       </main>
@@ -37,7 +39,7 @@ export const AnimalPage = () => {
       <AppTopbar />
 
       <Link className="back-link" to="/favorites">
-        <ArrowLeft size={15} /> назад в избранное
+        <ArrowLeft size={15} /> {t('animalPage.backToFavorites')}
       </Link>
 
       <section className="animal-hero">
@@ -47,7 +49,7 @@ export const AnimalPage = () => {
         </div>
         <div className="animal-intro">
           <p className="eyebrow">
-            <Sparkles size={15} /> подробнее о виде
+            <Sparkles size={15} /> {t('animal.aboutSpecies')}
           </p>
           <h1>{animal.name}</h1>
           <p className="animal-breed-line">{animal.breed}</p>
@@ -59,48 +61,49 @@ export const AnimalPage = () => {
               onClick={() => (isFavorite ? removeFavorite(animal.id) : addFavorite(animal))}
               aria-pressed={isFavorite}
             >
-              <Star size={15} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'В избранном' : 'В избранное'}
+              <Star size={15} fill={isFavorite ? 'currentColor' : 'none'} />{' '}
+              {isFavorite ? t('animal.inFavorites') : t('animal.addFavorite')}
             </button>
             <a className="add-button wiki-link" href={animal.wikiUrl} target="_blank" rel="noreferrer noopener">
-              <ExternalLink size={15} /> статья в википедии
+              <ExternalLink size={15} /> {t('animalPage.wikiLink')}
             </a>
           </div>
           {addedAt && (
             <div className="favorite-added animal-added">
-              <span className="live-dot" /> добавлено в избранное {formatAddedAt(addedAt)}
+              <span className="live-dot" /> {t('animalPage.addedAt', undefined, { date: formatAddedAt(addedAt, locale) })}
             </div>
           )}
         </div>
       </section>
 
-      <section className="animal-specs" aria-label="Характеристики животного">
+      <section className="animal-specs" aria-label={t('animalPage.specsAria')}>
         <div className="spec">
           <Scale size={19} strokeWidth={1.5} />
-          <span>средний вес</span>
+          <span>{t('animalPage.weight')}</span>
           <strong>{animal.weight}</strong>
         </div>
         <div className="spec">
           <Timer size={19} strokeWidth={1.5} />
-          <span>продолжительность жизни</span>
+          <span>{t('animalPage.lifespan')}</span>
           <strong>{animal.lifespan}</strong>
         </div>
         <div className="spec">
           <MapPin size={19} strokeWidth={1.5} />
-          <span>где обитает</span>
+          <span>{t('animalPage.habitat')}</span>
           <strong>{animal.habitat}</strong>
         </div>
       </section>
 
       <section className="animal-story">
-        <div className="card-kicker">характер и привычки</div>
-        <h2>Такой он, {animal.name}</h2>
+        <div className="card-kicker">{t('animalPage.storyKicker')}</div>
+        <h2>{t('animalPage.storyTitle', undefined, { name: animal.name })}</h2>
         <p>{animal.description}</p>
       </section>
 
       <footer>
-        <span>любопытные факты о видах</span>
+        <span>{t('animalPage.footerNote')}</span>
         <span className="footer-note">
-          <ExternalLink size={14} /> источник — википедия
+          <ExternalLink size={14} /> {t('animalPage.sourceWiki')}
         </span>
         <CreatorNote />
       </footer>

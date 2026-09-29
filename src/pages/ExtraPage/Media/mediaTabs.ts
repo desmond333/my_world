@@ -13,8 +13,8 @@ export type MediaTab = {
 
 export const mediaTabs: MediaTab[] = [
   { key: 'movies', label: 'Фильмы', hint: 'поиск и списки', icon: Clapperboard },
-  { key: 'books', label: 'Книги', hint: 'скоро', icon: BookOpen },
-  { key: 'games', label: 'Игры', hint: 'скоро', icon: Gamepad2 },
+  { key: 'books', label: 'Книги', hint: 'поиск и списки', icon: BookOpen },
+  { key: 'games', label: 'Игры', hint: 'поиск и списки', icon: Gamepad2 },
 ]
 
 export const isMediaTab = (value: string): value is MediaTabKey => mediaTabs.some((tab) => tab.key === value)

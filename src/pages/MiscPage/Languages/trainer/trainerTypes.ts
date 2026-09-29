@@ -1,13 +1,13 @@
 export type TrainerItem = {
   id: string
-  term: string // Target word / Georgian script
-  translation: string // Russian translation
-  transcription?: string // IPA or Russian transliteration
+  term: string
+  translation: string
+  transcription?: string
   category: string
-  badge?: string // e.g. "YouTube", "WSJ", "Связка", "Кафе"
-  meaning?: string // Deep explanation / usage note
-  example?: string // Example sentence in target language
-  exampleRu?: string // Example sentence in Russian
+  badge?: string
+  meaning?: string
+  example?: string
+  exampleRu?: string
   langCode: 'en-US' | 'ka-GE'
 }
 

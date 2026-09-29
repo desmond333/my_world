@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Check, X } from 'lucide-react'
 import type { Currency, FinanceEntry, FinanceKind } from '../../../data'
-import { CURRENCY_MARKS, CURRENCIES, FINANCE_KINDS, FINANCE_LABELS, isCurrency } from '../../../lib'
+import { CURRENCY_MARKS, CURRENCIES, FINANCE_KINDS, financeKindLabel, isCurrency } from '../../../lib'
+import { useTranslation } from '../../../lib/i18n'
 import { useFinanceStore } from '../../../store'
 
 export type EntryFormProps = {
@@ -16,6 +17,7 @@ const toAmount = (value: string) => {
 }
 
 export const EntryForm = ({ month, entry, onDone }: EntryFormProps) => {
+  const { lang, t } = useTranslation()
   const addEntry = useFinanceStore((state) => state.addEntry)
   const updateEntry = useFinanceStore((state) => state.updateEntry)
   const [kind, setKind] = useState<FinanceKind>(entry?.kind ?? 'salary')
@@ -36,24 +38,24 @@ export const EntryForm = ({ month, entry, onDone }: EntryFormProps) => {
 
   return (
     <form className="entry-form" onSubmit={submit}>
-      <div className="entry-field" role="group" aria-label="Тип поступления">
-        <span>Тип</span>
+      <div className="entry-field" role="group" aria-label={t('finance.form.kindAria')}>
+        <span>{t('finance.form.kind')}</span>
         <div className="entry-kinds">
           {FINANCE_KINDS.map((option) => (
             <button type="button" key={option} className={`mini-button${kind === option ? ' is-on' : ''}`} onClick={() => setKind(option)}>
-              {FINANCE_LABELS[option]}
+              {financeKindLabel(option, lang)}
             </button>
           ))}
         </div>
       </div>
 
       <label className="entry-field">
-        <span>Сумма</span>
+        <span>{t('finance.form.amount')}</span>
         <input type="text" inputMode="decimal" value={amount} placeholder="0" onChange={(event) => setAmount(event.target.value)} />
       </label>
 
       <label className="entry-field">
-        <span>Валюта</span>
+        <span>{t('finance.form.currency')}</span>
         <select
           value={currency}
           onChange={(event) => {
@@ -70,21 +72,26 @@ export const EntryForm = ({ month, entry, onDone }: EntryFormProps) => {
       </label>
 
       <label className="entry-field">
-        <span>Месяц</span>
-        <input type="month" aria-label="Месяц и год" value={formMonth} onChange={(event) => setFormMonth(event.target.value)} />
+        <span>{t('finance.form.month')}</span>
+        <input
+          type="month"
+          aria-label={t('finance.form.monthAria')}
+          value={formMonth}
+          onChange={(event) => setFormMonth(event.target.value)}
+        />
       </label>
 
       <label className="entry-field entry-field--wide">
-        <span>Заметка</span>
-        <input type="text" value={note} placeholder="Необязательно" onChange={(event) => setNote(event.target.value)} />
+        <span>{t('finance.form.note')}</span>
+        <input type="text" value={note} placeholder={t('finance.form.notePlaceholder')} onChange={(event) => setNote(event.target.value)} />
       </label>
 
       <div className="entry-actions">
         <button type="submit" className="add-button" disabled={toAmount(amount) <= 0}>
-          <Check size={16} /> {entry ? 'Сохранить' : 'Добавить'}
+          <Check size={16} /> {entry ? t('common.save') : t('common.add')}
         </button>
         <button type="button" className="mini-button mini-button--ghost" onClick={onDone}>
-          <X size={15} /> Отмена
+          <X size={15} /> {t('common.cancel')}
         </button>
       </div>
     </form>

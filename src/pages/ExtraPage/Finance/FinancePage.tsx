@@ -1,19 +1,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChartNoAxesColumn, RefreshCw, RotateCcw, Wallet } from 'lucide-react'
 import type { RatesSource } from '../../../store'
+import { BarChart } from '../../../shared/ui'
 import {
   CURRENCIES,
   CURRENCY_MARKS,
-  CURRENCY_NAMES,
+  currencyName,
   convert,
   formatMoney,
   groupByYear,
   monthKey,
+  monthName,
   monthTotal,
   monthsWithEntries,
   rateRows,
 } from '../../../lib'
 import { fetchRates } from '../../../services'
+import { countText, useTranslation } from '../../../lib/i18n'
 import { useFinanceStore } from '../../../store'
 import { MonthCard } from './MonthCard'
 import './Finance.css'
@@ -21,13 +24,13 @@ import './Finance.css'
 const STALE_MS = 6 * 60 * 60 * 1000
 
 const RATES_SOURCE_LABELS: Record<RatesSource, string> = {
-  server: 'Курсы с сервера',
-  manual: 'Курсы вручную',
-  default: 'Курсы по умолчанию',
+  server: 'finance.rates.sourceServer',
+  manual: 'finance.rates.sourceManual',
+  default: 'finance.rates.sourceDefault',
 }
 
-const formatStamp = (value: string) =>
-  new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+const formatStamp = (value: string, locale: string) =>
+  new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
 
 const isStale = (updatedAt: string | null) => {
   if (!updatedAt) return true
@@ -36,6 +39,7 @@ const isStale = (updatedAt: string | null) => {
 }
 
 export const FinancePage = () => {
+  const { lang, t, locale } = useTranslation()
   const entries = useFinanceStore((state) => state.entries)
   const balance = useFinanceStore((state) => state.balance)
   const currency = useFinanceStore((state) => state.currency)
@@ -53,6 +57,7 @@ export const FinancePage = () => {
   const [loading, setLoading] = useState(false)
   const [ratesError, setRatesError] = useState('')
   const manual = useRef(false)
+  const hasCheckedRates = useRef(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -61,13 +66,15 @@ export const FinancePage = () => {
       const snapshot = await fetchRates()
       applyRates(snapshot.rates, snapshot.updatedAt)
     } catch (error) {
-      setRatesError(error instanceof Error ? error.message : 'Не удалось обновить курсы.')
+      setRatesError(error instanceof Error ? error.message : t('finance.rates.failed'))
     } finally {
       setLoading(false)
     }
-  }, [applyRates])
+  }, [applyRates, t])
 
   useEffect(() => {
+    if (hasCheckedRates.current) return
+    hasCheckedRates.current = true
     if (manual.current || !isStale(ratesUpdatedAt)) return
     void load()
   }, [load, ratesUpdatedAt])
@@ -81,27 +88,43 @@ export const FinancePage = () => {
     () => (yearFilter ? months.filter((month) => month.startsWith(String(yearFilter))) : months),
     [months, yearFilter],
   )
-  const ratesTable = useMemo(() => rateRows(rates), [rates])
+  const ratesTable = useMemo(() => rateRows(rates, lang), [rates, lang])
 
   const totalBalance = useMemo(
     () => CURRENCIES.reduce((sum, item) => sum + convert(balance[item], item, currency, rates), 0),
     [balance, currency, rates],
   )
 
+  const chartData = useMemo(() => {
+    return [...visible]
+      .reverse()
+      .slice(-12)
+      .map((month) => {
+        const total = monthTotal(entries, month, currency, rates)
+        return {
+          id: month,
+          label: monthName(month, locale).slice(0, 3),
+          value: Math.max(0, Math.round(total.total)),
+          subLabel: formatMoney(total.total, currency, lang),
+          color: month === current ? 'var(--accent)' : 'rgba(244, 184, 73, 0.55)',
+        }
+      })
+  }, [visible, entries, currency, rates, locale, lang, current])
+
   return (
     <>
       <section className="extra-head">
         <p className="eyebrow">
-          <Wallet size={15} /> дополнительно · финансы
+          <Wallet size={15} /> {t('finance.kicker')}
         </p>
-        <h1>Финансы</h1>
-        <p className="intro">Поступления по месяцам в рублях, долларах и лари. Считается в рублях по умолчанию, курсы можно менять.</p>
+        <h1>{t('finance.title')}</h1>
+        <p className="intro">{t('finance.intro')}</p>
       </section>
 
       <section className="finance-panel">
         <div className="finance-balance">
           <div className="finance-balance-head">
-            <h2>Сейчас у меня</h2>
+            <h2>{t('finance.balance.title')}</h2>
             <div className="entry-kinds">
               {CURRENCIES.map((item) => (
                 <button
@@ -117,7 +140,7 @@ export const FinancePage = () => {
           </div>
 
           <label className="finance-balance-field">
-            <span className="visually-hidden">Текущая сумма в {currency}</span>
+            <span className="visually-hidden">{t('finance.balance.aria', undefined, { currency })}</span>
             <input
               type="text"
               inputMode="decimal"
@@ -130,13 +153,17 @@ export const FinancePage = () => {
             <span className="finance-balance-mark">{CURRENCY_MARKS[currency]}</span>
           </label>
 
-          <p className="finance-balance-total">{currency === 'RUB' ? 'Сумма в рублях' : `В рублях: ${formatMoney(totalBalance, 'RUB')}`}</p>
+          <p className="finance-balance-total">
+            {currency === 'RUB'
+              ? t('finance.balance.roubles')
+              : t('finance.balance.inRoubles', undefined, { sum: formatMoney(totalBalance, 'RUB', lang) })}
+          </p>
 
           <div className="finance-convert">
             {CURRENCIES.filter((item) => item !== currency).map((item) => (
               <div className="finance-convert-row" key={item}>
-                <span>{formatMoney(balance[currency], currency)} — это</span>
-                <strong>{formatMoney(convert(balance[currency], currency, item, rates), item)}</strong>
+                <span>{t('finance.balance.means', undefined, { sum: formatMoney(balance[currency], currency, lang) })}</span>
+                <strong>{formatMoney(convert(balance[currency], currency, item, rates), item, lang)}</strong>
               </div>
             ))}
           </div>
@@ -145,10 +172,10 @@ export const FinancePage = () => {
             {CURRENCIES.map((item) => (
               <div className="finance-wallet-row" key={item}>
                 <span className="finance-wallet-label">
-                  {CURRENCY_MARKS[item]} {CURRENCY_NAMES[item]}
+                  {CURRENCY_MARKS[item]} {currencyName(item, lang)}
                 </span>
                 <span className="finance-wallet-value">
-                  {item === currency ? '—' : formatMoney(convert(balance[item], item, currency, rates), currency)}
+                  {item === currency ? '—' : formatMoney(convert(balance[item], item, currency, rates), currency, lang)}
                 </span>
               </div>
             ))}
@@ -157,10 +184,11 @@ export const FinancePage = () => {
 
         <div className="finance-rates">
           <div className="finance-rates-head">
-            <h2>Курсы</h2>
+            <h2>{t('finance.rates.title')}</h2>
             <div className="finance-rates-actions">
               <button type="button" className="mini-button" onClick={load} disabled={loading}>
-                <RefreshCw size={14} className={loading ? 'spin' : undefined} /> {loading ? 'Обновляю' : 'Обновить'}
+                <RefreshCw size={14} className={loading ? 'spin' : undefined} />{' '}
+                {loading ? t('finance.rates.refreshing') : t('finance.rates.refresh')}
               </button>
               <button
                 type="button"
@@ -170,15 +198,18 @@ export const FinancePage = () => {
                   resetRates()
                 }}
               >
-                <RotateCcw size={14} /> Сбросить
+                <RotateCcw size={14} /> {t('finance.rates.reset')}
               </button>
             </div>
           </div>
           <p className={`finance-rates-state${ratesError ? ' is-error' : ''}`}>
             {ratesError ||
               (ratesUpdatedAt
-                ? `${RATES_SOURCE_LABELS[ratesSource]}, обновлено ${formatStamp(ratesUpdatedAt)}`
-                : 'Курсы ещё не загружены с сервера.')}
+                ? t('finance.rates.updated', undefined, {
+                    source: t(RATES_SOURCE_LABELS[ratesSource]),
+                    stamp: formatStamp(ratesUpdatedAt, locale),
+                  })
+                : t('finance.rates.empty'))}
           </p>
           <div className="finance-rate-inputs">
             {CURRENCIES.map((item) => (
@@ -210,10 +241,10 @@ export const FinancePage = () => {
 
       <section className="finance-years">
         <div className="finance-years-head">
-          <h2>По годам</h2>
+          <h2>{t('finance.years.title')}</h2>
           <div className="entry-kinds">
             <button type="button" className={`mini-button${yearFilter === null ? ' is-on' : ''}`} onClick={() => setYearFilter(null)}>
-              Все
+              {t('common.all')}
             </button>
             {years.map((year) => (
               <button
@@ -232,8 +263,8 @@ export const FinancePage = () => {
           {years.map((year) => (
             <div className="finance-year-card" key={year.year}>
               <span className="finance-year-name">{year.year}</span>
-              <span className="finance-year-total">{formatMoney(year.total, currency)}</span>
-              <span className="finance-year-months">{year.months} мес. с поступлениями</span>
+              <span className="finance-year-total">{formatMoney(year.total, currency, lang)}</span>
+              <span className="finance-year-months">{countText('finance.years.month', year.months, lang)}</span>
             </div>
           ))}
         </div>
@@ -241,10 +272,21 @@ export const FinancePage = () => {
 
       <section className="finance-months">
         <h2>
-          <ChartNoAxesColumn size={18} /> По месяцам
+          <ChartNoAxesColumn size={18} /> {t('finance.months.title')}
         </h2>
+        {chartData.length > 1 && (
+          <div className="finance-chart-wrapper">
+            <BarChart
+              data={chartData}
+              height={170}
+              formatValue={(val) =>
+                val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${Math.round(val / 1000)}k` : String(val)
+              }
+            />
+          </div>
+        )}
         {visible.length === 0 ? (
-          <p className="finance-empty">Поступлений пока нет. Добавь первое в текущем месяце.</p>
+          <p className="finance-empty">{t('finance.empty')}</p>
         ) : (
           <div className="finance-month-grid">
             {visible.map((month) => (

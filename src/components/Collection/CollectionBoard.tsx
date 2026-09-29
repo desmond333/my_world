@@ -31,7 +31,7 @@ export const CollectionBoard = memo(
     onUpdateItem,
   }: CollectionBoardProps) => {
     const { t } = useTranslation()
-    const listLabel = (key: CollectionListKey) => t(`movies.list.${key}`, lists.find((option) => option.key === key)?.label)
+    const listLabel = (key: CollectionListKey) => lists.find((option) => option.key === key)?.label ?? key
     const sensors = useSensors(
       useSensor(PointerSensor, { activationConstraint: { distance: DRAG_ACTIVATION_DISTANCE } }),
       useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -63,7 +63,7 @@ export const CollectionBoard = memo(
               aria-pressed={list === option.key}
               className={`list-tab${list === option.key ? ' is-on' : ''}`}
               onClick={() => onList(option.key)}
-              title={t(`movies.list.${option.key}Hint`, option.hint)}
+              title={option.hint}
             >
               {listLabel(option.key)}
               {counts[option.key] > 0 && <span className="list-count">{counts[option.key]}</span>}

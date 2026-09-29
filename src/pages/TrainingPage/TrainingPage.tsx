@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { Bike, ChevronLeft, ChevronRight, ClipboardCopy, Dumbbell, Flame, Plus, Settings2, Trash2, Check } from 'lucide-react'
+import { Bike, ChevronLeft, ChevronRight, ClipboardCopy, Dumbbell, Flame, PieChart, Plus, Settings2, Trash2, Check } from 'lucide-react'
 import { findCity } from '../../data'
 import { useCopyFeedback } from '../../hooks'
+import { DonutChart } from '../../shared/ui'
 import {
   activeSports,
   daySports,
@@ -104,17 +105,6 @@ export const TrainingPage = () => {
           </strong>
         </div>
       </section>
-
-      {totals.length > 0 && (
-        <section className="training-totals" aria-label={t('training.totalsAria')}>
-          {totals.map(({ sport, count }) => (
-            <span className="training-total" key={sport.id}>
-              <i style={{ background: sport.color }} />
-              {sportLabel(sport, lang)} <strong>{count}</strong>
-            </span>
-          ))}
-        </section>
-      )}
 
       <section className="today-training" aria-live="polite">
         <div className="training-today-icon">{todayKinds.length ? <Check size={22} /> : <Dumbbell size={22} />}</div>
@@ -279,6 +269,40 @@ export const TrainingPage = () => {
           <Flame size={14} /> {t('training.calendarNote')}
         </p>
       </section>
+
+      {totals.length > 0 && (
+        <section className="training-analytics" aria-label={t('training.totalsAria')}>
+          <div className="training-analytics-head">
+            <div className="card-kicker">
+              <PieChart size={14} /> {t('training.totalsAria')}
+            </div>
+            <h2>{t('training.totalsAria')}</h2>
+          </div>
+          <div className="training-analytics-body">
+            <DonutChart
+              data={totals.map(({ sport, count }) => ({
+                id: sport.id,
+                label: sportLabel(sport, lang),
+                value: count,
+                color: sport.color,
+              }))}
+              size={120}
+              strokeWidth={14}
+              showLegend={false}
+              centerLabel={t('training.statTotal')}
+              centerValue={stats.total}
+            />
+            <div className="training-totals">
+              {totals.map(({ sport, count }) => (
+                <span className="training-total" key={sport.id}>
+                  <i style={{ background: sport.color }} />
+                  {sportLabel(sport, lang)} <strong>{count}</strong>
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="copy-row">
         <div>

@@ -62,12 +62,11 @@ export const playSoundEffect = (type: SoundEffectType) => {
     }
 
     case 'jackpot': {
-      // Fanfare: C4, E4, G4, C5 arpeggio with celebratory shimmer
       const notes = [
-        { f: 523.25, t: 0, d: 0.12 }, // C5
-        { f: 659.25, t: 0.12, d: 0.12 }, // E5
-        { f: 783.99, t: 0.24, d: 0.14 }, // G5
-        { f: 1046.5, t: 0.38, d: 0.6 }, // C6
+        { f: 523.25, t: 0, d: 0.12 },
+        { f: 659.25, t: 0.12, d: 0.12 },
+        { f: 783.99, t: 0.24, d: 0.14 },
+        { f: 1046.5, t: 0.38, d: 0.6 },
       ]
       notes.forEach(({ f, t, d }) => {
         const osc = ctx.createOscillator()

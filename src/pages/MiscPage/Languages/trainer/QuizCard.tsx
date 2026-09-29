@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { ArrowRight, Check, Sparkles, Volume2, X } from 'lucide-react'
+import { useTranslation } from '../../../../lib/i18n'
 import type { QuizOption, TrainerItem } from './trainerTypes'
 
 type QuizCardProps = {
@@ -29,6 +30,7 @@ export const QuizCard = ({
   audioRate,
   playingId,
 }: QuizCardProps) => {
+  const { t } = useTranslation()
   const isDirect = effectiveDirection === 'direct'
   const promptText = isDirect ? item.term : item.translation
   const isPlaying = playingId === item.id
@@ -61,10 +63,9 @@ export const QuizCard = ({
 
   return (
     <div className="trainer-quiz-card">
-      {/* Top Question Header */}
       <div className="trainer-card-top">
         <div className="trainer-badges-row">
-          <span className="trainer-mode-chip">🎯 Выбери правильный ответ</span>
+          <span className="trainer-mode-chip">{t('lang.quiz.pick')}</span>
           {item.badge && <span className="trainer-badge">{item.badge}</span>}
         </div>
 
@@ -72,22 +73,20 @@ export const QuizCard = ({
           type="button"
           className={`trainer-speak-btn ${isPlaying ? 'playing' : ''}`}
           onClick={() => onSpeak(item, audioRate)}
-          title="Прослушать (R)"
-          aria-label="Прослушать"
+          title={t('lang.card.listenTitle')}
+          aria-label={t('lang.card.listenAria')}
         >
           <Volume2 size={18} />
-          <span>{isPlaying ? 'Играет...' : 'Озвучить'}</span>
+          <span>{isPlaying ? t('lang.card.playing') : t('lang.card.speak')}</span>
         </button>
       </div>
 
-      {/* Main Prompt Word */}
       <div className="trainer-quiz-prompt">
-        <span className="trainer-quiz-subtitle">{isDirect ? 'Как переводится это слово?' : 'Как это звучит на изучаемом языке?'}</span>
+        <span className="trainer-quiz-subtitle">{isDirect ? t('lang.quiz.howTranslate') : t('lang.quiz.howSays')}</span>
         <h2 className="trainer-prompt-word">{promptText}</h2>
         {isDirect && item.transcription && <div className="trainer-transcription">{item.transcription}</div>}
       </div>
 
-      {/* 4 Choices Grid */}
       <div className="trainer-quiz-options" role="radiogroup">
         {options.map((opt, idx) => {
           const isSelected = selectedOption === idx
@@ -110,7 +109,7 @@ export const QuizCard = ({
               className={`trainer-quiz-option ${stateClass} ${isSelected ? 'is-selected' : ''}`}
               onClick={() => onSelectOption(idx)}
               disabled={isAnswerChecked}
-              aria-label={`Вариант ${OPTION_LABELS[idx]}: ${opt.text}`}
+              aria-label={t('lang.quiz.optionAria', undefined, { letter: OPTION_LABELS[idx], text: opt.text })}
             >
               <span className="option-label-badge">{OPTION_LABELS[idx]}</span>
               <span className="option-text">{opt.text}</span>
@@ -121,29 +120,28 @@ export const QuizCard = ({
         })}
       </div>
 
-      {/* Feedback & Explanation Card */}
       {isAnswerChecked && (
         <div className="trainer-quiz-feedback">
           <div className="trainer-feedback-header">
             {selectedOption !== null && options[selectedOption]?.isCorrect ? (
               <div className="feedback-status status--correct">
                 <Check size={20} />
-                <strong>Отлично! Абсолютно верно!</strong>
+                <strong>{t('lang.quiz.correct')}</strong>
               </div>
             ) : (
               <div className="feedback-status status--wrong">
                 <X size={20} />
                 <div>
-                  <strong>Не совсем так</strong>
+                  <strong>{t('lang.quiz.wrong')}</strong>
                   <p>
-                    Правильный ответ: <u>{isDirect ? item.translation : item.term}</u>
+                    {t('lang.quiz.correctAnswerLabel')} <u>{isDirect ? item.translation : item.term}</u>
                   </p>
                 </div>
               </div>
             )}
 
             <button type="button" className="trainer-btn trainer-btn--next" onClick={onAdvance} autoFocus>
-              <span>Следующий вопрос (Enter)</span>
+              <span>{t('lang.quiz.next')}</span>
               <ArrowRight size={18} />
             </button>
           </div>

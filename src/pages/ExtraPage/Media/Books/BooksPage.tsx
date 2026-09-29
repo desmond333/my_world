@@ -1,9 +1,22 @@
 import { BookOpen } from 'lucide-react'
-import { ComingSoon } from '../../../../components/ComingSoon/ComingSoon'
+import { CollectionView } from '../../../../components/Collection/CollectionView'
 import { useTranslation } from '../../../../lib/i18n'
+import { useBooksStore } from '../../../../store'
+import { booksCollection } from './books'
 
 export const BooksPage = () => {
   const { t } = useTranslation()
 
-  return <ComingSoon icon={BookOpen} kicker={t('media.books.kicker')} heading={t('media.tab.books')} description={t('media.books.desc')} />
+  return (
+    <>
+      <section className="extra-head">
+        <p className="eyebrow">
+          <BookOpen size={15} /> {t('books.kicker', booksCollection.kicker)}
+        </p>
+        <h1>{t('books.title', booksCollection.heading)}</h1>
+        <p className="intro">{t('books.intro', booksCollection.intro)}</p>
+      </section>
+      <CollectionView descriptor={booksCollection} store={useBooksStore} />
+    </>
+  )
 }

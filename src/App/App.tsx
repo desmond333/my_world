@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
+import { useTranslation } from '../lib/i18n'
 import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom'
 import { findCity } from '../data'
 import { MINUTE_MS, useNow } from '../hooks'
@@ -7,14 +8,12 @@ import { useAnimalsStore, useDailyStore } from '../store'
 import { DailyPage } from '../pages/DailyPage/DailyPage'
 import { NewUserHint } from '../components/NewUserHint/NewUserHint'
 
-// Lazy loaded secondary modules for fast initial load & code splitting
 const AnimalPage = lazy(() => import('../pages/AnimalPage/AnimalPage').then((m) => ({ default: m.AnimalPage })))
 const ExtraPage = lazy(() => import('../pages/ExtraPage/ExtraPage').then((m) => ({ default: m.ExtraPage })))
 const MiscPage = lazy(() => import('../pages/MiscPage/MiscPage').then((m) => ({ default: m.MiscPage })))
 const CreatorPage = lazy(() => import('../pages/CreatorPage/CreatorPage').then((m) => ({ default: m.CreatorPage })))
 const FavoritesPage = lazy(() => import('../pages/FavoritesPage/FavoritesPage').then((m) => ({ default: m.FavoritesPage })))
 
-// Extra Page children
 const TrainingPage = lazy(() => import('../pages/TrainingPage/TrainingPage').then((m) => ({ default: m.TrainingPage })))
 const FinancePage = lazy(() => import('../pages/ExtraPage/Finance/FinancePage').then((m) => ({ default: m.FinancePage })))
 const ProductivityPage = lazy(() =>
@@ -29,7 +28,6 @@ const MoviesPage = lazy(() => import('../pages/ExtraPage/Media/Movies/MoviesPage
 const BooksPage = lazy(() => import('../pages/ExtraPage/Media/Books/BooksPage').then((m) => ({ default: m.BooksPage })))
 const GamesPage = lazy(() => import('../pages/ExtraPage/Media/Games/GamesPage').then((m) => ({ default: m.GamesPage })))
 
-// Misc Page children
 const SubscriptionsPage = lazy(() =>
   import('../pages/MiscPage/Subscriptions/SubscriptionsPage').then((m) => ({ default: m.SubscriptionsPage })),
 )
@@ -68,20 +66,23 @@ const ThemeSync = () => {
   return null
 }
 
-const PageLoader = () => (
-  <main className="page-shell">
-    <div style={{ display: 'grid', placeItems: 'center', minHeight: '40vh', color: 'var(--muted)' }}>
-      <p style={{ font: "500 14px 'DM Mono', monospace" }}>Загрузка раздела...</p>
-    </div>
-  </main>
-)
+const PageLoader = () => {
+  const { t } = useTranslation()
+
+  return (
+    <main className="page-shell">
+      <div style={{ display: 'grid', placeItems: 'center', minHeight: '40vh', color: 'var(--muted)' }}>
+        <p style={{ font: "500 14px 'DM Mono', monospace" }}>{t('common.loading')}</p>
+      </div>
+    </main>
+  )
+}
 
 const NotFound = () => {
-  const lang = useDailyStore((state) => state.lang ?? 'ru')
-  const title = lang === 'en' ? 'Page not found' : 'Такой страницы нет'
-  const desc =
-    lang === 'en' ? 'However, an animal of the day is waiting for you today.' : 'Зато есть животное дня, которое ждёт тебя сегодня.'
-  const homeBtn = lang === 'en' ? 'Home' : 'На главную'
+  const { t } = useTranslation()
+  const title = t('notFound.title')
+  const desc = t('notFound.note')
+  const homeBtn = t('common.home')
 
   return (
     <main className="page-shell">

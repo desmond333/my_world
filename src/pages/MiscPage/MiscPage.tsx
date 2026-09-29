@@ -44,10 +44,10 @@ export const MiscPage = () => {
         </div>
       ) : (
         <section className="favorites-empty extra-off">
-          <h2>Раздел выключен</h2>
-          <p>«Разное» включается ползунком в настройках на главной — там же, где блоки дня.</p>
+          <h2>{t('sectionOff.title')}</h2>
+          <p>{t('sectionOff.misc')}</p>
           <button className="add-button" type="button" onClick={toggleExtraTab}>
-            Включить раздел
+            {t('sectionOff.enable')}
           </button>
         </section>
       )}

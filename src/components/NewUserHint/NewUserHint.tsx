@@ -14,7 +14,6 @@ export const NewUserHint = () => {
   useEffect(() => {
     const isSeen = storage.get<boolean>(ONBOARDING_KEY, false)
     if (!isSeen) {
-      // Delay slightly for smooth page entrance
       const timer = setTimeout(() => {
         setVisible(true)
       }, 1500)

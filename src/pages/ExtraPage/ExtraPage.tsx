@@ -44,10 +44,10 @@ export const ExtraPage = () => {
         </div>
       ) : (
         <section className="favorites-empty extra-off">
-          <h2>Раздел выключен</h2>
-          <p>«Полезное» включается ползунком в настройках на главной — там же, где блоки дня.</p>
+          <h2>{t('sectionOff.title')}</h2>
+          <p>{t('sectionOff.useful')}</p>
           <button className="add-button" type="button" onClick={toggleExtraTab}>
-            Включить раздел
+            {t('sectionOff.enable')}
           </button>
         </section>
       )}

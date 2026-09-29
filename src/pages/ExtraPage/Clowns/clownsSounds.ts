@@ -34,7 +34,6 @@ export const playSoundEffect = (type: SoundEffectType) => {
 
   switch (type) {
     case 'honk': {
-      // Classic rubber bulb horn
       const osc1 = ctx.createOscillator()
       const gain1 = ctx.createGain()
       osc1.type = 'sawtooth'
@@ -62,14 +61,13 @@ export const playSoundEffect = (type: SoundEffectType) => {
     }
 
     case 'airhorn': {
-      // Iconic MLG / Reggae multi-burst airhorn
       const bursts = [
         { start: 0, dur: 0.09 },
         { start: 0.11, dur: 0.09 },
         { start: 0.22, dur: 0.09 },
         { start: 0.33, dur: 0.38 },
       ]
-      const freq = 466.16 // Bb4
+      const freq = 466.16
 
       bursts.forEach(({ start, dur }) => {
         const osc = ctx.createOscillator()
@@ -103,7 +101,6 @@ export const playSoundEffect = (type: SoundEffectType) => {
     }
 
     case 'auf': {
-      // Wolf howl gliding up with gentle vibrato and gliding down
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       const vibrato = ctx.createOscillator()
@@ -134,11 +131,10 @@ export const playSoundEffect = (type: SoundEffectType) => {
     }
 
     case 'drama': {
-      // 3 dramatic low brass hits
       const hits = [
-        { time: 0, dur: 0.16, f1: 130.81, f2: 155.56 }, // C3 / Eb3
-        { time: 0.2, dur: 0.16, f1: 123.47, f2: 146.83 }, // B2 / D3
-        { time: 0.42, dur: 0.55, f1: 110.0, f2: 130.81 }, // A2 / C3
+        { time: 0, dur: 0.16, f1: 130.81, f2: 155.56 },
+        { time: 0.2, dur: 0.16, f1: 123.47, f2: 146.83 },
+        { time: 0.42, dur: 0.55, f1: 110.0, f2: 130.81 },
       ]
 
       hits.forEach(({ time, dur, f1, f2 }) => {
@@ -167,12 +163,11 @@ export const playSoundEffect = (type: SoundEffectType) => {
     }
 
     case 'sad': {
-      // Sad trombone (Wah-wah-wah-waaaah)
       const notes = [
-        { f: 293.66, t: 0, d: 0.2 }, // D4
-        { f: 277.18, t: 0.22, d: 0.2 }, // C#4
-        { f: 261.63, t: 0.44, d: 0.2 }, // C4
-        { f: 246.94, t: 0.66, d: 0.6, slide: 215 }, // B3 -> A3
+        { f: 293.66, t: 0, d: 0.2 },
+        { f: 277.18, t: 0.22, d: 0.2 },
+        { f: 261.63, t: 0.44, d: 0.2 },
+        { f: 246.94, t: 0.66, d: 0.6, slide: 215 },
       ]
 
       notes.forEach(({ f, t, d, slide }) => {
@@ -197,7 +192,6 @@ export const playSoundEffect = (type: SoundEffectType) => {
     }
 
     case 'boing': {
-      // Cartoon spring jump
       const osc = ctx.createOscillator()
       const mod = ctx.createOscillator()
       const modGain = ctx.createGain()

@@ -92,6 +92,14 @@ export const daily: Dictionary = {
     'weather.showWeek': 'Показать 7 дней',
     'weather.failed': 'Погода недоступна',
     'weather.loading': 'загружаем...',
+    'weather.rainAlert': 'Весь день дожди — лучше остаться дома!',
+    'weather.event.newYear': 'Новый год! 🎄',
+    'weather.event.newYearEve': 'Канун Нового года! ✨',
+    'weather.event.defender': '23 февраля — День защитника Отечества ⭐',
+    'weather.event.women': '8 марта — Международный женский день 🌸',
+    'weather.event.victory': '9 мая — День Победы ⭐',
+    'weather.event.ownBirthday': 'Мой день рождения! 🎂',
+    'weather.event.birthday': 'День рождения: {name} 🎂',
 
     'wish.kicker': 'пожелание дня',
     'wish.note': 'Не от животного и не от календаря. Просто на удачу.',
@@ -118,7 +126,6 @@ export const daily: Dictionary = {
     'trainingCard.done': 'Тренировка была',
     'trainingCard.log': 'Отметить',
     'trainingCard.calendar': 'календарь',
-
 
     'blocks.animal.label': 'Животное дня',
     'blocks.animal.hint': 'фотография, фраза и описание вида',
@@ -280,6 +287,14 @@ export const daily: Dictionary = {
     'weather.showWeek': 'Show 7 days',
     'weather.failed': 'Weather unavailable',
     'weather.loading': 'loading...',
+    'weather.rainAlert': 'Rain all day — better stay home!',
+    'weather.event.newYear': 'New Year! 🎄',
+    'weather.event.newYearEve': "New Year's Eve! ✨",
+    'weather.event.defender': 'Defender of the Fatherland Day ⭐',
+    'weather.event.women': "International Women's Day 🌸",
+    'weather.event.victory': 'Victory Day ⭐',
+    'weather.event.ownBirthday': 'My birthday! 🎂',
+    'weather.event.birthday': 'Birthday: {name} 🎂',
 
     'wish.kicker': 'daily wish',
     'wish.note': 'Not from an animal, nor from the calendar. Just for good luck.',
@@ -306,7 +321,6 @@ export const daily: Dictionary = {
     'trainingCard.done': 'Done',
     'trainingCard.log': 'Log',
     'trainingCard.calendar': 'calendar',
-
 
     'blocks.animal.label': 'Animal of the day',
     'blocks.animal.hint': 'photo, phrase and species description',

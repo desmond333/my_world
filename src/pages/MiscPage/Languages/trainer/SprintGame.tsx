@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Flame, Play, RotateCcw, Trophy, X, Zap } from 'lucide-react'
 import { storage } from '../../../../lib'
+import { useTranslation } from '../../../../lib/i18n'
 import type { TrainerItem } from './trainerTypes'
 
 type SprintGameProps = {
@@ -13,6 +14,7 @@ type SprintGameProps = {
 const GAME_DURATION_SECONDS = 45
 
 export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit }: SprintGameProps) => {
+  const { t } = useTranslation()
   const highscoreKey = `${storageKeyPrefix}-sprint-highscore`
   const [highScore, setHighScore] = useState<number>(() => storage.get<number>(highscoreKey, 0))
 
@@ -24,7 +26,6 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
   const [totalAttempts, setTotalAttempts] = useState(0)
   const [correctAttempts, setCorrectAttempts] = useState(0)
 
-  // Current question: item + proposed translation + isMatch
   const [currentWord, setCurrentWord] = useState<TrainerItem | null>(null)
   const [suggestedTranslation, setSuggestedTranslation] = useState<string>('')
   const [isMatch, setIsMatch] = useState<boolean>(true)
@@ -32,13 +33,11 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
 
   const timerRef = useRef<number | null>(null)
 
-  // Generate next pair
   const nextPair = useCallback(() => {
     if (items.length === 0) return
     const randomItem = items[Math.floor(Math.random() * items.length)]
     if (!randomItem) return
 
-    // 50% chance match, 50% chance distractor
     const shouldMatch = Math.random() >= 0.5
     let trans = randomItem.translation
 
@@ -67,7 +66,6 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
     nextPair()
   }, [nextPair])
 
-  // Answer handler
   const handleAnswer = useCallback(
     (userSaidMatch: boolean) => {
       if (gameState !== 'playing' || !currentWord) return
@@ -81,7 +79,6 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
         setStreak(nextStreak)
         if (nextStreak > maxStreak) setMaxStreak(nextStreak)
 
-        // Combo multiplier: 1x (0-2), 2x (3-5), 3x (6-9), 5x (10+)
         const multiplier = nextStreak >= 10 ? 5 : nextStreak >= 6 ? 3 : nextStreak >= 3 ? 2 : 1
         setScore((prev) => prev + 100 * multiplier)
         setFeedbackEffect('correct')
@@ -97,7 +94,6 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
     [gameState, currentWord, isMatch, streak, maxStreak, nextPair],
   )
 
-  // Timer countdown
   const scoreRef = useRef(score)
   const highScoreRef = useRef(highScore)
 
@@ -116,7 +112,6 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
           if (prev <= 1) {
             if (timerRef.current) clearInterval(timerRef.current)
             setGameState('gameover')
-            // Update high score inline (no separate effect needed)
             if (scoreRef.current > highScoreRef.current) {
               setHighScore(scoreRef.current)
               storage.set(highscoreKey, scoreRef.current)
@@ -133,7 +128,6 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
     }
   }, [gameState, highscoreKey])
 
-  // Keyboard controls during game
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameState === 'playing') {
@@ -172,29 +166,26 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
           <div className="sprint-splash-icon">
             <Zap size={44} />
           </div>
-          <h2>⚡ Спринт-челлендж (45 секунд)</h2>
-          <p>
-            Быстрая проверка словарного запаса на скорость! Смотри на слово и предложенный перевод — и моментально решай, верно или нет. За
-            серии правильных ответов включается комбо-множитель до 5x!
-          </p>
+          <h2>{t('lang.sprint.title')}</h2>
+          <p>{t('lang.sprint.desc')}</p>
 
           <div className="sprint-splash-meta">
             <div className="sprint-meta-badge">
               <Trophy size={16} />
-              <span>Рекорд: {highScore} очков</span>
+              <span>{t('lang.sprint.record', undefined, { count: highScore })}</span>
             </div>
             <div className="sprint-meta-badge">
-              <span>⏱️ Время: 45 сек</span>
+              <span>{t('lang.sprint.time')}</span>
             </div>
           </div>
 
           <div className="sprint-splash-actions">
             <button type="button" className="trainer-btn trainer-btn--mastered sprint-start-btn" onClick={startGame}>
               <Play size={20} />
-              <span>Начать спринт! (Пробел)</span>
+              <span>{t('lang.sprint.start')}</span>
             </button>
             <button type="button" className="trainer-btn trainer-btn--secondary" onClick={onExit}>
-              Назад к тренажёру
+              {t('lang.sprint.back')}
             </button>
           </div>
         </div>
@@ -202,7 +193,6 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
 
       {gameState === 'playing' && currentWord && (
         <div className={`sprint-playfield ${feedbackEffect ? `flash-${feedbackEffect}` : ''}`}>
-          {/* Top Hud */}
           <div className="sprint-hud">
             <div className="sprint-timer-badge">
               <span className="timer-number">{timeLeft}s</span>
@@ -219,55 +209,53 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
               {streak >= 3 && (
                 <div className="sprint-combo-badge">
                   <Flame size={18} className="flame-icon" />
-                  <span>x{comboMultiplier} КОМБО!</span>
+                  <span>{t('lang.sprint.combo', undefined, { count: comboMultiplier })}</span>
                 </div>
               )}
             </div>
 
             <div className="sprint-score-badge">
               <span className="score-val">{score}</span>
-              <small>очков</small>
+              <small>{t('lang.sprint.points')}</small>
             </div>
           </div>
 
-          {/* Card to Evaluate */}
           <div className="sprint-card">
             <div className="sprint-word-prompt">
-              <span className="sprint-hint">Оригинал:</span>
+              <span className="sprint-hint">{t('lang.sprint.original')}</span>
               <h2 className="sprint-term">{currentWord.term}</h2>
               {currentWord.transcription && <div className="trainer-transcription">{currentWord.transcription}</div>}
             </div>
 
             <div className="sprint-divider">
-              <span>равно?</span>
+              <span>{t('lang.sprint.means')}</span>
             </div>
 
             <div className="sprint-translation-prompt">
-              <span className="sprint-hint">Предложенный перевод:</span>
+              <span className="sprint-hint">{t('lang.sprint.suggested')}</span>
               <h3 className="sprint-suggested">{suggestedTranslation}</h3>
             </div>
           </div>
 
-          {/* True / False Buttons */}
           <div className="sprint-action-buttons">
             <button
               type="button"
               className="sprint-btn sprint-btn--false"
               onClick={() => handleAnswer(false)}
-              aria-label="Неверно (1 или Стрелка влево)"
+              aria-label={t('lang.sprint.falseAria')}
             >
               <X size={24} />
-              <span>НЕВЕРНО (1 / ←)</span>
+              <span>{t('lang.sprint.false')}</span>
             </button>
 
             <button
               type="button"
               className="sprint-btn sprint-btn--true"
               onClick={() => handleAnswer(true)}
-              aria-label="Верно (2 или Стрелка вправо)"
+              aria-label={t('lang.sprint.trueAria')}
             >
               <Check size={24} />
-              <span>ВЕРНО (2 / →)</span>
+              <span>{t('lang.sprint.true')}</span>
             </button>
           </div>
         </div>
@@ -278,43 +266,43 @@ export const SprintGame = ({ items, storageKeyPrefix, onSpeak: _onSpeak, onExit 
           <div className="gameover-trophy">
             <Trophy size={48} />
           </div>
-          <h2>Время вышло!</h2>
+          <h2>{t('lang.sprint.over')}</h2>
           <div className="gameover-score-hero">
             <span className="hero-score-val">{score}</span>
-            <span className="hero-score-label">Итоговые очки</span>
+            <span className="hero-score-label">{t('lang.sprint.finalScore')}</span>
           </div>
 
           {score > 0 && score >= highScore && (
             <div className="gameover-new-record">
               <Flame size={18} />
-              <span>🔥 Новый личный рекорд! Поздравляем!</span>
+              <span>{t('lang.sprint.newRecord')}</span>
             </div>
           )}
 
           <div className="gameover-stats-grid">
             <div className="gameover-stat-item">
               <strong>{accuracyPct}%</strong>
-              <small>Точность</small>
+              <small>{t('lang.sprint.accuracy')}</small>
             </div>
             <div className="gameover-stat-item">
               <strong>
                 {correctAttempts} / {totalAttempts}
               </strong>
-              <small>Правильных слов</small>
+              <small>{t('lang.sprint.correctWords')}</small>
             </div>
             <div className="gameover-stat-item">
               <strong>{maxStreak}</strong>
-              <small>Лучшая серия 🔥</small>
+              <small>{t('lang.sprint.bestStreak')}</small>
             </div>
           </div>
 
           <div className="gameover-actions">
             <button type="button" className="trainer-btn trainer-btn--mastered" onClick={startGame}>
               <RotateCcw size={18} />
-              <span>Сыграть ещё раз (Пробел)</span>
+              <span>{t('lang.sprint.again')}</span>
             </button>
             <button type="button" className="trainer-btn trainer-btn--secondary" onClick={onExit}>
-              К обычным карточкам
+              {t('lang.sprint.toCards')}
             </button>
           </div>
         </div>

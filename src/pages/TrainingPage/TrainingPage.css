@@ -265,11 +265,37 @@
   }
 }
 
+.training-analytics {
+  margin-top: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 28px 29px 30px;
+}
+.training-analytics-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.training-analytics-head h2 {
+  margin: 0;
+  font:
+    500 24px 'Fraunces',
+    serif;
+  letter-spacing: -0.04em;
+}
+.training-analytics-body {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
 .training-totals {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 12px;
+  flex: 1;
 }
 .training-total {
   display: inline-flex;
@@ -516,5 +542,17 @@
   .copy-button {
     width: 100%;
     min-height: 46px;
+  }
+  .training-analytics {
+    padding: 20px 14px 22px;
+  }
+  .training-analytics-body {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  .training-analytics .training-totals {
+    width: 100%;
+    justify-content: center;
   }
 }

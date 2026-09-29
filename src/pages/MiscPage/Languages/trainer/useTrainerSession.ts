@@ -44,7 +44,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
   const [incorrectCount, setIncorrectCount] = useState(0)
   const [isSessionFinished, setIsSessionFinished] = useState(false)
 
-  // Filter pool (pure, no randomness)
   const filteredPool = useMemo(() => {
     let pool = items.filter((item) => {
       if (categoryFilter !== 'all' && item.category !== categoryFilter) return false
@@ -62,7 +61,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
     return pool
   }, [items, categoryFilter, onlyUnlearned, onlyMistakes, learnedIds, sessionMistakeIds])
 
-  // Build queue: pure deterministic shuffle using seeded generator
   const queue = useMemo(() => {
     if (!isShuffle) return filteredPool
     const rng = getSeededRandom(shuffleSeed)
@@ -89,14 +87,12 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
   const clampedIndex = queue.length > 0 && currentIndex >= queue.length ? 0 : currentIndex
   const currentItem = queue[clampedIndex] as TrainerItem | undefined
 
-  // Effective direction for this card
   const effectiveDirection: 'direct' | 'reverse' = useMemo(() => {
     if (direction === 'direct') return 'direct'
     if (direction === 'reverse') return 'reverse'
     return clampedIndex % 2 === 0 ? 'direct' : 'reverse'
   }, [direction, clampedIndex])
 
-  // Generate 4 options for Quiz & Listening modes deterministically
   const quizOptions: QuizOption[] = useMemo(() => {
     if (!currentItem) return []
 
@@ -109,7 +105,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
     }
     const rng = getSeededRandom(Math.abs(hash) + clampedIndex * 17 + 11)
 
-    // Potential distractors
     const pool = items.filter((i) => i.id !== currentItem.id)
     const shuffledPool = [...pool].sort(() => rng() - 0.5)
     const selectedDistractors = shuffledPool.slice(0, 3)
@@ -126,7 +121,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
     return rawOptions.sort(() => rng() - 0.5)
   }, [currentItem, effectiveDirection, items, clampedIndex])
 
-  // Record an answer result
   const recordAnswer = useCallback(
     (isCorrect: boolean) => {
       if (!currentItem) return
@@ -142,7 +136,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
           return next
         })
 
-        // Add to learned if not present
         if (!learnedIds.includes(currentItem.id)) {
           setLearnedIds((prev) => {
             const next = [...prev, currentItem.id]
@@ -159,7 +152,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
     [currentItem, bestStreak, bestStreakKey, learnedIds, learnedKey],
   )
 
-  // Advance to next card
   const advanceNext = useCallback(() => {
     setIsRevealed(false)
     setSelectedOption(null)
@@ -172,7 +164,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
     }
   }, [currentIndex, queue.length])
 
-  // Flashcard direct actions
   const handleFlashcardAnswer = useCallback(
     (known: boolean) => {
       recordAnswer(known)
@@ -181,7 +172,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
     [recordAnswer, advanceNext],
   )
 
-  // Quiz / Listening option selection
   const handleOptionSelect = useCallback(
     (optionIndex: number) => {
       if (isAnswerChecked) return
@@ -195,7 +185,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
     [isAnswerChecked, quizOptions, recordAnswer],
   )
 
-  // Restart session
   const restartSession = useCallback((mistakesOnly = false) => {
     if (mistakesOnly) {
       setOnlyMistakes(true)
@@ -213,7 +202,6 @@ export const useTrainerSession = ({ items, storageKeyPrefix }: UseTrainerSession
     setCurrentStreak(0)
   }, [])
 
-  // Reset all learned progress
   const resetAllProgress = useCallback(() => {
     setLearnedIds([])
     storage.remove(learnedKey)

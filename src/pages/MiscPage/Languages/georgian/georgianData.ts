@@ -67,7 +67,6 @@ export const PRONUNCIATION_RULES = [
 ]
 
 export const GEORGIAN_PHRASES: GeorgianPhrase[] = [
-  // БАЗОВЫЕ ФРАЗЫ И ВЕЖЛИВОСТЬ
   {
     id: 'b-1',
     category: 'basics',
@@ -246,7 +245,6 @@ export const GEORGIAN_PHRASES: GeorgianPhrase[] = [
     tip: 'Уверенное подтверждение: «само собой разумеется».',
   },
 
-  // ЗНАКОМСТВО И ОБЩЕНИЕ
   {
     id: 's-1',
     category: 'social',
@@ -344,7 +342,6 @@ export const GEORGIAN_PHRASES: GeorgianPhrase[] = [
     tip: 'Если сказали слишком быстро.',
   },
 
-  // В КАФЕ И РЕСТОРАНЕ
   {
     id: 'c-1',
     category: 'cafe',
@@ -490,7 +487,6 @@ export const GEORGIAN_PHRASES: GeorgianPhrase[] = [
     tip: 'Традиционное пожелание перед едой.',
   },
 
-  // В МАГАЗИНЕ И НА РЫНКЕ
   {
     id: 'm-1',
     category: 'shop',
@@ -572,7 +568,6 @@ export const GEORGIAN_PHRASES: GeorgianPhrase[] = [
     tip: 'Мелочь или сдача с крупной купюры.',
   },
 
-  // В ГОРОДЕ И ТАКСИ
   {
     id: 't-1',
     category: 'city',
@@ -646,7 +641,6 @@ export const GEORGIAN_PHRASES: GeorgianPhrase[] = [
     tip: 'Бодрый призыв выдвигаться в путь.',
   },
 
-  // ЧИСЛА И СЧЁТ
   {
     id: 'n-1',
     category: 'numbers',
@@ -752,7 +746,6 @@ export const GEORGIAN_PHRASES: GeorgianPhrase[] = [
     tip: 'Сто лари — аси лари.',
   },
 
-  // ЭКСТРЕННОЕ И ПОМОЩЬ
   {
     id: 'e-1',
     category: 'emergency',
@@ -802,7 +795,6 @@ export const GEORGIAN_PHRASES: GeorgianPhrase[] = [
     tip: 'Слово для фармацевта в аптеке.',
   },
 
-  // ДЛЯ ДУШИ И ТОСТОВ
   {
     id: 'soul-1',
     category: 'soul',

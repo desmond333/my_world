@@ -60,8 +60,8 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
   return (
     <section className="collection-panel" aria-label={config.panelTitle}>
       <div className="panel-heading">
-        <span className="card-kicker">{t('movies.search.kicker', config.kicker)}</span>
-        <h2>{t('movies.search.title', config.panelTitle)}</h2>
+        <span className="card-kicker">{config.kicker}</span>
+        <h2>{config.panelTitle}</h2>
       </div>
 
       <label className="search-field">
@@ -72,16 +72,16 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
           className="search-input"
           type="search"
           value={query}
-          placeholder={t('movies.search.placeholder', config.placeholder)}
-          aria-label={t('movies.search.field', config.fieldLabel)}
+          placeholder={config.placeholder}
+          aria-label={config.fieldLabel}
           onChange={(event) => onQuery(event.target.value)}
         />
       </label>
 
-      {!config.configured && (
+      {!config.configured && config.notConfiguredHint && (
         <p className="key-note">
           <KeyRound size={15} />
-          <span>{t('movies.search.notConfigured')}</span>
+          <span>{config.notConfiguredHint}</span>
         </p>
       )}
 
@@ -113,8 +113,8 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
               lists={lists}
               actions={actions}
               onOpenDetails={config.details ? openDetails : undefined}
-              detailsLabel={config.details ? t('movies.search.details', config.details.label) : undefined}
-              online={config.online ? { ...config.online, label: t('movies.search.online', config.online.label) } : undefined}
+              detailsLabel={config.details ? config.details.label : undefined}
+              online={config.online ? config.online : undefined}
             />
           ))}
         </div>

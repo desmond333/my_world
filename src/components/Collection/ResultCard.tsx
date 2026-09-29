@@ -2,7 +2,6 @@ import { memo } from 'react'
 import { Check, Eye, ImageOff, Info, Plus, Tv } from 'lucide-react'
 import type { CollectionListKey, SearchCandidate } from '../../data'
 import { yearLabel } from '../../lib'
-import { useTranslation } from '../../lib/i18n'
 import type { ResultCardProps } from './types'
 
 const listIcon = (key: CollectionListKey, active: boolean) => {
@@ -17,7 +16,6 @@ const hasOriginalTitle = (candidate: SearchCandidate) => candidate.subtitle.leng
 
 export const ResultCard = memo(
   ({ candidate, location, lists, actions, onOpenDetails, detailsLabel = 'Подробнее', online }: ResultCardProps) => {
-    const { t } = useTranslation()
     const select = (list: CollectionListKey) => {
       if (location === list) actions.remove(list, candidate.id)
       else if (location === null) actions.add(list, candidate)
@@ -77,10 +75,10 @@ export const ResultCard = memo(
               className={`mini-button${location === option.key ? ' is-on' : ''}`}
               onClick={() => select(option.key)}
               aria-pressed={location === option.key}
-              title={t(`movies.list.${option.key}Hint`, option.hint)}
+              title={option.hint}
             >
               {listIcon(option.key, location === option.key)}
-              {t(`movies.list.${option.key}`, option.label)}
+              {option.label}
             </button>
           ))}
           {onOpenDetails && (

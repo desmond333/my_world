@@ -1,10 +1,15 @@
+import { useTranslation } from '../../../../lib/i18n'
 import { ProductivityList } from '../ProductivityList'
 
-export const GoalsPage = () => (
-  <ProductivityList
-    kind="goal"
-    fieldLabel="Новая цель"
-    placeholder="Цель на ближайший месяц"
-    empty="Целей пока нет. Добавь первую — за неё дадут 100 баллов."
-  />
-)
+export const GoalsPage = () => {
+  const { t } = useTranslation()
+
+  return (
+    <ProductivityList
+      kind="goal"
+      fieldLabel={t('productivity.goal.field')}
+      placeholder={t('productivity.goal.placeholder')}
+      empty={t('productivity.goal.empty')}
+    />
+  )
+}

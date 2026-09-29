@@ -4,7 +4,7 @@ import { useTranslation } from '../../../lib/i18n'
 import type { HeroSectionProps } from '../types'
 
 export const HeroSection = ({ animal, isFavorite, onToggleFavorite }: HeroSectionProps) => {
-  const { lang, t } = useTranslation()
+  const { t } = useTranslation()
 
   return (
     <section className="hero">

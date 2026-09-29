@@ -8,7 +8,7 @@ import './LanguagesPage.css'
 export type LanguageSubTab = 'english' | 'georgian'
 
 export const LanguagesPage = () => {
-  const { lang, t } = useTranslation()
+  const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const currentTab = (searchParams.get('tab') as LanguageSubTab) || 'english'
@@ -19,7 +19,6 @@ export const LanguagesPage = () => {
 
   return (
     <div className="languages-page">
-      {/* Top Header */}
       <header className="languages-header">
         <div className="languages-header-left">
           <div className="languages-badge">
@@ -31,8 +30,7 @@ export const LanguagesPage = () => {
         </div>
       </header>
 
-      {/* Main Sub-Tabs Navigation */}
-      <div className="languages-nav-tabs" role="tablist" aria-label="Языки обучения">
+      <div className="languages-nav-tabs" role="tablist" aria-label={t('langPage.tabsAria')}>
         <button
           type="button"
           role="tab"
@@ -44,8 +42,8 @@ export const LanguagesPage = () => {
             🇺🇸
           </span>
           <span className="lang-tab-text">
-            <strong>{lang === 'ru' ? 'Английский' : 'English'}</strong>
-            <small>{lang === 'ru' ? 'YouTube & Пресса' : 'YouTube & Press'}</small>
+            <strong>{t('langPage.englishName')}</strong>
+            <small>{t('langPage.englishHint')}</small>
           </span>
           <span className="lang-tab-badge">Advanced</span>
         </button>
@@ -61,13 +59,12 @@ export const LanguagesPage = () => {
             🇬🇪
           </span>
           <span className="lang-tab-text">
-            <strong>{lang === 'ru' ? 'Грузинский' : 'Georgian'}</strong>
-            <small>{lang === 'ru' ? 'Разговорник & Звуки' : 'Phrasebook & Audio'}</small>
+            <strong>{t('langPage.georgianName')}</strong>
+            <small>{t('langPage.georgianHint')}</small>
           </span>
         </button>
       </div>
 
-      {/* Active Tab Content */}
       <div className="languages-content">{currentTab === 'english' ? <EnglishTab /> : <GeorgianTab />}</div>
     </div>
   )

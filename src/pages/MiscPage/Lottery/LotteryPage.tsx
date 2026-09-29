@@ -12,6 +12,7 @@ import {
   prizeText,
   withCount,
 } from '../../../lib'
+import { useTranslation } from '../../../lib/i18n'
 import { useLotteryStore } from '../../../store'
 import { LotteryWheel } from './LotteryWheel'
 import './Lottery.css'
@@ -19,9 +20,10 @@ import './Lottery.css'
 const SPIN_MS = 3200
 const BATCH = 100
 
-const compact = (value: number) => value.toLocaleString('ru-RU', { maximumFractionDigits: value < 10 ? 2 : 0 })
+const compact = (value: number, locale: string) => value.toLocaleString(locale, { maximumFractionDigits: value < 10 ? 2 : 0 })
 
 export const LotteryPage = () => {
+  const { lang, t, locale } = useTranslation()
   const [id, setId] = useState(DEFAULT_VARIANT_ID)
   const [angle, setAngle] = useState(0)
   const [spinning, setSpinning] = useState(false)
@@ -65,12 +67,10 @@ export const LotteryPage = () => {
     <>
       <section className="extra-head">
         <p className="eyebrow">
-          <Ticket size={15} /> дополнительно · лотерея
+          <Ticket size={15} /> {t('lottery.eyebrow')}
         </p>
-        <h1>Лотерея</h1>
-        <p className="intro">
-          Три варианта с разными шансами. Крути колесо столько, сколько хочешь: оно честно, поэтому настоящую лотерею прочувствуешь быстро.
-        </p>
+        <h1>{t('lottery.title')}</h1>
+        <p className="intro">{t('lottery.intro')}</p>
       </section>
 
       <div className="lottery-variants">
@@ -84,9 +84,9 @@ export const LotteryPage = () => {
               setResult(null)
             }}
           >
-            <span className="lottery-variant-label">{item.label}</span>
-            <span className="lottery-variant-hint">{item.hint}</span>
-            <span className="lottery-variant-prize">{prizeText(item.prize)}</span>
+            <span className="lottery-variant-label">{t(`lottery.variant.${item.id}`, item.label)}</span>
+            <span className="lottery-variant-hint">{chanceText(item, lang)}</span>
+            <span className="lottery-variant-prize">{prizeText(item.prize, lang)}</span>
           </button>
         ))}
       </div>
@@ -98,11 +98,11 @@ export const LotteryPage = () => {
             <p className={`lottery-result${result.won ? ' is-win' : ''}`} key={result.id}>
               {result.won ? (
                 <>
-                  <Sparkles size={16} /> Выигрыш! {prizeText(variant.prize)} — нечаянно, но честно.
+                  <Sparkles size={16} /> {t('lottery.result.win', undefined, { prize: prizeText(variant.prize, lang) })}
                 </>
               ) : (
                 <>
-                  <X size={16} /> Мимо. Шанс был {chanceText(variant)}, так что это нормально.
+                  <X size={16} /> {t('lottery.result.miss', undefined, { chance: chanceText(variant, lang) })}
                 </>
               )}
             </p>
@@ -112,50 +112,53 @@ export const LotteryPage = () => {
         <div className="lottery-facts">
           <dl className="lottery-odds">
             <div>
-              <dt>Шанс</dt>
-              <dd>{chanceText(variant)}</dd>
+              <dt>{t('lottery.oddsTitle')}</dt>
+              <dd>{chanceText(variant, lang)}</dd>
             </div>
             <div>
-              <dt>Это значит</dt>
-              <dd>{oddsText(variant)}</dd>
+              <dt>{t('lottery.meansTitle')}</dt>
+              <dd>{oddsText(variant, lang)}</dd>
             </div>
             <div>
-              <dt>Максимум</dt>
-              <dd>{prizeText(variant.prize)}</dd>
+              <dt>{t('lottery.maxTitle')}</dt>
+              <dd>{prizeText(variant.prize, lang)}</dd>
             </div>
             <div>
-              <dt>Номеров в билете</dt>
+              <dt>{t('lottery.numbersTitle')}</dt>
               <dd>{variant.ticket}</dd>
             </div>
           </dl>
-          <p className="lottery-comment">{variant.comment}</p>
+          <p className="lottery-comment">{t(`lottery.variant.${variant.id}.comment`, variant.comment)}</p>
 
           <div className="lottery-stats">
             <div className="lottery-stat">
-              <span className="lottery-stat-value">{compact(current.spins)}</span>
-              <span className="lottery-stat-label">попыток</span>
+              <span className="lottery-stat-value">{compact(current.spins, locale)}</span>
+              <span className="lottery-stat-label">{t('lottery.stat.spins')}</span>
             </div>
             <div className="lottery-stat">
-              <span className="lottery-stat-value">{compact(current.wins)}</span>
-              <span className="lottery-stat-label">выигрышей</span>
+              <span className="lottery-stat-value">{compact(current.wins, locale)}</span>
+              <span className="lottery-stat-label">{t('lottery.stat.wins')}</span>
             </div>
             <div className="lottery-stat">
-              <span className="lottery-stat-value">{prizeText(current.earned)}</span>
-              <span className="lottery-stat-label">выиграно всего</span>
+              <span className="lottery-stat-value">{prizeText(current.earned, lang)}</span>
+              <span className="lottery-stat-label">{t('lottery.stat.total')}</span>
             </div>
           </div>
 
           <p className={`lottery-expect${current.wins > expected ? ' is-lucky' : ''}`}>
-            <Gift size={15} /> При {compact(current.spins)} попытках математика ждала{' '}
-            {withCount(Math.round(expected * 100) / 100, ['выигрыш', 'выигрыша', 'выигрышей'])}.
+            <Gift size={15} />{' '}
+            {t('lottery.expect', undefined, {
+              spins: compact(current.spins, locale),
+              wins: withCount(Math.round(expected * 100) / 100, [t('lottery.wins.one'), t('lottery.wins.few'), t('lottery.wins.many')]),
+            })}
           </p>
 
           <div className="lottery-actions">
             <button type="button" className="mini-button" onClick={batch} disabled={spinning}>
-              Проверить {BATCH} попыток
+              {t('lottery.batch', undefined, { count: BATCH })}
             </button>
             <button type="button" className="mini-button mini-button--ghost" onClick={reset} disabled={spinning}>
-              Сбросить статистику
+              {t('lottery.reset')}
             </button>
           </div>
         </div>

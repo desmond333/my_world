@@ -5,7 +5,7 @@ import { useTranslation } from '../../../../lib/i18n'
 import { READING_ARTICLES, type ReadingArticle, type ReadingParagraph, type ReadingVocabularyItem } from './readingData'
 
 export const EnglishReadingView = () => {
-  const { lang } = useTranslation()
+  const { lang, t } = useTranslation()
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'youtube' | 'press' | 'tech'>('all')
   const [showAllTranslations, setShowAllTranslations] = useState(false)
@@ -72,13 +72,11 @@ export const EnglishReadingView = () => {
     })
   }
 
-  // --- Article Reading Screen ---
   if (selectedArticle) {
     const isPlayingFull = playingId === `full-${selectedArticle.id}`
 
     return (
       <div className="reading-article-view">
-        {/* Navigation & Controls Top Bar */}
         <div className="reading-top-toolbar">
           <button
             type="button"
@@ -89,12 +87,11 @@ export const EnglishReadingView = () => {
             }}
           >
             <ArrowLeft size={16} />
-            <span>{lang === 'en' ? 'All articles' : 'Все тексты'}</span>
+            <span>{t('lang.reading.allArticles')}</span>
           </button>
 
           <div className="reading-settings-controls">
-            {/* Font Size Selector */}
-            <div className="reading-font-toggle" title={lang === 'en' ? 'Font size' : 'Размер шрифта'}>
+            <div className="reading-font-toggle" title={t('lang.reading.fontSize')}>
               <Type size={14} />
               <button type="button" className={`reading-size-btn ${fontSize === 'sm' ? 'active' : ''}`} onClick={() => setFontSize('sm')}>
                 A
@@ -107,7 +104,6 @@ export const EnglishReadingView = () => {
               </button>
             </div>
 
-            {/* Global Translation Toggle */}
             <button
               type="button"
               className={`reading-toggle-trans-btn ${showAllTranslations ? 'is-active' : ''}`}
@@ -115,22 +111,13 @@ export const EnglishReadingView = () => {
             >
               <Languages size={15} />
               <span className="trans-btn-full">
-                {showAllTranslations
-                  ? lang === 'en'
-                    ? 'Hide Russian'
-                    : 'Скрыть перевод'
-                  : lang === 'en'
-                    ? 'Show Russian'
-                    : 'Параллельный перевод'}
+                {showAllTranslations ? t('lang.reading.hideTranslation') : t('lang.reading.showTranslation')}
               </span>
-              <span className="trans-btn-short">
-                {showAllTranslations ? (lang === 'en' ? 'Hide' : 'Скрыть') : lang === 'en' ? 'RU' : 'Перевод'}
-              </span>
+              <span className="trans-btn-short">{showAllTranslations ? t('lang.reading.hideShort') : t('lang.reading.showShort')}</span>
             </button>
           </div>
         </div>
 
-        {/* Article Header Card */}
         <header className="reading-article-header">
           <div className="reading-article-meta-row">
             <span className="reading-category-pill">
@@ -139,7 +126,7 @@ export const EnglishReadingView = () => {
             </span>
             <span className="reading-level-badge">{selectedArticle.level}</span>
             <span className="reading-time-tag">
-              <Clock size={13} /> {selectedArticle.readMinutes} {lang === 'en' ? 'min read' : 'мин чтения'}
+              <Clock size={13} /> {t('lang.reading.minRead', undefined, { count: selectedArticle.readMinutes })}
             </span>
           </div>
 
@@ -147,7 +134,6 @@ export const EnglishReadingView = () => {
           <p className="reading-article-title-ru">{selectedArticle.titleRu}</p>
           <p className="reading-article-subtitle">{selectedArticle.subtitle}</p>
 
-          {/* Full Audio Playback Bar */}
           <div className="reading-audio-bar">
             <button
               type="button"
@@ -156,37 +142,29 @@ export const EnglishReadingView = () => {
             >
               {isPlayingFull && isSpeaking && !isPaused ? (
                 <>
-                  <Pause size={16} /> {lang === 'en' ? 'Pause full audio' : 'Пауза'}
+                  <Pause size={16} /> {t('lang.reading.pause')}
                 </>
               ) : isPlayingFull && isPaused ? (
                 <>
-                  <Play size={16} /> {lang === 'en' ? 'Resume audio' : 'Продолжить'}
+                  <Play size={16} /> {t('lang.reading.resume')}
                 </>
               ) : (
                 <>
-                  <Volume2 size={16} /> {lang === 'en' ? 'Listen to full article' : 'Озвучить весь текст'}
+                  <Volume2 size={16} /> {t('lang.reading.listenFull')}
                 </>
               )}
             </button>
 
             {isPlayingFull && (
-              <button
-                type="button"
-                className="reading-audio-stop-btn"
-                onClick={cancel}
-                title={lang === 'en' ? 'Stop audio' : 'Остановить озвучку'}
-              >
+              <button type="button" className="reading-audio-stop-btn" onClick={cancel} title={t('lang.reading.stop')}>
                 <Square size={14} />
               </button>
             )}
 
-            <span className="reading-audio-hint">
-              {lang === 'en' ? 'Native American TTS pronunciation · Zero cost' : 'Американское произношение Web Speech API · 0 ₽'}
-            </span>
+            <span className="reading-audio-hint">{t('lang.reading.ttsHint')}</span>
           </div>
         </header>
 
-        {/* Article Body */}
         <div className={`reading-article-body size-${fontSize}`}>
           {selectedArticle.paragraphs.map((paragraph, index) => {
             const isPlayingThis = playingId === paragraph.id
@@ -202,29 +180,27 @@ export const EnglishReadingView = () => {
                       type="button"
                       className={`reading-para-btn ${isPlayingThis ? 'is-active' : ''}`}
                       onClick={() => handlePlayParagraph(paragraph)}
-                      title={lang === 'en' ? 'Listen to this paragraph' : 'Озвучить этот абзац'}
-                      aria-label={`Озвучить абзац ${index + 1}`}
+                      title={t('lang.reading.listenParagraph')}
+                      aria-label={t('lang.reading.paragraphAria', undefined, { index: index + 1 })}
                     >
                       <Volume2 size={14} />
-                      <span>{isPlayingThis ? (lang === 'en' ? 'Playing' : 'Звучит...') : lang === 'en' ? 'Listen' : 'Слушать'}</span>
+                      <span>{isPlayingThis ? t('lang.reading.playing') : t('lang.reading.listen')}</span>
                     </button>
 
                     <button
                       type="button"
                       className={`reading-para-btn ${isRevealed ? 'is-active' : ''}`}
                       onClick={() => toggleParagraphTranslation(paragraph.id)}
-                      title={lang === 'en' ? 'Toggle Russian translation' : 'Показать перевод на русский'}
+                      title={t('lang.reading.toggleTranslation')}
                     >
                       <Languages size={14} />
-                      <span>{isRevealed ? (lang === 'en' ? 'Hide' : 'Скрыть') : lang === 'en' ? 'Translate' : 'Перевод'}</span>
+                      <span>{isRevealed ? t('lang.reading.hideShort') : t('lang.reading.translateShort')}</span>
                     </button>
                   </div>
                 </div>
 
-                {/* English Text */}
                 <p className="reading-paragraph-text-en">{paragraph.en}</p>
 
-                {/* Russian Translation (Expandable) */}
                 {isRevealed && (
                   <div className="reading-paragraph-text-ru">
                     <p>{paragraph.ru}</p>
@@ -235,14 +211,13 @@ export const EnglishReadingView = () => {
           })}
         </div>
 
-        {/* Key Vocabulary Section for this Article */}
         <section className="reading-vocab-section">
           <div className="reading-vocab-head">
             <div className="reading-vocab-badge">
               <BookOpen size={14} />
-              <span>{lang === 'en' ? 'Key Vocabulary in this text' : 'Ключевая лексика этого текста'}</span>
+              <span>{t('lang.reading.keyVocab')}</span>
             </div>
-            <h3>{lang === 'en' ? 'Advanced Phrasing & Context' : 'Продвинутые термины и выражения'}</h3>
+            <h3>{t('lang.reading.advancedPhrasing')}</h3>
           </div>
 
           <div className="reading-vocab-grid">
@@ -261,8 +236,8 @@ export const EnglishReadingView = () => {
                       type="button"
                       className={`reading-vocab-listen-btn ${isPlayingVocab ? 'active' : ''}`}
                       onClick={() => handleSpeakTerm(vocab)}
-                      title={lang === 'en' ? 'Listen pronunciation' : 'Послушать произношение'}
-                      aria-label={`Озвучить ${vocab.term}`}
+                      title={t('lang.reading.listenPronunciation')}
+                      aria-label={t('lang.reading.termAria', undefined, { term: vocab.term })}
                     >
                       <Volume2 size={15} />
                     </button>
@@ -276,13 +251,12 @@ export const EnglishReadingView = () => {
           </div>
         </section>
 
-        {/* Takeaway / Insight Banner */}
         <div className="reading-takeaway-card">
           <div className="reading-takeaway-icon">
             <Flame size={20} />
           </div>
           <div className="reading-takeaway-content">
-            <h4>{lang === 'en' ? 'Core Insight' : 'Главный инсайт текста'}</h4>
+            <h4>{t('lang.reading.coreInsight')}</h4>
             <p>{selectedArticle.takeawayRu}</p>
           </div>
         </div>
@@ -290,42 +264,39 @@ export const EnglishReadingView = () => {
     )
   }
 
-  // --- Article Catalog / List Screen ---
   return (
     <div className="reading-catalog-view">
-      {/* Category Pills */}
-      <div className="reading-cat-tabs" role="tablist" aria-label="Категории статей">
+      <div className="reading-cat-tabs" role="tablist" aria-label={t('lang.reading.catsAria')}>
         <button
           type="button"
           className={`reading-cat-tab ${selectedCategory === 'all' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('all')}
         >
-          {lang === 'en' ? 'All topics' : 'Все темы'} ({READING_ARTICLES.length})
+          {t('lang.reading.allTopics')} ({READING_ARTICLES.length})
         </button>
         <button
           type="button"
           className={`reading-cat-tab ${selectedCategory === 'youtube' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('youtube')}
         >
-          🎬 {lang === 'en' ? 'YouTube & Science' : 'YouTube и наука'}
+          🎬 {t('lang.reading.catYoutube')}
         </button>
         <button
           type="button"
           className={`reading-cat-tab ${selectedCategory === 'press' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('press')}
         >
-          📰 {lang === 'en' ? 'WSJ & Bloomberg' : 'Пресса WSJ / Bloomberg'}
+          📰 {t('lang.reading.catPress')}
         </button>
         <button
           type="button"
           className={`reading-cat-tab ${selectedCategory === 'tech' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('tech')}
         >
-          🚀 {lang === 'en' ? 'Silicon Valley Startups' : 'Кремниевая долина'}
+          🚀 {t('lang.reading.catTech')}
         </button>
       </div>
 
-      {/* Articles Grid */}
       <div className="reading-articles-grid">
         {filteredArticles.map((article) => {
           return (
@@ -345,8 +316,8 @@ export const EnglishReadingView = () => {
 
               <div className="reading-card-footer">
                 <span className="reading-card-time">
-                  <Clock size={13} /> {article.readMinutes} {lang === 'en' ? 'min read' : 'мин чтения'} · {article.paragraphs.length}{' '}
-                  {lang === 'en' ? 'paragraphs' : 'абзаца'}
+                  <Clock size={13} /> {t('lang.reading.minRead', undefined, { count: article.readMinutes })} ·{' '}
+                  {t('lang.reading.paragraphs', undefined, { count: article.paragraphs.length })}
                 </span>
 
                 <button
@@ -357,7 +328,7 @@ export const EnglishReadingView = () => {
                     setSelectedArticleId(article.id)
                   }}
                 >
-                  <span>{lang === 'en' ? 'Read with audio' : 'Читать с озвучкой'}</span>
+                  <span>{t('lang.reading.readWithAudio')}</span>
                   <ExternalLink size={14} />
                 </button>
               </div>

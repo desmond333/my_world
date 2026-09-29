@@ -1,38 +1,40 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Heart, Send } from 'lucide-react'
 import { creator } from '../../data'
+import { useTranslation } from '../../lib/i18n'
 import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
 import './CreatorPage.css'
 
-export const CreatorPage = () => (
-  <main className="page-shell">
-    <AppTopbar />
+export const CreatorPage = () => {
+  const { t } = useTranslation()
 
-    <section className="creator-head">
-      <p className="eyebrow">
-        <Heart size={15} /> автор
-      </p>
-      <h1>{creator.name}</h1>
-      <p className="intro">Фронтенд-разработчик этого приложения. Животные, погода, подборки фильмов и всё остальное — его работа.</p>
-    </section>
+  return (
+    <main className="page-shell">
+      <AppTopbar />
 
-    <section className="creator-card">
-      <p className="creator-text">
-        Если приложение оказалось полезным и хочется сказать спасибо — это всегда приятно. Можно написать лично, а можно просто отправить
-        благодарность на карту: автору будет приятно независимо от способа.
-      </p>
+      <section className="creator-head">
+        <p className="eyebrow">
+          <Heart size={15} /> {t('creator.eyebrow')}
+        </p>
+        <h1>{creator.name}</h1>
+        <p className="intro">{t('creator.intro')}</p>
+      </section>
 
-      <div className="creator-actions">
-        <a className="add-button creator-telegram" href={creator.telegram} target="_blank" rel="noopener noreferrer">
-          <Send size={16} /> Написать в Telegram
-        </a>
-      </div>
+      <section className="creator-card">
+        <p className="creator-text">{t('creator.text')}</p>
 
-      <p className="creator-note-line">Спасибо, что пользуешься.</p>
-    </section>
+        <div className="creator-actions">
+          <a className="add-button creator-telegram" href={creator.telegram} target="_blank" rel="noopener noreferrer">
+            <Send size={16} /> {t('creator.writeTelegram')}
+          </a>
+        </div>
 
-    <Link className="creator-back" to="/">
-      <ArrowLeft size={16} /> Вернуться к животному дня
-    </Link>
-  </main>
-)
+        <p className="creator-note-line">{t('creator.thanks')}</p>
+      </section>
+
+      <Link className="creator-back" to="/">
+        <ArrowLeft size={16} /> {t('creator.back')}
+      </Link>
+    </main>
+  )
+}

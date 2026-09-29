@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Check, Eye, EyeOff, Volume2, X } from 'lucide-react'
+import { useTranslation } from '../../../../lib/i18n'
 import type { TrainerItem } from './trainerTypes'
 
 type FlashcardCardProps = {
@@ -23,15 +24,14 @@ export const FlashcardCard = ({
   audioRate,
   playingId,
 }: FlashcardCardProps) => {
+  const { t } = useTranslation()
   const isDirect = effectiveDirection === 'direct'
   const promptText = isDirect ? item.term : item.translation
   const answerText = isDirect ? item.translation : item.term
   const isPlaying = playingId === item.id
 
-  // Keyboard controls for speed & power users
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if typing in an input
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
 
       if (e.code === 'Space') {
@@ -60,67 +60,63 @@ export const FlashcardCard = ({
   return (
     <div className={`trainer-card-container ${isRevealed ? 'is-revealed' : ''}`}>
       <div className="trainer-flashcard">
-        {/* Top Card Meta */}
         <div className="trainer-card-top">
           <div className="trainer-badges-row">
             {item.badge && <span className="trainer-badge">{item.badge}</span>}
-            <span className="trainer-dir-badge">{isDirect ? 'Слово ➔ Перевод' : 'Перевод ➔ Слово'}</span>
+            <span className="trainer-dir-badge">{isDirect ? t('lang.card.dirDirect') : t('lang.card.dirReverse')}</span>
           </div>
 
           <div className="trainer-card-audio-group">
             <button
               type="button"
               className={`trainer-speak-btn ${isPlaying ? 'playing' : ''}`}
-              title="Прослушать произношение (R)"
-              aria-label="Прослушать"
+              title={t('lang.card.listenTitle')}
+              aria-label={t('lang.card.listenAria')}
               onClick={() => onSpeak(item, audioRate)}
             >
               <Volume2 size={18} />
-              <span>{isPlaying ? 'Играет...' : audioRate === 0.8 ? '0.8x' : 'Озвучить'}</span>
+              <span>{isPlaying ? t('lang.card.playing') : audioRate === 0.8 ? '0.8x' : t('lang.card.speak')}</span>
             </button>
           </div>
         </div>
 
-        {/* Prompt Section */}
         <div className="trainer-prompt-section">
           <h2 className="trainer-prompt-word">{promptText}</h2>
 
           {isDirect && item.transcription && <div className="trainer-transcription">{item.transcription}</div>}
         </div>
 
-        {/* Reveal Toggle Banner */}
         <button
           type="button"
           className="trainer-reveal-btn"
           onClick={onToggleReveal}
           aria-expanded={isRevealed}
-          aria-label={isRevealed ? 'Скрыть перевод' : 'Показать перевод (Пробел)'}
+          aria-label={isRevealed ? t('lang.card.hideAria') : t('lang.card.showAria')}
         >
           {isRevealed ? (
             <>
               <EyeOff size={16} />
-              <span>Скрыть подсказки</span>
+              <span>{t('lang.card.hide')}</span>
             </>
           ) : (
             <>
               <Eye size={16} />
-              <span>Показать перевод и пример (Пробел)</span>
+              <span>{t('lang.card.show')}</span>
             </>
           )}
         </button>
 
-        {/* Back / Revealed Details */}
         {isRevealed && (
           <div className="trainer-card-details">
             <div className="trainer-answer-highlight">
-              <span className="trainer-answer-label">Перевод:</span>
+              <span className="trainer-answer-label">{t('lang.card.translation')}</span>
               <h3 className="trainer-answer-text">{answerText}</h3>
               {!isDirect && item.transcription && <div className="trainer-transcription">{item.transcription}</div>}
             </div>
 
             {item.meaning && (
               <div className="trainer-detail-block">
-                <span className="trainer-detail-title">Нюанс и значение:</span>
+                <span className="trainer-detail-title">{t('lang.card.meaning')}</span>
                 <p className="trainer-detail-desc">{item.meaning}</p>
               </div>
             )}
@@ -137,7 +133,6 @@ export const FlashcardCard = ({
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="trainer-action-footer">
           {isRevealed ? (
             <div className="trainer-eval-buttons">
@@ -145,25 +140,25 @@ export const FlashcardCard = ({
                 type="button"
                 className="trainer-btn trainer-btn--mistake"
                 onClick={() => onAnswer(false)}
-                title="Горячая клавиша: 1 или Стрелка влево"
+                title={t('lang.card.noTitle')}
               >
                 <X size={18} />
-                <span>Не помню (1)</span>
+                <span>{t('lang.card.no')}</span>
               </button>
 
               <button
                 type="button"
                 className="trainer-btn trainer-btn--mastered"
                 onClick={() => onAnswer(true)}
-                title="Горячая клавиша: 2 или Стрелка вправо"
+                title={t('lang.card.yesTitle')}
               >
                 <Check size={18} />
-                <span>Знаю (2)</span>
+                <span>{t('lang.card.yes')}</span>
               </button>
             </div>
           ) : (
             <div className="trainer-reveal-hint">
-              <span>Нажмите карточку или «Пробел», чтобы проверить себя</span>
+              <span>{t('lang.card.hint')}</span>
             </div>
           )}
         </div>

@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react'
 import type { Dictionary, Lang, Translations } from './types'
 import { nav } from './nav'
 import { daily } from './daily'
@@ -24,8 +25,14 @@ export const DEFAULT_LANG: Lang = 'ru'
 
 export const localeOf = (lang: Lang = DEFAULT_LANG) => (lang === 'en' ? 'en-US' : 'ru-RU')
 
-export const getTranslation = (key: string, lang: Lang = DEFAULT_LANG, fallback?: string): string => {
-  return translations[lang]?.[key] ?? fallback ?? translations.ru[key] ?? key
+export const getTranslation = (
+  key: string,
+  lang: Lang = DEFAULT_LANG,
+  fallback?: string,
+  values?: Record<string, string | number>,
+): string => {
+  const template = translations[lang]?.[key] ?? fallback ?? translations.ru[key] ?? key
+  return values ? formatText(template, values) : template
 }
 
 export const formatText = (template: string, values: Record<string, string | number>) =>
@@ -43,12 +50,17 @@ export const useTranslation = () => {
   const setLang = useDailyStore((state) => state.setLang)
   const toggleLang = useDailyStore((state) => state.toggleLang)
 
-  const t = (key: string, fallback?: string, values?: Record<string, string | number>): string => {
-    const template = getTranslation(key, lang, fallback)
-    return values ? formatText(template, values) : template
-  }
+  const t = useCallback(
+    (key: string, fallback?: string, values?: Record<string, string | number>): string => {
+      const template = getTranslation(key, lang, fallback)
+      return values ? formatText(template, values) : template
+    },
+    [lang],
+  )
 
-  return { lang, setLang, toggleLang, t, locale: localeOf(lang) }
+  const locale = useMemo(() => localeOf(lang), [lang])
+
+  return { lang, setLang, toggleLang, t, locale }
 }
 
 export type { Lang } from './types'

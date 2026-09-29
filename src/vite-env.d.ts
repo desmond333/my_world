@@ -4,6 +4,8 @@ interface ImportMetaEnv {
   readonly VITE_CAT_API_KEY?: string
   readonly VITE_TMDB_PROXY_URL?: string
   readonly VITE_TMDB_TOKEN?: string
+  readonly VITE_GOOGLE_BOOKS_API_KEY?: string
+  readonly VITE_RAWG_API_KEY?: string
 }
 
 interface ImportMeta {

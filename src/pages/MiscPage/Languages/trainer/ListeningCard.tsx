@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { ArrowRight, Check, Headphones, Sparkles, Volume2, X } from 'lucide-react'
+import { useTranslation } from '../../../../lib/i18n'
 import type { QuizOption, TrainerItem } from './trainerTypes'
 
 type ListeningCardProps = {
@@ -27,12 +28,11 @@ export const ListeningCard = ({
   audioRate,
   playingId,
 }: ListeningCardProps) => {
+  const { t } = useTranslation()
   const isPlaying = playingId === item.id
 
-  // Auto-play sound when card first mounts
   useEffect(() => {
     onSpeak(item, audioRate)
-    // Only run on item id mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item.id])
 
@@ -64,48 +64,41 @@ export const ListeningCard = ({
 
   return (
     <div className="trainer-listening-card">
-      {/* Listening Header */}
       <div className="trainer-card-top">
         <div className="trainer-badges-row">
           <span className="trainer-mode-chip">
-            <Headphones size={15} /> Аудирование на слух
+            <Headphones size={15} /> {t('lang.listen.mode')}
           </span>
           {item.badge && <span className="trainer-badge">{item.badge}</span>}
         </div>
       </div>
 
-      {/* Big Audio Player Box */}
       <div className="trainer-listening-hero">
         <div className={`listening-sound-ring ${isPlaying ? 'is-pulsing' : ''}`}>
           <button
             type="button"
             className="listening-big-play-btn"
             onClick={() => onSpeak(item, audioRate)}
-            title="Прослушать ещё раз (R)"
-            aria-label="Прослушать произношение"
+            title={t('lang.listen.againTitle')}
+            aria-label={t('lang.listen.aria')}
           >
             <Volume2 size={36} />
           </button>
         </div>
 
         <div className="listening-prompt-label">
-          {isPlaying ? (
-            <span className="listening-wave-text">Слушайте внимательно... 🔊</span>
-          ) : (
-            <span>Нажмите на динамик, чтобы прослушать фразу (R)</span>
-          )}
+          {isPlaying ? <span className="listening-wave-text">{t('lang.listen.waiting')}</span> : <span>{t('lang.listen.hint')}</span>}
         </div>
 
         <div className="listening-audio-controls">
           <button type="button" className={`speed-pill ${audioRate === 1.0 ? 'active' : ''}`} onClick={() => onSpeak(item, 1.0)}>
-            1.0x (Нормальная)
+            {t('lang.listen.speedNormal')}
           </button>
           <button type="button" className={`speed-pill ${audioRate === 0.8 ? 'active' : ''}`} onClick={() => onSpeak(item, 0.8)}>
-            0.8x (Медленно)
+            {t('lang.listen.speedSlow')}
           </button>
         </div>
 
-        {/* Revealed Term when answered */}
         {isAnswerChecked && (
           <div className="listening-revealed-term">
             <h2 className="revealed-word">{item.term}</h2>
@@ -114,10 +107,8 @@ export const ListeningCard = ({
         )}
       </div>
 
-      {/* Question subtitle */}
-      <div className="listening-question-title">Какое значение у прозвучавшего слова?</div>
+      <div className="listening-question-title">{t('lang.listen.question')}</div>
 
-      {/* 4 Choices */}
       <div className="trainer-quiz-options" role="radiogroup">
         {options.map((opt, idx) => {
           const isSelected = selectedOption === idx
@@ -150,29 +141,28 @@ export const ListeningCard = ({
         })}
       </div>
 
-      {/* Feedback Card */}
       {isAnswerChecked && (
         <div className="trainer-quiz-feedback">
           <div className="trainer-feedback-header">
             {selectedOption !== null && options[selectedOption]?.isCorrect ? (
               <div className="feedback-status status--correct">
                 <Check size={20} />
-                <strong>Отличный слух! Верно!</strong>
+                <strong>{t('lang.listen.correct')}</strong>
               </div>
             ) : (
               <div className="feedback-status status--wrong">
                 <X size={20} />
                 <div>
-                  <strong>Ошибка в распознавании</strong>
+                  <strong>{t('lang.listen.wrong')}</strong>
                   <p>
-                    Это было: <u>{item.term}</u> ({item.translation})
+                    {t('lang.listen.wasLabel')} <u>{item.term}</u> ({item.translation})
                   </p>
                 </div>
               </div>
             )}
 
             <button type="button" className="trainer-btn trainer-btn--next" onClick={onAdvance} autoFocus>
-              <span>Следующая фраза (Enter)</span>
+              <span>{t('lang.listen.next')}</span>
               <ArrowRight size={18} />
             </button>
           </div>

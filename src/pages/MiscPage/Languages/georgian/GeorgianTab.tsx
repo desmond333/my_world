@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { BookOpen, Check, ChevronDown, ChevronUp, Copy, GraduationCap, Search, Sparkles, Star, Volume2 } from 'lucide-react'
 import { useCopyFeedback, useSpeechSynthesis } from '../../../../hooks'
 import { storage } from '../../../../lib'
+import { useTranslation } from '../../../../lib/i18n'
 import { GEORGIAN_CATEGORIES, GEORGIAN_PHRASES, type GeorgianPhrase, PRONUNCIATION_RULES } from './georgianData'
 import { LanguageTrainer, type TrainerItem } from '../trainer'
 import './GeorgianTab.css'
@@ -9,6 +10,7 @@ import './GeorgianTab.css'
 const FAVORITES_STORAGE_KEY = 'georgian-favorite-phrases'
 
 export const GeorgianTab = () => {
+  const { t } = useTranslation()
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [rulesOpen, setRulesOpen] = useState(true)
@@ -79,13 +81,12 @@ export const GeorgianTab = () => {
     })
   }, [activeCategory, searchQuery, favoriteIds])
 
-  // Trainer items adapter: Georgian phrases → TrainerItem[]
   const trainerItems: TrainerItem[] = useMemo(() => {
     return GEORGIAN_PHRASES.map((p) => ({
       id: p.id,
-      term: p.transcription, // Show transcription as the "word" to learn
+      term: p.transcription,
       translation: p.ru,
-      transcription: p.ka, // Georgian script as secondary info
+      transcription: p.ka,
       category: p.category,
       badge: GEORGIAN_CATEGORIES.find((c) => c.id === p.category)?.icon,
       meaning: p.tip,
@@ -135,14 +136,13 @@ export const GeorgianTab = () => {
         <div className="georgian-hero-content">
           <div className="georgian-hero-pill">
             <Sparkles size={14} />
-            <span>Грузинский разговорник</span>
+            <span>{t('lang.ka.heroPill')}</span>
           </div>
-          <h3>Разговорный грузинский с русской транскрипцией</h3>
-          <p>Читай транскрипцию по-русски, слушай озвучку фраз и тренируй речь для поездок, ресторанов, такси и душевных бесед.</p>
+          <h3>{t('lang.ka.heroTitle')}</h3>
+          <p>{t('lang.ka.heroNote')}</p>
         </div>
       </div>
 
-      {/* Mode Switcher */}
       <div className="georgian-mode-bar">
         <div className="georgian-mode-switch">
           <button
@@ -151,13 +151,17 @@ export const GeorgianTab = () => {
             onClick={() => setMode('phrasebook')}
           >
             <BookOpen size={16} />
-            <span className="mode-btn-full">Разговорник ({filteredPhrases.length})</span>
-            <span className="mode-btn-short">Фразы ({filteredPhrases.length})</span>
+            <span className="mode-btn-full">
+              {t('lang.ka.phrasebook')} ({filteredPhrases.length})
+            </span>
+            <span className="mode-btn-short">
+              {t('lang.ka.phrasebookShort')} ({filteredPhrases.length})
+            </span>
           </button>
           <button type="button" className={`georgian-mode-btn${mode === 'trainer' ? ' is-active' : ''}`} onClick={() => setMode('trainer')}>
             <GraduationCap size={16} />
-            <span className="mode-btn-full">Тренажёр карточек</span>
-            <span className="mode-btn-short">Тренажёр</span>
+            <span className="mode-btn-full">{t('lang.ka.trainer')}</span>
+            <span className="mode-btn-short">{t('lang.ka.trainerShort')}</span>
           </button>
         </div>
 
@@ -168,30 +172,30 @@ export const GeorgianTab = () => {
             onClick={() => setActiveCategory((prev) => (prev === 'favorites' ? 'all' : 'favorites'))}
           >
             <Star size={14} fill={activeCategory === 'favorites' ? 'currentColor' : 'none'} />
-            <span className="mode-btn-full">Избранные фразы ({favoriteIds.length})</span>
-            <span className="mode-btn-short">Избранное ({favoriteIds.length})</span>
+            <span className="mode-btn-full">
+              {t('lang.ka.favorites')} ({favoriteIds.length})
+            </span>
+            <span className="mode-btn-short">
+              {t('lang.ka.favoritesShort')} ({favoriteIds.length})
+            </span>
           </button>
         )}
       </div>
 
-      {/* Pronunciation Guide (Collapsible) */}
       <section className="georgian-rules-card">
         <button type="button" className="georgian-rules-toggle" onClick={() => setRulesOpen((prev) => !prev)} aria-expanded={rulesOpen}>
           <div className="georgian-rules-head">
             <span className="georgian-rules-badge">
-              <Sparkles size={14} /> Произношение
+              <Sparkles size={14} /> {t('lang.ka.rulesBadge')}
             </span>
-            <h3>Как читать по-грузински: памятка звуков и ударений</h3>
+            <h3>{t('lang.ka.rulesTitle')}</h3>
           </div>
           {rulesOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
 
         {rulesOpen && (
           <div className="georgian-rules-body">
-            <p className="georgian-rules-lead">
-              В грузинском алфавите 33 буквы, нет родов (он, она, оно выражаются одинаково), а ударение не растягивает слог. Вот главное,
-              чтобы тебя сразу понимали:
-            </p>
+            <p className="georgian-rules-lead">{t('lang.ka.rulesLead')}</p>
             <div className="georgian-rules-grid">
               {PRONUNCIATION_RULES.map((rule) => (
                 <div key={rule.letter} className="georgian-rule-item">
@@ -200,7 +204,7 @@ export const GeorgianTab = () => {
                     <span className="georgian-rule-sound">{rule.sound}</span>
                   </div>
                   <p className="georgian-rule-example">
-                    Пример: <em>{rule.example}</em>
+                    {t('lang.ka.example')} <em>{rule.example}</em>
                   </p>
                   <p className="georgian-rule-tip">{rule.tip}</p>
                 </div>
@@ -210,7 +214,6 @@ export const GeorgianTab = () => {
         )}
       </section>
 
-      {/* Trainer Mode — New unified trainer */}
       {mode === 'trainer' ? (
         <LanguageTrainer
           items={trainerItems}
@@ -222,9 +225,7 @@ export const GeorgianTab = () => {
           onExit={() => setMode('phrasebook')}
         />
       ) : (
-        /* Phrasebook Mode */
         <>
-          {/* Search & Categories Bar */}
           <section className="georgian-controls">
             <div className="georgian-search-box">
               <Search size={16} className="georgian-search-icon" />
@@ -232,10 +233,10 @@ export const GeorgianTab = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Поиск фразы: здравствуйте, хинкали, счет, мадлоба, такси..."
+                placeholder={t('lang.ka.searchPlaceholder')}
               />
               {searchQuery && (
-                <button type="button" className="georgian-search-clear" onClick={() => setSearchQuery('')} title="Очистить">
+                <button type="button" className="georgian-search-clear" onClick={() => setSearchQuery('')} title={t('lang.ka.clear')}>
                   ×
                 </button>
               )}
@@ -260,10 +261,9 @@ export const GeorgianTab = () => {
             </div>
           </section>
 
-          {/* Phrases Grid */}
           {filteredPhrases.length === 0 ? (
             <div className="georgian-empty">
-              <p>По запросу «{searchQuery}» ничего не найдено.</p>
+              <p>{t('lang.ka.notFound', undefined, { term: searchQuery })}</p>
               <button
                 type="button"
                 className="add-button"
@@ -272,7 +272,7 @@ export const GeorgianTab = () => {
                   setActiveCategory('all')
                 }}
               >
-                Показать все фразы
+                {t('lang.ka.showAll')}
               </button>
             </div>
           ) : (
@@ -289,52 +289,48 @@ export const GeorgianTab = () => {
                         type="button"
                         className={`georgian-card-star${isFav ? ' is-fav' : ''}`}
                         onClick={() => toggleFavorite(phrase.id)}
-                        title={isFav ? 'Убрать из избранного' : 'Добавить в избранное'}
+                        title={isFav ? t('lang.ka.favRemove') : t('lang.ka.favAdd')}
                       >
                         <Star size={16} fill={isFav ? 'currentColor' : 'none'} />
                       </button>
                     </div>
 
-                    {/* Prominent Russian Transcription */}
                     <div className="georgian-transcription-box">
-                      <span className="georgian-transcription-label">как читать:</span>
+                      <span className="georgian-transcription-label">{t('lang.ka.readAs')}</span>
                       <strong className="georgian-transcription-text">{phrase.transcription}</strong>
                     </div>
 
-                    {/* Georgian Script */}
                     <div className="georgian-ka-row">
                       <span className="georgian-ka-text">{phrase.ka}</span>
                     </div>
 
-                    {/* Tips & Literal */}
                     {phrase.tip && (
                       <p className="georgian-card-tip">
-                        💡 <strong>Произношение:</strong> {phrase.tip}
+                        💡 <strong>{t('lang.ka.pronunciation')}</strong> {phrase.tip}
                       </p>
                     )}
 
                     {phrase.literal && <p className="georgian-card-literal">{phrase.literal}</p>}
 
-                    {/* Card Actions */}
                     <div className="georgian-card-actions">
                       <button
                         type="button"
                         className={`georgian-btn-sound${isPlaying ? ' is-playing' : ''}`}
                         onClick={() => speakPhrase(phrase)}
-                        title="Послушать произношение"
+                        title={t('lang.ka.listenTitle')}
                       >
                         <Volume2 size={15} />
-                        <span>{isPlaying ? 'Звучит...' : 'Слушать'}</span>
+                        <span>{isPlaying ? t('lang.ka.playing') : t('lang.ka.listen')}</span>
                       </button>
 
                       <button
                         type="button"
                         className="georgian-btn-copy"
                         onClick={() => copy(`${phrase.ka} (${phrase.transcription})`)}
-                        title="Скопировать фразу с транскрипцией"
+                        title={t('lang.ka.copyTitle')}
                       >
                         <Copy size={14} />
-                        <span>Копировать</span>
+                        <span>{t('common.copy')}</span>
                       </button>
                     </div>
                   </article>
@@ -345,7 +341,7 @@ export const GeorgianTab = () => {
 
           {copied && (
             <div className="georgian-toast" role="status" aria-live="polite">
-              <Check size={16} /> Фраза скопирована в буфер обмена!
+              <Check size={16} /> {t('lang.ka.copied')}
             </div>
           )}
         </>

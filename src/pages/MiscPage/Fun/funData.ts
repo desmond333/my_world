@@ -106,7 +106,7 @@ export const LOTTERY_PRIZES: LotteryPrize[] = [
     isJackpot: true,
     description: 'Абсолютный суперприз! Личный Джейсон Стэйтем теперь присматривает за твоими делами, выдаёт базу и одобряет каждый шаг.',
     quote: '«Ты выиграл меня. А я никогда никому не проигрывал. Задумайся.»',
-    probabilityWeight: 8, // 8% chance jackpot
+    probabilityWeight: 8,
   },
   {
     id: 'prize-tea',

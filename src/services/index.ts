@@ -1,4 +1,6 @@
 export * from './animals'
+export * from './books'
+export * from './games'
 export * from './holidays'
 export * from './rates'
 export * from './tmdb'

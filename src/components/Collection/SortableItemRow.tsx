@@ -23,11 +23,11 @@ const ENJOYMENT_FALLBACK: Record<number, string> = {
   10: 'Чистый кайф! Шедевр',
   9: 'Восторг, на одном дыхании',
   8: 'Очень понравилось, рекомендую',
-  7: 'Хороший добротный фильм',
+  7: 'Хорошо, добротно',
   6: 'Нормально, вечер скоротать',
   5: 'Средне, без эмоций',
   4: 'На любителя, затянуто',
-  3: 'Скучно, еле досмотрел',
+  3: 'Скучно, не зацепило',
   2: 'Не понравилось совсем',
   1: 'Зря потратил время',
 }
@@ -36,7 +36,7 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
   const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
   const target = otherCollectionList(list)
-  const targetLabel = t(`movies.list.${target}`, lists.find((option) => option.key === target)?.label)
+  const targetLabel = lists.find((option) => option.key === target)?.label ?? target
 
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [feelings, setFeelings] = useState(item.review ?? '')
@@ -88,7 +88,6 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
             {item.tags.length ? ` · ${item.tags.join(', ')}` : ''}
           </p>
 
-          {/* Watched Feelings & Enjoyment Badge */}
           {list === 'watched' && (item.enjoyment || item.review) && (
             <div className="row-review-badge">
               {item.enjoyment && (
@@ -140,7 +139,6 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
         </div>
       </div>
 
-      {/* Watched Feelings & Enjoyment Editor */}
       {isReviewOpen && list === 'watched' && (
         <div className="row-review-panel">
           <div className="review-panel-head">

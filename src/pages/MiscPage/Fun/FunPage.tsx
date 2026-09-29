@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Award, Crown, Dices, Flame, Laugh, MessageCircle, RefreshCw, Sparkles, Ticket, Volume2 } from 'lucide-react'
 import { storage } from '../../../lib'
+import { useTranslation } from '../../../lib/i18n'
 import {
   CLOWN_HONK_WORDS,
   CLOWN_STATUSES,
@@ -28,7 +29,8 @@ type FloatingWord = {
 }
 
 export const FunPage = () => {
-  // Statham Costume & Quotes
+  const { t } = useTranslation()
+
   const [costume, setCostume] = useState<StathamCostume>('none')
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [statusIndex, setStatusIndex] = useState(0)
@@ -38,17 +40,14 @@ export const FunPage = () => {
   const [clownPercent, setClownPercent] = useState(33)
   const [floatingWords, setFloatingWords] = useState<FloatingWord[]>([])
 
-  // Lottery State
   const [isSpinning, setIsSpinning] = useState(false)
   const [reelPrize, setReelPrize] = useState<LotteryPrize>(LOTTERY_PRIZES[0])
   const [wonPrize, setWonPrize] = useState<LotteryPrize | null>(null)
   const [trophies, setTrophies] = useState<string[]>(() => storage.get<string[]>(TROPHIES_STORAGE_KEY, []))
 
-  // Meme Randomizer State
   const [memeCategory, setMemeCategory] = useState<string>('all')
   const [memeIndex, setMemeIndex] = useState(0)
 
-  // Floating word trigger
   const triggerHonk = useCallback((e?: React.MouseEvent) => {
     playSoundEffect('honk')
     setHonkCount((c) => c + 1)
@@ -74,7 +73,6 @@ export const FunPage = () => {
     setStatusIndex((i) => (i + 1) % CLOWN_STATUSES.length)
   }
 
-  // Statham Lottery Spin
   const spinLottery = () => {
     if (isSpinning) return
     setIsSpinning(true)
@@ -90,7 +88,6 @@ export const FunPage = () => {
       if (counter >= 18) {
         clearInterval(interval)
 
-        // Weighted draw
         const totalWeight = LOTTERY_PRIZES.reduce((sum, p) => sum + p.probabilityWeight, 0)
         let rand = Math.random() * totalWeight
         let selected = LOTTERY_PRIZES[0]
@@ -113,7 +110,6 @@ export const FunPage = () => {
           playSoundEffect('airhorn')
         }
 
-        // Save trophy
         setTrophies((prev) => {
           if (!prev.includes(selected.id)) {
             const next = [...prev, selected.id]
@@ -126,7 +122,6 @@ export const FunPage = () => {
     }, 90)
   }
 
-  // Filtered Memes
   const filteredMemes = FUNNY_MEMES.filter((m) => (memeCategory === 'all' ? true : m.category === memeCategory))
   const currentMeme = filteredMemes[memeIndex % (filteredMemes.length || 1)] ?? FUNNY_MEMES[0]
 
@@ -139,32 +134,27 @@ export const FunPage = () => {
 
   return (
     <div className="fun-page">
-      {/* Floating Honk Texts */}
       {floatingWords.map((item) => (
         <span key={item.id} className="floating-word" style={{ left: item.x, top: item.y }}>
           {item.text}
         </span>
       ))}
 
-      {/* Hero Banner */}
       <section className="extra-head">
         <p className="eyebrow">
-          <Laugh size={15} /> Территория позитива
+          <Laugh size={15} /> {t('fun.kicker')}
         </p>
-        <h1>Веселье, Стэйтем и Мемы</h1>
-        <p className="intro">
-          Лотерея с суперпризом Джейсоном Стэйтемом, рандомайзер смешных картинок, пацанский саундборд и интерактивный хонк-манеж!
-        </p>
+        <h1>{t('fun.title')}</h1>
+        <p className="intro">{t('fun.intro')}</p>
       </section>
 
-      {/* 1. STATHAM LOTTERY SECTION */}
       <section className="statham-lottery-card">
         <div className="lottery-head">
           <h3>
-            <Ticket size={24} /> Лотерея удачи: Выиграй Стэйтема!
+            <Ticket size={24} /> {t('fun.lottery.title')}
           </h3>
           <div className="jackpot-banner">
-            <Crown size={15} /> СУПЕРПРИЗ: ДЖЕЙСОН СТЭЙТЕМ ВО ПЛОТИ
+            <Crown size={15} /> {t('fun.lottery.jackpotBanner')}
           </div>
         </div>
 
@@ -178,13 +168,13 @@ export const FunPage = () => {
 
           <button type="button" className="lottery-spin-btn" onClick={spinLottery} disabled={isSpinning}>
             <Dices size={20} />
-            <span>{isSpinning ? 'Барабан крутится...' : 'Испытать удачу! (Крутить)'}</span>
+            <span>{isSpinning ? t('fun.lottery.spinning') : t('fun.lottery.spin')}</span>
           </button>
 
           {wonPrize && (
             <div className={`won-prize-box ${wonPrize.isJackpot ? 'is-jackpot' : ''}`}>
               <div className="won-prize-title">
-                {wonPrize.icon} {wonPrize.isJackpot ? '🔥 ДЖЕКПОТ ВЫПАЛ! 🔥' : 'Твой приз:'} {wonPrize.name}
+                {wonPrize.icon} {wonPrize.isJackpot ? t('fun.lottery.jackpot') : t('fun.lottery.yourPrize')} {wonPrize.name}
               </div>
               <p className="won-prize-desc">{wonPrize.description}</p>
               <div className="won-prize-quote">{wonPrize.quote}</div>
@@ -192,11 +182,10 @@ export const FunPage = () => {
           )}
         </div>
 
-        {/* Trophies Collection */}
         {trophies.length > 0 && (
           <div className="trophies-shelf">
             <span className="trophies-shelf-title">
-              <Award size={14} /> Выигранные трофеи в коллекции ({trophies.length} из {LOTTERY_PRIZES.length}):
+              <Award size={14} /> {t('fun.lottery.trophies', undefined, { current: trophies.length, total: LOTTERY_PRIZES.length })}
             </span>
             <div className="trophies-grid">
               {trophies.map((id) => {
@@ -213,11 +202,10 @@ export const FunPage = () => {
         )}
       </section>
 
-      {/* 2. MEME RANDOMIZER SECTION */}
       <section className="meme-section-card">
         <div className="meme-section-head">
           <h3>
-            <Sparkles size={22} /> Рандомайзер смешных картинок и мемов
+            <Sparkles size={22} /> {t('fun.meme.title')}
           </h3>
           <div className="meme-categories-row">
             <button
@@ -225,35 +213,35 @@ export const FunPage = () => {
               className={`meme-cat-btn ${memeCategory === 'all' ? 'is-active' : ''}`}
               onClick={() => setMemeCategory('all')}
             >
-              Все
+              {t('fun.meme.all')}
             </button>
             <button
               type="button"
               className={`meme-cat-btn ${memeCategory === 'statham' ? 'is-active' : ''}`}
               onClick={() => setMemeCategory('statham')}
             >
-              Джейсон Стэйтем
+              {t('fun.meme.category.statham')}
             </button>
             <button
               type="button"
               className={`meme-cat-btn ${memeCategory === 'animals' ? 'is-active' : ''}`}
               onClick={() => setMemeCategory('animals')}
             >
-              Животные
+              {t('fun.meme.category.animals')}
             </button>
             <button
               type="button"
               className={`meme-cat-btn ${memeCategory === 'office' ? 'is-active' : ''}`}
               onClick={() => setMemeCategory('office')}
             >
-              Офис & Дедлайны
+              {t('fun.meme.category.office')}
             </button>
             <button
               type="button"
               className={`meme-cat-btn ${memeCategory === 'life' ? 'is-active' : ''}`}
               onClick={() => setMemeCategory('life')}
             >
-              Жизненное
+              {t('fun.meme.category.life')}
             </button>
           </div>
         </div>
@@ -272,18 +260,16 @@ export const FunPage = () => {
 
             <button type="button" className="meme-random-btn" onClick={nextRandomMeme}>
               <RefreshCw size={17} />
-              <span>Выдать следующий мем 🎲</span>
+              <span>{t('fun.meme.next')}</span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* 3. INTERACTIVE STATHAM CARD WITH COSTUMES */}
       <section className="statham-hero-card">
         <div className="statham-portrait-box">
-          <img src={STATHAM_IMAGE} alt="Джейсон Стэйтем" className="statham-photo" />
+          <img src={STATHAM_IMAGE} alt={t('fun.statham.alt')} className="statham-photo" />
 
-          {/* Costume Overlays */}
           <div className="statham-costume-overlay">
             {(costume === 'nose' || costume === 'full') && <div className="clown-nose-svg" />}
             {(costume === 'shades' || costume === 'full') && <div className="statham-shades-svg">🕶️</div>}
@@ -297,8 +283,8 @@ export const FunPage = () => {
               <h2 className="statham-title">Джейсон Стэйтем</h2>
               <span className="statham-status-tag">{CLOWN_STATUSES[statusIndex]}</span>
             </div>
-            <button type="button" className="costume-btn" onClick={nextStatus} title="Сменить пацанский статус">
-              Новый статус ↻
+            <button type="button" className="costume-btn" onClick={nextStatus} title={t('fun.statham.statusTitle')}>
+              {t('fun.statham.newStatus')}
             </button>
           </div>
 
@@ -317,26 +303,25 @@ export const FunPage = () => {
                   playSoundEffect(c === 'nose' ? 'honk' : c === 'shades' ? 'airhorn' : c === 'hair' ? 'boing' : 'auf')
                 }}
               >
-                {COSTUME_LABELS[c]}
+                {t(`fun.costume.${c}`, COSTUME_LABELS[c])}
               </button>
             ))}
           </div>
 
           <div className="statham-action-row">
             <button type="button" className="honk-big-btn" onClick={(e) => triggerHonk(e)}>
-              🔴 НАЖАТЬ НА КРАСНЫЙ НОС ({honkCount})
+              {t('fun.statham.pressNose', undefined, { count: honkCount })}
             </button>
             <button type="button" className="costume-btn" onClick={nextQuote}>
-              <MessageCircle size={15} /> Другая цитата
+              <MessageCircle size={15} /> {t('fun.statham.anotherQuote')}
             </button>
           </div>
         </div>
       </section>
 
-      {/* 4. SOUNDBOARD PANEL */}
       <section className="clown-soundboard-panel">
         <div className="soundboard-header">
-          <span className="soundboard-badge">Пацанский саундборд звуков</span>
+          <span className="soundboard-badge">{t('fun.soundboard.badge')}</span>
           <Volume2 size={16} color="var(--accent)" />
         </div>
 
@@ -357,10 +342,9 @@ export const FunPage = () => {
         </div>
       </section>
 
-      {/* 5. CLOWN-O-METER */}
       <section className="clown-meter-card">
         <h3 className="clown-meter-title">
-          <Flame size={20} color="var(--accent)" /> Клоунометр дня
+          <Flame size={20} color="var(--accent)" /> {t('fun.meter.title')}
         </h3>
 
         <div className="meter-track">
@@ -368,9 +352,9 @@ export const FunPage = () => {
         </div>
 
         <div className="meter-labels">
-          <span>Стэйтем (0%)</span>
+          <span>{t('fun.meter.low')}</span>
           <strong>{clownPercent}%</strong>
-          <span>Фулл Цирк (100%)</span>
+          <span>{t('fun.meter.high')}</span>
         </div>
 
         <div className="meter-verdict-box">
@@ -380,13 +364,13 @@ export const FunPage = () => {
 
         <div className="statham-action-row">
           <button type="button" className="costume-btn" onClick={() => setClownPercent((p) => Math.min(p + 15, 100))}>
-            Добавить +15% цирка 🤡
+            {t('fun.meter.add')}
           </button>
           <button type="button" className="costume-btn" onClick={() => setClownPercent(10)}>
-            Сбросить на суровый режим 🗿
+            {t('fun.meter.reset')}
           </button>
           <button type="button" className="costume-btn" onClick={() => setPunchlineIndex((i) => (i + 1) % STATHAM_BASE_PUNCHLINES.length)}>
-            Выдать базу 🐺
+            {t('fun.meter.basis')}
           </button>
         </div>
 
@@ -394,7 +378,7 @@ export const FunPage = () => {
           {STATHAM_BASE_PUNCHLINES[punchlineIndex]}
         </p>
         <p className="meter-verdict-desc" style={{ fontStyle: 'italic', color: 'var(--accent)' }}>
-          Действие дня: {CIRCUS_MOVES[circusMoveIndex % CIRCUS_MOVES.length]}
+          {t('fun.meter.action', undefined, { move: CIRCUS_MOVES[circusMoveIndex % CIRCUS_MOVES.length] })}
           <button type="button" className="costume-btn" style={{ marginLeft: 8 }} onClick={() => setCircusMoveIndex((i) => i + 1)}>
             ↻
           </button>

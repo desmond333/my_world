@@ -1,4 +1,5 @@
 import { Award, Flame, RotateCcw, Sparkles, Volume2 } from 'lucide-react'
+import { useTranslation } from '../../../../lib/i18n'
 import type { TrainerItem, TrainerStats } from './trainerTypes'
 
 type TrainerSummaryProps = {
@@ -10,6 +11,7 @@ type TrainerSummaryProps = {
 }
 
 export const TrainerSummary = ({ stats, items, onRestart, onExit, onSpeak }: TrainerSummaryProps) => {
+  const { t } = useTranslation()
   const { totalAnswered, correctCount, incorrectCount, bestStreak, mistakeIds } = stats
 
   const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0
@@ -21,31 +23,25 @@ export const TrainerSummary = ({ stats, items, onRestart, onExit, onSpeak }: Tra
   return (
     <div className="trainer-summary-container">
       <div className="trainer-summary-card">
-        {/* Celebration Header */}
         <div className="summary-trophy-badge">
           {isFlawless ? <Award size={52} className="flawless-icon" /> : <Sparkles size={52} className="summary-icon" />}
         </div>
 
-        <h2 className="summary-title">{isFlawless ? 'Безупречный результат! 🎯' : 'Сессия тренировки завершена! 🎉'}</h2>
+        <h2 className="summary-title">{isFlawless ? t('lang.summary.flawless') : t('lang.summary.done')}</h2>
 
-        <p className="summary-subtitle">
-          {isFlawless
-            ? 'Вы ответили на все карточки без единой ошибки. Потрясающая память!'
-            : 'Отличная работа! Регулярные повторения закрепляют слова в долговременной памяти.'}
-        </p>
+        <p className="summary-subtitle">{isFlawless ? t('lang.summary.flawlessNote') : t('lang.summary.note')}</p>
 
-        {/* Stats Grid */}
         <div className="summary-stats-grid">
           <div className="summary-stat-cell">
             <span className="stat-value">{accuracy}%</span>
-            <span className="stat-label">Точность</span>
+            <span className="stat-label">{t('lang.summary.accuracy')}</span>
           </div>
 
           <div className="summary-stat-cell">
             <span className="stat-value">
               {correctCount} / {totalAnswered}
             </span>
-            <span className="stat-label">Правильно</span>
+            <span className="stat-label">{t('lang.summary.correct')}</span>
           </div>
 
           <div className="summary-stat-cell">
@@ -53,23 +49,22 @@ export const TrainerSummary = ({ stats, items, onRestart, onExit, onSpeak }: Tra
               <Flame size={20} />
               {bestStreak}
             </span>
-            <span className="stat-label">Лучший стрик</span>
+            <span className="stat-label">{t('lang.summary.streak')}</span>
           </div>
         </div>
 
-        {/* Mistakes Review List */}
         {mistakeItems.length > 0 && (
           <div className="summary-mistakes-section">
             <div className="summary-mistakes-header">
-              <span className="mistakes-count-badge">Ошибки: {mistakeItems.length}</span>
-              <h4>Слова, вызвавшие затруднения:</h4>
+              <span className="mistakes-count-badge">{t('lang.summary.mistakesBadge', undefined, { count: mistakeItems.length })}</span>
+              <h4>{t('lang.summary.mistakesTitle')}</h4>
             </div>
 
             <div className="summary-mistakes-list">
               {mistakeItems.map((item) => (
                 <div key={item.id} className="summary-mistake-row">
                   <div className="mistake-term-col">
-                    <button type="button" className="mistake-audio-btn" onClick={() => onSpeak(item, 0.85)} title="Озвучить">
+                    <button type="button" className="mistake-audio-btn" onClick={() => onSpeak(item, 0.85)} title={t('lang.speak.aria')}>
                       <Volume2 size={16} />
                     </button>
                     <div>
@@ -88,22 +83,21 @@ export const TrainerSummary = ({ stats, items, onRestart, onExit, onSpeak }: Tra
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="summary-actions-row">
           {mistakeItems.length > 0 && (
             <button type="button" className="trainer-btn trainer-btn--mistake-review" onClick={() => onRestart(true)}>
               <RotateCcw size={18} />
-              <span>Повторить только ошибки ({mistakeItems.length})</span>
+              <span>{t('lang.summary.retryMistakes', undefined, { count: mistakeItems.length })}</span>
             </button>
           )}
 
           <button type="button" className="trainer-btn trainer-btn--mastered" onClick={() => onRestart(false)}>
             <RotateCcw size={18} />
-            <span>Начать заново всю сессию</span>
+            <span>{t('lang.summary.restartAll')}</span>
           </button>
 
           <button type="button" className="trainer-btn trainer-btn--secondary" onClick={onExit}>
-            <span>Вернуться к словарю</span>
+            <span>{t('lang.summary.backToDict')}</span>
           </button>
         </div>
       </div>

@@ -5,10 +5,10 @@ import { findCity } from '../../../data'
 import { CURRENCY_MARKS, formatShortDate } from '../../../lib'
 import { useTranslation } from '../../../lib/i18n'
 import {
-  PERIOD_LABELS,
   SUBSCRIPTION_PERIODS,
   leftLabel,
   leftText,
+  periodLabel,
   priceText,
   statusLabel,
   subscriptionSummary,
@@ -35,7 +35,7 @@ const previousDay = (key: string) => {
 export type SubFilter = 'all' | 'active' | 'soon' | 'stopped'
 
 export const SubscriptionsPage = () => {
-  const { lang, t } = useTranslation()
+  const { lang, t, locale } = useTranslation()
   const items = useSubscriptionStore((state) => state.items)
   const add = useSubscriptionStore((state) => state.add)
   const update = useSubscriptionStore((state) => state.update)
@@ -53,7 +53,7 @@ export const SubscriptionsPage = () => {
   const [until, setUntil] = useState('')
   const [filter, setFilter] = useState<SubFilter>('all')
 
-  const summary = useMemo(() => subscriptionSummary(items, today, currency, rates), [items, today, currency, rates])
+  const summary = useMemo(() => subscriptionSummary(items, today, currency, rates, lang), [items, today, currency, rates, lang])
   const { monthTotal, activeCount, closest, views } = summary
 
   const sorted = useMemo(() => {
@@ -99,74 +99,60 @@ export const SubscriptionsPage = () => {
     <div className="subs-page">
       <header className="extra-head">
         <p className="eyebrow">
-          <Wallet size={15} /> {lang === 'en' ? 'misc · subscriptions' : 'разное · подписки'}
+          <Wallet size={15} /> {t('subs.kicker')}
         </p>
-        <h1>{t('sub.title')}</h1>
-        <p className="intro">
-          {lang === 'en'
-            ? 'Convenient tracking of recurring charges. See upcoming dates and amounts with automatic billing cycle rollforward.'
-            : 'Удобный контроль регулярных списаний. Видно, когда и сколько снимут, а при отмене сервис помнит оплаченный период.'}
-        </p>
+        <h1>{t('subs.title')}</h1>
+        <p className="intro">{t('subs.intro')}</p>
       </header>
 
-      {/* Stats Cards */}
       <section className="subs-stats-grid">
         <div className="subs-stat-card">
           <span className="subs-stat-label">
-            <CreditCard size={14} /> {lang === 'en' ? 'Monthly expenses' : 'Расходы в месяц'}
+            <CreditCard size={14} /> {t('subs.stat.monthly')}
           </span>
           <strong className="subs-stat-value">
-            {monthTotal > 0
-              ? new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'ru-RU', { maximumFractionDigits: 0 }).format(monthTotal)
-              : '0'}{' '}
+            {monthTotal > 0 ? new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(monthTotal) : '0'}{' '}
             <span>{CURRENCY_MARKS[currency]}</span>
           </strong>
-          <span className="subs-stat-sub">{lang === 'en' ? 'at today’s exchange rate' : 'по курсу на сегодня'}</span>
+          <span className="subs-stat-sub">{t('subs.stat.rate')}</span>
         </div>
 
         <div className="subs-stat-card">
           <span className="subs-stat-label">
-            <Wallet size={14} /> {lang === 'en' ? 'Active subscriptions' : 'Активных сервисов'}
+            <Wallet size={14} /> {t('subs.stat.active')}
           </span>
           <strong className="subs-stat-value is-accent">{activeCount}</strong>
           <span className="subs-stat-sub">
-            {soonCount > 0
-              ? lang === 'en'
-                ? `⚠️ ${soonCount} billing soon`
-                : `⚠️ ${soonCount} со скорым списанием`
-              : lang === 'en'
-                ? 'all under control'
-                : 'все под контролем'}
+            {soonCount > 0 ? t('subs.stat.soon', undefined, { count: soonCount }) : t('subs.stat.underControl')}
           </span>
         </div>
 
         <div className="subs-stat-card">
           <span className="subs-stat-label">
-            <Clock size={14} /> {lang === 'en' ? 'Next bill' : 'Ближайший счёт'}
+            <Clock size={14} /> {t('subs.stat.nextBill')}
           </span>
           {closest ? (
             <>
               <strong className="subs-stat-value is-closest">{closest.sub.name}</strong>
               <span className={`subs-stat-tag${closest.daysLeft <= 3 ? ' is-alert' : ''}`}>
-                {leftLabel(closest.daysLeft, lang)} · {formatShortDate(closest.deadline, lang === 'en' ? 'en-US' : 'ru-RU')}
+                {leftLabel(closest.daysLeft, lang)} · {formatShortDate(closest.deadline, locale)}
               </span>
             </>
           ) : (
             <>
               <strong className="subs-stat-value">—</strong>
-              <span className="subs-stat-sub">{lang === 'en' ? 'no scheduled charges' : 'нет запланированных списаний'}</span>
+              <span className="subs-stat-sub">{t('subs.stat.noCharges')}</span>
             </>
           )}
         </div>
       </section>
 
-      {/* Add Subscription Form */}
       <section className="subs-form-panel">
         <div className="subs-form-head">
           <h2>
-            <Plus size={18} /> Новая подписка
+            <Plus size={18} /> {t('subs.form.title')}
           </h2>
-          <span className="subs-form-tip">Добавь сервис, чтобы не пропустить дату списания</span>
+          <span className="subs-form-tip">{t('subs.form.tip')}</span>
         </div>
 
         <form
@@ -177,7 +163,7 @@ export const SubscriptionsPage = () => {
           }}
         >
           <div className="subs-form-presets">
-            <span className="subs-presets-label">Быстрый выбор:</span>
+            <span className="subs-presets-label">{t('subs.form.presets')}</span>
             <div className="subs-presets-list">
               {POPULAR_PRESETS.map((preset) => (
                 <button key={preset.name} type="button" className="subs-preset-pill" onClick={() => applyPreset(preset)}>
@@ -189,18 +175,18 @@ export const SubscriptionsPage = () => {
 
           <div className="subs-form-row">
             <label className="subs-field-name">
-              <span className="subs-label-text">Название сервиса</span>
+              <span className="subs-label-text">{t('subs.form.name')}</span>
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Например, Яндекс Плюс, Netflix, Telegram"
+                placeholder={t('subs.form.namePlaceholder')}
                 autoComplete="off"
               />
             </label>
 
             <div className="subs-price-group">
               <label className="subs-field-price">
-                <span className="subs-label-text">Стоимость</span>
+                <span className="subs-label-text">{t('subs.form.price')}</span>
                 <input value={price} onChange={(event) => setPrice(event.target.value)} inputMode="decimal" placeholder="299" />
               </label>
 
@@ -221,7 +207,7 @@ export const SubscriptionsPage = () => {
 
           <div className="subs-form-row subs-form-secondary">
             <div className="subs-period-group">
-              <span className="subs-label-text">Период списания</span>
+              <span className="subs-label-text">{t('subs.form.period')}</span>
               <div className="subs-period-pills">
                 {SUBSCRIPTION_PERIODS.map((value) => (
                   <button
@@ -230,7 +216,7 @@ export const SubscriptionsPage = () => {
                     className={`subs-period-btn${period === value ? ' is-on' : ''}`}
                     onClick={() => setPeriod(value)}
                   >
-                    {PERIOD_LABELS[value]}
+                    {periodLabel(value, lang)}
                   </button>
                 ))}
               </div>
@@ -238,7 +224,7 @@ export const SubscriptionsPage = () => {
 
             <div className="subs-date-group">
               <label className="subs-field-date">
-                <span className="subs-label-text">Первый счёт (дата)</span>
+                <span className="subs-label-text">{t('subs.form.firstBill')}</span>
                 <div className="subs-date-inline">
                   <input type="date" value={startedAt} onChange={(event) => setStartedAt(event.target.value)} />
                   <button
@@ -246,18 +232,18 @@ export const SubscriptionsPage = () => {
                     className={`subs-date-chip${startedAt === today ? ' is-on' : ''}`}
                     onClick={() => setStartedAt(today)}
                   >
-                    Сегодня
+                    {t('subs.form.today')}
                   </button>
                 </div>
               </label>
 
               <label className="subs-field-date">
-                <span className="subs-label-text">Пользоваться до (если отменяешь)</span>
+                <span className="subs-label-text">{t('subs.form.useUntil')}</span>
                 <div className="subs-date-inline">
                   <input type="date" value={until} onChange={(event) => setUntil(event.target.value)} />
                   {until && (
                     <button type="button" className="subs-date-chip is-clear" onClick={() => setUntil('')}>
-                      Сброс
+                      {t('subs.form.reset')}
                     </button>
                   )}
                 </div>
@@ -271,20 +257,19 @@ export const SubscriptionsPage = () => {
               type="submit"
               disabled={!name.trim() || !Number.isFinite(Number(price.replace(',', '.'))) || Number(price.replace(',', '.')) <= 0}
             >
-              <Plus size={16} /> Добавить подписку
+              <Plus size={16} /> {t('subs.add')}
             </button>
           </div>
         </form>
       </section>
 
-      {/* Filter Tabs */}
       {sorted.length > 0 && (
         <div className="subs-filters">
           <button type="button" className={`subs-filter-btn${filter === 'all' ? ' is-on' : ''}`} onClick={() => setFilter('all')}>
-            {lang === 'en' ? 'All' : 'Все'} ({sorted.length})
+            {t('subs.filter.all')} ({sorted.length})
           </button>
           <button type="button" className={`subs-filter-btn${filter === 'active' ? ' is-on' : ''}`} onClick={() => setFilter('active')}>
-            {lang === 'en' ? 'Active' : 'Активные'} ({activeCount})
+            {t('subs.filter.active')} ({activeCount})
           </button>
           {soonCount > 0 && (
             <button
@@ -292,32 +277,27 @@ export const SubscriptionsPage = () => {
               className={`subs-filter-btn is-alert${filter === 'soon' ? ' is-on' : ''}`}
               onClick={() => setFilter('soon')}
             >
-              {lang === 'en' ? 'Due soon' : 'Скоро счёт'} ({soonCount})
+              {t('subs.filter.soon')} ({soonCount})
             </button>
           )}
           {stoppedCount > 0 && (
             <button type="button" className={`subs-filter-btn${filter === 'stopped' ? ' is-on' : ''}`} onClick={() => setFilter('stopped')}>
-              {lang === 'en' ? 'Canceled' : 'Отменённые'} ({stoppedCount})
+              {t('subs.filter.canceled')} ({stoppedCount})
             </button>
           )}
         </div>
       )}
 
-      {/* Subscriptions List */}
       {sorted.length === 0 ? (
         <div className="subs-empty-card">
           <Sparkles size={32} className="subs-empty-icon" />
-          <h2>{lang === 'en' ? 'No subscriptions yet' : 'Подписок пока нет'}</h2>
-          <p>
-            {lang === 'en'
-              ? 'Add your services above or select a popular preset (Telegram Premium, iCloud, etc.) to start tracking billing dates.'
-              : 'Добавь свои сервисы выше или нажми на быстрый выбор (Яндекс Плюс, Telegram Premium и др.), чтобы сразу видеть даты следующих списаний.'}
-          </p>
+          <h2>{t('subs.empty.title')}</h2>
+          <p>{t('subs.empty.note')}</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="subs-empty-card">
           <Check size={32} className="subs-empty-icon" />
-          <p>{lang === 'en' ? 'No services in this category.' : 'В этой категории сейчас нет сервисов.'}</p>
+          <p>{t('subs.empty.category')}</p>
         </div>
       ) : (
         <div className="subs-cards-list">
@@ -351,7 +331,7 @@ export const SubscriptionsPage = () => {
                       {isSoon && <AlertCircle size={15} />}
                       {leftText(daysLeft, lang)}
                     </strong>
-                    <span className="sub-deadline">{formatShortDate(view.deadline, lang === 'en' ? 'en-US' : 'ru-RU')}</span>
+                    <span className="sub-deadline">{formatShortDate(view.deadline, locale)}</span>
                   </div>
                 </div>
 
@@ -362,19 +342,17 @@ export const SubscriptionsPage = () => {
                         className="sub-action-btn is-renew"
                         type="button"
                         onClick={() => renew(sub.id, view.charge)}
-                        title={lang === 'en' ? 'Mark as paid and advance cycle' : 'Подтвердить оплату и сдвинуть на следующий цикл'}
+                        title={t('subs.action.paidTitle')}
                       >
-                        <Check size={14} /> {lang === 'en' ? 'Paid' : 'Оплачено'}
+                        <Check size={14} /> {t('subs.action.paid')}
                       </button>
                       <button
                         className="sub-action-btn is-cancel"
                         type="button"
                         onClick={() => update(sub.id, { until: previousDay(view.charge) })}
-                        title={
-                          lang === 'en' ? 'Cancel subscription before next bill' : 'Поставить окончание за 1 день до следующего списания'
-                        }
+                        title={t('subs.action.cancelTitle')}
                       >
-                        {lang === 'en' ? 'Cancel subscription' : 'Отменить подписку'}
+                        {t('subs.action.cancel')}
                       </button>
                     </>
                   )}
@@ -383,17 +361,12 @@ export const SubscriptionsPage = () => {
                       className="sub-action-btn is-resume"
                       type="button"
                       onClick={() => update(sub.id, { until: '' })}
-                      title={lang === 'en' ? 'Resume active subscription' : 'Вернуть подписку в активные'}
+                      title={t('subs.action.resumeTitle')}
                     >
-                      <RotateCcw size={14} /> {lang === 'en' ? 'Resume' : 'Возобновить'}
+                      <RotateCcw size={14} /> {t('subs.action.resume')}
                     </button>
                   )}
-                  <button
-                    className="sub-action-btn is-delete"
-                    type="button"
-                    onClick={() => remove(sub.id)}
-                    title={lang === 'en' ? 'Delete subscription' : 'Удалить подписку из списка'}
-                  >
+                  <button className="sub-action-btn is-delete" type="button" onClick={() => remove(sub.id)} title={t('subs.action.delete')}>
                     <Trash2 size={14} />
                   </button>
                 </div>
@@ -404,10 +377,7 @@ export const SubscriptionsPage = () => {
       )}
 
       <footer className="subs-footer-note">
-        <p>
-          💡 <strong>Как это работает:</strong> даты рассчитываются автоматически от первого счёта по выбранному периоду. Кнопка «Отменить
-          подписку» устанавливает дату окончания на день раньше списания, чтобы напомнить отключить автоплатёж вовремя.
-        </p>
+        <p>{t('subs.footer.note')}</p>
       </footer>
     </div>
   )

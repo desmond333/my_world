@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { RotateCw } from 'lucide-react'
 import type { LotteryVariant } from '../../../lib'
 import { sectorAngle } from '../../../lib'
+import { useTranslation } from '../../../lib/i18n'
 
 export type LotteryWheelProps = {
   variant: LotteryVariant
@@ -11,6 +12,7 @@ export type LotteryWheelProps = {
 }
 
 export const LotteryWheel = ({ variant, angle, spinning, onSpin }: LotteryWheelProps) => {
+  const { t } = useTranslation()
   const [flash, setFlash] = useState(false)
   const lastAngle = useRef(0)
 
@@ -36,11 +38,11 @@ export const LotteryWheel = ({ variant, angle, spinning, onSpin }: LotteryWheelP
       >
         <div className="lottery-wheel-core">
           <RotateCw size={18} />
-          <span>{spinning ? 'крутится' : 'крути'}</span>
+          <span>{spinning ? t('lottery.wheel.spinning') : t('lottery.wheel.spin')}</span>
         </div>
       </div>
       <button type="button" className="add-button lottery-spin" onClick={onSpin} disabled={spinning}>
-        {spinning ? 'Крутится…' : 'Испытать удачу'}
+        {spinning ? t('lottery.wheel.spinningLong') : t('lottery.wheel.tryLuck')}
       </button>
     </div>
   )

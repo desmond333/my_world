@@ -629,6 +629,11 @@
   gap: 6px;
   overflow-x: auto;
   padding: 2px 0;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.review-rating-selector::-webkit-scrollbar {
+  display: none;
 }
 .score-btn {
   flex: 1;
@@ -831,7 +836,7 @@
   .collection-filters {
     grid-template-columns: 1fr;
   }
-  .collection-row {
+  .collection-row-main {
     grid-template-columns: 28px 44px minmax(0, 1fr);
     gap: 10px;
   }
@@ -846,6 +851,15 @@
   .mini-button--ghost,
   .mini-button--online {
     margin-left: 0;
+  }
+  .result-actions {
+    padding: 10px 14px 14px;
+    gap: 6px;
+  }
+  .result-actions .mini-button {
+    font-size: 11px;
+    padding: 0 9px;
+    min-height: 36px;
   }
   .modal-backdrop {
     padding: 0;
