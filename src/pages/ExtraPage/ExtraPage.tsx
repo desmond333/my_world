@@ -3,22 +3,25 @@ import { CircleDollarSign } from 'lucide-react'
 import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
 import { CreatorNote } from '../../components/CreatorNote/CreatorNote'
 import { ExtraNav } from '../../components/ExtraNav/ExtraNav'
+import { useTranslation } from '../../lib/i18n'
 import { useDailyStore } from '../../store'
-import { extraSections } from './sections'
+import { usefulSections } from './sections'
 import './ExtraPage.css'
 
-const navItems = extraSections.map((section) => ({
-  to: `/extra/${section.key}`,
-  label: section.label,
-  hint: section.hint,
-  icon: section.icon,
-  end: section.key === 'media' || section.key === 'productivity',
-}))
-
 export const ExtraPage = () => {
+  const { t } = useTranslation()
   const extraTab = useDailyStore((state) => state.extraTab)
   const toggleExtraTab = useDailyStore((state) => state.toggleExtraTab)
   const { pathname } = useLocation()
+
+  const navItems = usefulSections.map((section) => ({
+    to: `/extra/${section.key}`,
+    label: t(`section.${section.key}`, section.label),
+    hint: t(`section.${section.key}.hint`, section.hint),
+    icon: section.icon,
+    end: section.key === 'media' || section.key === 'productivity',
+  }))
+
   const active = navItems.find((item) => pathname === item.to || pathname.startsWith(`${item.to}/`))?.to ?? ''
 
   return (
@@ -30,9 +33,9 @@ export const ExtraPage = () => {
           <div className="extra-content">
             <Outlet />
             <footer>
-              <span>всё хранится на этом устройстве</span>
+              <span>{t('footer.device')}</span>
               <span className="footer-note">
-                <CircleDollarSign size={14} /> курсы подтягиваются с сервера
+                <CircleDollarSign size={14} /> {t('section.finance.hint')}
               </span>
               <CreatorNote />
             </footer>
@@ -41,10 +44,10 @@ export const ExtraPage = () => {
         </div>
       ) : (
         <section className="favorites-empty extra-off">
-          <h2>Вкладка выключена</h2>
-          <p>«Дополнительно» включается ползунком в настройках на главной — там же, где блоки дня.</p>
+          <h2>Раздел выключен</h2>
+          <p>«Полезное» включается ползунком в настройках на главной — там же, где блоки дня.</p>
           <button className="add-button" type="button" onClick={toggleExtraTab}>
-            Включить вкладку
+            Включить раздел
           </button>
         </section>
       )}

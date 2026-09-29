@@ -1,5 +1,6 @@
 import type { SearchCandidate } from '../data'
 import { formatScore, sortByLocale } from '../lib/collection'
+import { getFallbackMovieDetails, searchFallbackMovies } from './fallbackMovies'
 
 const TMDB_API = 'https://api.themoviedb.org/3'
 const IMAGE_CDN = 'https://image.tmdb.org/t/p/w500'
@@ -150,13 +151,29 @@ const toCandidate = (raw: TmdbMovie, genreNames: GenreNames): SearchCandidate =>
 export const searchMovies = async (query: string, signal?: AbortSignal): Promise<SearchCandidate[]> => {
   const term = query.trim()
   if (term.length < MIN_QUERY_LENGTH) return []
-  const params: Record<string, string | number | boolean> = { query: term, page: 1 }
-  if (!usesProxy) params.include_adult = false
-  const [data, genreNames] = await Promise.all([
-    request<TmdbSearchResponse>('/search/movie', params, signal),
-    loadGenreNames(signal).catch(() => new Map<number, string>()),
-  ])
-  return (data.results ?? []).map((raw) => toCandidate(raw, genreNames))
+
+  if (!isTmdbConfigured()) {
+    return searchFallbackMovies(term)
+  }
+
+  try {
+    const params: Record<string, string | number | boolean> = { query: term, page: 1 }
+    if (!usesProxy) params.include_adult = false
+    const [data, genreNames] = await Promise.all([
+      request<TmdbSearchResponse>('/search/movie', params, signal),
+      loadGenreNames(signal).catch(() => new Map<number, string>()),
+    ])
+    const results = (data.results ?? []).map((raw) => toCandidate(raw, genreNames))
+    if (results.length > 0) return results
+    return searchFallbackMovies(term)
+  } catch (error) {
+    if (signal?.aborted) throw error
+    const fallbackResults = searchFallbackMovies(term)
+    if (fallbackResults.length > 0) {
+      return fallbackResults
+    }
+    throw error
+  }
 }
 
 const toDetails = (raw: TmdbMovieDetails): MovieDetails => ({
@@ -182,6 +199,9 @@ const toDetails = (raw: TmdbMovieDetails): MovieDetails => ({
 })
 
 export const fetchMovieDetails = async (id: string, signal?: AbortSignal): Promise<MovieDetails> => {
+  const fallback = getFallbackMovieDetails(id)
+  if (fallback) return fallback
+
   if (!MOVIE_ID_PATTERN.test(id)) throw new Error('Некорректный идентификатор фильма.')
   const raw = await request<TmdbMovieDetails>(`/movie/${id}`, {}, signal)
   return toDetails(raw)

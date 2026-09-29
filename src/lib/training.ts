@@ -1,5 +1,6 @@
 import type { TrainingSport } from '../data'
 import { dateKey, formatShortDate, monthTitle } from './date'
+import { getTranslation, type Lang } from './i18n'
 
 export const STRENGTH_ID = 'strength'
 
@@ -10,6 +11,15 @@ export const BUILTIN_SPORTS: TrainingSport[] = [
   { id: 'skate', label: 'Ролики', color: '#7aa6e8', enabled: false, custom: false },
   { id: 'bike', label: 'Велик', color: '#7fc8a9', enabled: false, custom: false },
 ]
+
+const SPORT_LABEL_KEYS: Record<string, string> = {
+  [STRENGTH_ID]: 'training.sport.strength',
+  skate: 'training.sport.skate',
+  bike: 'training.sport.bike',
+}
+
+export const sportLabel = (sport: TrainingSport, lang: Lang = 'ru') =>
+  sport.custom ? sport.label : getTranslation(SPORT_LABEL_KEYS[sport.id] ?? '', lang, sport.label)
 
 export const sportColor = (sports: TrainingSport[], id: string) => sports.find((sport) => sport.id === id)?.color ?? '#f4b849'
 
@@ -41,7 +51,17 @@ export const trainingStats = (days: Record<string, string[]>, today: string) => 
   return { total: dates.length, streak, month: dates.filter((date) => date.startsWith(month)).length, last: dates[dates.length - 1] ?? '' }
 }
 
-export const trainingReport = (days: Record<string, string[]>, today: string, cityName: string, sports: TrainingSport[]) => {
+export const trainingReport = (
+  days: Record<string, string[]>,
+  today: string,
+  cityName: string,
+  sports: TrainingSport[],
+  lang: Lang = 'ru',
+) => {
+  const tr = (key: string, values?: Record<string, string | number>) => {
+    const template = getTranslation(key, lang)
+    return values ? template.replace(/\{(\w+)\}/g, (match, name: string) => (name in values ? String(values[name]) : match)) : template
+  }
   const stats = trainingStats(days, today)
   const byMonth = new Map<string, number[]>()
   Object.keys(days)
@@ -52,24 +72,24 @@ export const trainingReport = (days: Record<string, string[]>, today: string, ci
       byMonth.set(`${year}-${month}`, [...(byMonth.get(`${year}-${month}`) ?? []), Number(day)])
     })
   const lines = [
-    `Тренировки — ${cityName}`,
-    'Календарь отмечен по датам, время считается местным.',
+    tr('training.report.title', { city: cityName }),
+    tr('training.report.note'),
     '',
-    `Всего дней с тренировкой: ${stats.total}`,
-    `Подряд сейчас: ${stats.streak}`,
-    `В этом месяце: ${stats.month}`,
-    `Последняя тренировка: ${stats.last ? formatShortDate(stats.last) : 'пока нет'}`,
+    tr('training.report.total', { count: stats.total }),
+    tr('training.report.streak', { count: stats.streak }),
+    tr('training.report.month', { count: stats.month }),
+    `${tr('training.report.last')}: ${stats.last ? formatShortDate(stats.last, lang === 'en' ? 'en-US' : 'ru-RU') : tr('training.report.lastNone')}`,
   ]
   const totals = sportTotals(days, sports).filter((item) => item.count > 0)
   if (totals.length) {
-    lines.push('', 'По видам:')
-    totals.forEach(({ sport, count }) => lines.push(`${sport.label} — ${count}`))
+    lines.push('', tr('training.report.byKind'))
+    totals.forEach(({ sport, count }) => lines.push(`${sportLabel(sport, lang)} — ${count}`))
   }
   if (byMonth.size) {
-    lines.push('', 'По месяцам:')
+    lines.push('', tr('training.report.byMonth'))
     byMonth.forEach((numbers, key) => {
       const [year, month] = key.split('-').map(Number)
-      lines.push(`${monthTitle(year, month - 1)} — ${numbers.join(', ')}`)
+      lines.push(`${monthTitle(year, month - 1, lang === 'en' ? 'en-US' : 'ru-RU')} — ${numbers.join(', ')}`)
     })
   }
   return lines.join('\n')

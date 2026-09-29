@@ -1,0 +1,110 @@
+import { Cake, X } from 'lucide-react'
+import { blockOptions, cities, findCity } from '../../../data'
+import { useTranslation } from '../../../lib/i18n'
+import type { SettingsPanelProps } from '../types'
+
+export const SettingsPanel = ({
+  city,
+  scope,
+  themeMode,
+  blocks,
+  season,
+  extraTab,
+  onClose,
+  onCity,
+  onScope,
+  onTheme,
+  onToggleBlock,
+  onToggleExtraTab,
+  onOpenBirthday,
+}: SettingsPanelProps) => {
+  const { t } = useTranslation()
+
+  return (
+    <section className="settings-panel" id="settings-panel" aria-label={t('settings.title')}>
+      <div className="settings-heading">
+        <div>
+          <span className="card-kicker">{t('settings.kicker')}</span>
+          <h2>{t('settings.title')}</h2>
+        </div>
+        <button className="close-button" onClick={onClose} aria-label={t('settings.close')}>
+          <X size={18} />
+        </button>
+      </div>
+      <div className="settings-fields">
+        <label className="setting-field">
+          <span>{t('settings.where')}</span>
+          <select value={city.id} onChange={(event) => onCity(findCity(event.target.value))}>
+            {cities.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <fieldset className="setting-field">
+          <legend>{t('settings.circle')}</legend>
+          <div className="scope-options">
+            <label className={scope === 'all' ? 'selected' : ''}>
+              <input type="radio" name="scope" checked={scope === 'all'} onChange={() => onScope('all')} /> {t('settings.allAnimals')}
+            </label>
+            <label className={scope === 'home' ? 'selected' : ''}>
+              <input type="radio" name="scope" checked={scope === 'home'} onChange={() => onScope('home')} /> {t('settings.homeFriends')}
+            </label>
+          </div>
+        </fieldset>
+      </div>
+      <fieldset className="setting-field blocks-field">
+        <legend>{t('settings.blocks')}</legend>
+        <div className="block-toggles">
+          {blockOptions.map((option) => (
+            <label className="switch-row" key={option.key}>
+              <span className="switch-text">
+                {t(`blocks.${option.key}.label`, option.label)}
+                <small>{t(`blocks.${option.key}.hint`, option.hint)}</small>
+              </span>
+              <input type="checkbox" checked={blocks[option.key]} onChange={() => onToggleBlock(option.key)} />
+              <i className="switch" aria-hidden="true" />
+            </label>
+          ))}
+        </div>
+        <small className="theme-season-note">{t('settings.allOff')}</small>
+      </fieldset>
+      <fieldset className="setting-field blocks-field">
+        <legend>{t('settings.tabs')}</legend>
+        <div className="block-toggles">
+          <label className="switch-row">
+            <span className="switch-text">
+              {t('settings.tabsLabel')}
+              <small>{t('settings.tabsHint')}</small>
+            </span>
+            <input type="checkbox" checked={extraTab} onChange={onToggleExtraTab} />
+            <i className="switch" aria-hidden="true" />
+          </label>
+        </div>
+      </fieldset>
+      <fieldset className="setting-field theme-field">
+        <legend>{t('settings.theme')}</legend>
+        <div className="scope-options">
+          <label className={themeMode === 'system' ? 'selected' : ''}>
+            <input type="radio" name="theme" checked={themeMode === 'system'} onChange={() => onTheme('system')} />{' '}
+            {t('settings.themeSystem')}
+          </label>
+          <label className={themeMode === 'light' ? 'selected' : ''}>
+            <input type="radio" name="theme" checked={themeMode === 'light'} onChange={() => onTheme('light')} /> {t('settings.themeLight')}
+          </label>
+          <label className={themeMode === 'dark' ? 'selected' : ''}>
+            <input type="radio" name="theme" checked={themeMode === 'dark'} onChange={() => onTheme('dark')} /> {t('settings.themeDark')}
+          </label>
+        </div>
+        <small className="theme-season-note">
+          {season} {t('settings.palette')}
+        </small>
+      </fieldset>
+      <button className="birthday-menu-button" onClick={onOpenBirthday}>
+        <Cake size={16} /> {t('settings.birthday')}
+      </button>
+      <p className="settings-note">{t('settings.note')}</p>
+    </section>
+  )
+}

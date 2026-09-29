@@ -8,12 +8,15 @@ export type DailyState = {
   cityId: string
   scope: AnimalScope
   themeMode: ThemeMode
+  lang: 'ru' | 'en'
   blocks: Blocks
   extraTab: boolean
   chooseForToday: (date: string, scope: AnimalScope) => void
   setCity: (city: City) => void
   setScope: (scope: AnimalScope) => void
   setThemeMode: (mode: ThemeMode) => void
+  setLang: (lang: 'ru' | 'en') => void
+  toggleLang: () => void
   toggleBlock: (key: BlockKey) => void
   toggleExtraTab: () => void
 }
@@ -52,4 +55,5 @@ export type CollectionState = {
   remove: (list: CollectionListKey, id: string) => void
   move: (id: string, to: CollectionListKey) => void
   reorder: (list: CollectionListKey, orderedIds: string[]) => void
+  updateItem: (list: CollectionListKey, id: string, patch: Partial<CollectionItem>) => void
 }

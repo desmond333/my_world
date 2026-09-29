@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { KeyRound, Loader2, Search, SearchX } from 'lucide-react'
 import type { CollectionDetails, SearchCandidate } from '../../data'
+import { useTranslation } from '../../lib/i18n'
 import { DetailsModal } from './DetailsModal'
 import { ResultCard } from './ResultCard'
 import type { SearchPanelProps } from './types'
 
 export const SearchPanel = ({ query, results, loading, error, config, lists, locationOf, actions, onQuery }: SearchPanelProps) => {
+  const { t } = useTranslation()
   const [openId, setOpenId] = useState<string | null>(null)
   const [details, setDetails] = useState<CollectionDetails | null>(null)
   const [detailsLoading, setDetailsLoading] = useState(false)
@@ -38,12 +40,12 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
         setDetails(loaded)
       } catch (cause) {
         if (controller.signal.aborted) return
-        setDetailsError(cause instanceof Error ? cause.message : 'Не удалось загрузить детали.')
+        setDetailsError(cause instanceof Error ? cause.message : t('collection.search.detailsFailed'))
       } finally {
         if (!controller.signal.aborted) setDetailsLoading(false)
       }
     },
-    [config.details],
+    [config.details, t],
   )
 
   const closeDetails = useCallback(() => {
@@ -58,8 +60,8 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
   return (
     <section className="collection-panel" aria-label={config.panelTitle}>
       <div className="panel-heading">
-        <span className="card-kicker">{config.kicker}</span>
-        <h2>{config.panelTitle}</h2>
+        <span className="card-kicker">{t('movies.search.kicker', config.kicker)}</span>
+        <h2>{t('movies.search.title', config.panelTitle)}</h2>
       </div>
 
       <label className="search-field">
@@ -70,8 +72,8 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
           className="search-input"
           type="search"
           value={query}
-          placeholder={config.placeholder}
-          aria-label={config.fieldLabel}
+          placeholder={t('movies.search.placeholder', config.placeholder)}
+          aria-label={t('movies.search.field', config.fieldLabel)}
           onChange={(event) => onQuery(event.target.value)}
         />
       </label>
@@ -79,15 +81,17 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
       {!config.configured && (
         <p className="key-note">
           <KeyRound size={15} />
-          <span>{config.notConfiguredHint}</span>
+          <span>{t('movies.search.notConfigured')}</span>
         </p>
       )}
 
-      {config.configured && tooShort && <p className="search-status">Напиши хотя бы {config.minLength} буквы.</p>}
+      {config.configured && tooShort && (
+        <p className="search-status">{t('collection.search.minLength', undefined, { count: config.minLength })}</p>
+      )}
 
       {config.configured && loading && (
         <p className="search-status">
-          <Loader2 size={15} className="spin" /> Ищем «{term}»…
+          <Loader2 size={15} className="spin" /> {t('collection.search.loading', undefined, { term })}
         </p>
       )}
 
@@ -97,7 +101,7 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
         </p>
       )}
 
-      {nothingFound && <p className="search-status">По запросу «{term}» ничего не нашлось.</p>}
+      {nothingFound && <p className="search-status">{t('collection.search.nothing', undefined, { term })}</p>}
 
       {results.length > 0 && (
         <div className="result-grid">
@@ -109,8 +113,8 @@ export const SearchPanel = ({ query, results, loading, error, config, lists, loc
               lists={lists}
               actions={actions}
               onOpenDetails={config.details ? openDetails : undefined}
-              detailsLabel={config.details?.label}
-              online={config.online}
+              detailsLabel={config.details ? t('movies.search.details', config.details.label) : undefined}
+              online={config.online ? { ...config.online, label: t('movies.search.online', config.online.label) } : undefined}
             />
           ))}
         </div>

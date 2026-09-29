@@ -1,5 +1,6 @@
 import type { Currency, CurrencyRates, FinanceEntry, FinanceKind } from '../data'
 import { monthKeyParts, sortByNewestKey } from './date'
+import { getTranslation, localeOf, type Lang } from './i18n'
 
 export const CURRENCIES: Currency[] = ['RUB', 'USD', 'GEL']
 
@@ -15,6 +16,11 @@ export const FINANCE_KINDS: FinanceKind[] = ['salary', 'oneoff']
 
 export const FINANCE_LABELS: Record<FinanceKind, string> = { salary: 'Зарплата', oneoff: 'Разовое' }
 
+export const currencyName = (currency: Currency, lang: Lang = 'ru') =>
+  getTranslation(`finance.currency.${currency}`, lang, CURRENCY_NAMES[currency])
+
+export const financeKindLabel = (kind: FinanceKind, lang: Lang = 'ru') => getTranslation(`finance.kind.${kind}`, lang, FINANCE_LABELS[kind])
+
 export const isCurrency = (value: string): value is Currency => CURRENCIES.includes(value as Currency)
 
 export const convert = (amount: number, from: Currency, to: Currency, rates: CurrencyRates) => {
@@ -23,21 +29,22 @@ export const convert = (amount: number, from: Currency, to: Currency, rates: Cur
   return (amount * fromRate) / toRate
 }
 
-const money = (value: number) => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: value < 100 ? 2 : 0 }).format(value)
+const money = (value: number, lang: Lang = 'ru') =>
+  new Intl.NumberFormat(localeOf(lang), { maximumFractionDigits: value < 100 ? 2 : 0 }).format(value)
 
-export const formatMoney = (amount: number, currency: Currency) => `${money(amount)} ${CURRENCY_MARKS[currency]}`
+export const formatMoney = (amount: number, currency: Currency, lang: Lang = 'ru') => `${money(amount, lang)} ${CURRENCY_MARKS[currency]}`
 
-export const formatConverted = (amount: number, from: Currency, to: Currency, rates: CurrencyRates) =>
-  formatMoney(convert(amount, from, to, rates), to)
+export const formatConverted = (amount: number, from: Currency, to: Currency, rates: CurrencyRates, lang: Lang = 'ru') =>
+  formatMoney(convert(amount, from, to, rates), to, lang)
 
 export type RateRow = { from: Currency; to: Currency; value: string }
 
-export const rateRows = (rates: CurrencyRates): RateRow[] =>
+export const rateRows = (rates: CurrencyRates, lang: Lang = 'ru'): RateRow[] =>
   CURRENCIES.flatMap((from) =>
     CURRENCIES.filter((to) => from !== to).map((to) => ({
       from,
       to,
-      value: `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 3 }).format(convert(1, from, to, rates))} ${CURRENCY_MARKS[to]}`,
+      value: `${new Intl.NumberFormat(localeOf(lang), { maximumFractionDigits: 3 }).format(convert(1, from, to, rates))} ${CURRENCY_MARKS[to]}`,
     })),
   )
 

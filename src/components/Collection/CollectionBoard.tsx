@@ -3,6 +3,8 @@ import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, us
 import type { DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { GripVertical, Inbox } from 'lucide-react'
+import type { CollectionListKey } from '../../data'
+import { useTranslation } from '../../lib/i18n'
 import { CollectionFilters } from './CollectionFilters'
 import { SortableItemRow } from './SortableItemRow'
 import type { CollectionBoardProps } from './types'
@@ -26,7 +28,10 @@ export const CollectionBoard = memo(
     onRemove,
     onMove,
     onReorder,
+    onUpdateItem,
   }: CollectionBoardProps) => {
+    const { t } = useTranslation()
+    const listLabel = (key: CollectionListKey) => t(`movies.list.${key}`, lists.find((option) => option.key === key)?.label)
     const sensors = useSensors(
       useSensor(PointerSensor, { activationConstraint: { distance: DRAG_ACTIVATION_DISTANCE } }),
       useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -44,13 +49,13 @@ export const CollectionBoard = memo(
     }
 
     return (
-      <section className="collection-panel" aria-label="Списки">
+      <section className="collection-panel" aria-label={t('collection.listsAria')}>
         <div className="panel-heading">
-          <span className="card-kicker">твои списки</span>
-          <h2>{lists.find((option) => option.key === list)?.label}</h2>
+          <span className="card-kicker">{t('collection.listsKicker')}</span>
+          <h2>{listLabel(list)}</h2>
         </div>
 
-        <div className="list-switch" role="group" aria-label="Выбор списка">
+        <div className="list-switch" role="group" aria-label={t('collection.listSwitchAria')}>
           {lists.map((option) => (
             <button
               key={option.key}
@@ -58,9 +63,9 @@ export const CollectionBoard = memo(
               aria-pressed={list === option.key}
               className={`list-tab${list === option.key ? ' is-on' : ''}`}
               onClick={() => onList(option.key)}
-              title={option.hint}
+              title={t(`movies.list.${option.key}Hint`, option.hint)}
             >
-              {option.label}
+              {listLabel(option.key)}
               {counts[option.key] > 0 && <span className="list-count">{counts[option.key]}</span>}
             </button>
           ))}
@@ -68,18 +73,16 @@ export const CollectionBoard = memo(
 
         {counts[list] === 0 ? (
           <p className="list-empty">
-            <Inbox size={19} /> Пока пусто. Найди выше и добавь в этот список.
+            <Inbox size={19} /> {t('collection.empty')}
           </p>
         ) : (
           <>
             <CollectionFilters tags={tags} tag={tag} periods={periods} periodId={periodId} onTag={onTag} onPeriod={onPeriod} />
 
-            <p className="list-summary">
-              Показано {items.length} из {counts[list]}
-            </p>
+            <p className="list-summary">{t('collection.summary', undefined, { shown: items.length, total: counts[list] })}</p>
 
             {items.length === 0 ? (
-              <p className="list-empty">Под эти фильтры ничего не подходит.</p>
+              <p className="list-empty">{t('collection.emptyFilters')}</p>
             ) : (
               <>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -94,6 +97,7 @@ export const CollectionBoard = memo(
                           online={online}
                           onRemove={onRemove}
                           onMove={onMove}
+                          onUpdateItem={onUpdateItem}
                         />
                       ))}
                     </ul>
@@ -101,7 +105,7 @@ export const CollectionBoard = memo(
                 </DndContext>
                 {items.length > 1 && (
                   <p className="dnd-hint">
-                    <GripVertical size={14} /> Потяни за ручку — порядок сохранится. С клавиатуры: пробел, стрелки, пробел.
+                    <GripVertical size={14} /> {t('collection.dndHint')}
                   </p>
                 )}
               </>

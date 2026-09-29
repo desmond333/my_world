@@ -2,24 +2,29 @@ import { useEffect, useState } from 'react'
 import { defaultBlocks, findCity, type BlockKey } from '../../data'
 import { MINUTE_MS, useAsyncResource, useCopyFeedback, useNow } from '../../hooks'
 import { getSeason, getThemedOccasion, getWish, hasTraining, seasonName, STRENGTH_ID, trainingReport } from '../../lib'
+import { useTranslation } from '../../lib/i18n'
 import { fetchHoliday } from '../../services/holidays'
 import { fetchWeather } from '../../services/weather'
 import { getDateForTimezone, useAnimalsStore, useDailyStore, useFavoritesStore, useTrainingStore } from '../../store'
 import { BirthdayModal } from '../../components/BirthdayModal/BirthdayModal'
-import { BreedCard } from './BreedCard'
-import { DailyFooter, DesktopHint } from './DailyFooter'
-import { ForecastStrip } from './ForecastStrip'
-import { HeroSection } from './HeroSection'
-import { OccasionCard } from './OccasionCard'
-import { SettingsPanel } from './SettingsPanel'
-import { TodayCard } from './TodayCard'
-import { Topbar } from './Topbar'
-import { TrainingCard } from './TrainingCard'
-import { WeatherCard } from './WeatherCard'
-import { WishCard } from './WishCard'
+import {
+  BreedCard,
+  DailyFooter,
+  DesktopHint,
+  ForecastStrip,
+  HeroSection,
+  OccasionCard,
+  SettingsPanel,
+  TodayCard,
+  Topbar,
+  TrainingCard,
+  WeatherCard,
+  WishCard,
+} from './components'
 import './DailyPage.css'
 
 export const DailyPage = () => {
+  const { lang, t } = useTranslation()
   const animalIndex = useDailyStore((state) => state.animalIndex)
   const cityId = useDailyStore((state) => state.cityId)
   const scope = useDailyStore((state) => state.scope)
@@ -61,7 +66,7 @@ export const DailyPage = () => {
   const wish = getWish(currentDate)
   const occasion = getThemedOccasion(currentDate)
   const currentSeason = getSeason(now, city.timezone)
-  const season = seasonName(currentSeason)
+  const season = seasonName(currentSeason, lang)
   const trainedToday = hasTraining(trainingDays, currentDate)
   const forecast = weather.data?.forecast ?? []
   const infoCards = [show('animal'), show('today'), show('weather')].filter(Boolean).length
@@ -76,7 +81,7 @@ export const DailyPage = () => {
     else addFavorite(animal)
   }
 
-  const copyTraining = () => copy(trainingReport(trainingDays, currentDate, city.name, trainingSports))
+  const copyTraining = () => copy(trainingReport(trainingDays, currentDate, city.name, trainingSports, lang))
 
   return (
     <main className="page-shell">
@@ -103,7 +108,7 @@ export const DailyPage = () => {
       {show('animal') && animal && <HeroSection animal={animal} isFavorite={Boolean(isFavorite)} onToggleFavorite={toggleFavorite} />}
 
       {infoCards > 0 && (
-        <section className={`info-grid cards-${infoCards}`} aria-label="Информация о сегодняшнем дне">
+        <section className={`info-grid cards-${infoCards}`} aria-label={t('daily.infoAria')}>
           {show('animal') && animal && <BreedCard animal={animal} />}
           {show('today') && <TodayCard timezone={city.timezone} zone={city.zone} season={currentSeason} />}
           {show('weather') && (

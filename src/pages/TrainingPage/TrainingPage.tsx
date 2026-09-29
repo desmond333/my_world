@@ -9,16 +9,17 @@ import {
   monthMatrix,
   monthTitle,
   sportColor,
+  sportLabel,
   sportTotals,
   SPORT_COLORS,
   trainingReport,
   trainingStats,
+  weekDayLabels,
 } from '../../lib'
+import { countText, useTranslation } from '../../lib/i18n'
 import { getDateForTimezone, useDailyStore, useTrainingStore } from '../../store'
 import type { MonthCursor } from './types'
 import './TrainingPage.css'
-
-const weekDays = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
 
 const sportIcon = (id: string) => {
   if (id === 'skate') return <Bike size={15} />
@@ -27,6 +28,7 @@ const sportIcon = (id: string) => {
 }
 
 export const TrainingPage = () => {
+  const { lang, t, locale } = useTranslation()
   const cityId = useDailyStore((state) => state.cityId)
   const city = findCity(cityId)
   const today = getDateForTimezone(city.timezone)
@@ -58,7 +60,7 @@ export const TrainingPage = () => {
       return { year: next.getUTCFullYear(), month: next.getUTCMonth() }
     })
 
-  const copyReport = () => copy(trainingReport(days, today, city.name, sports))
+  const copyReport = () => copy(trainingReport(days, today, city.name, sports, lang))
 
   const submitSport = (event: React.FormEvent) => {
     event.preventDefault()
@@ -67,45 +69,48 @@ export const TrainingPage = () => {
     setName('')
   }
 
-  const sportLabel = (id: string) => sports.find((sport) => sport.id === id)?.label ?? id
+  const labelOf = (id: string) => {
+    const sport = sports.find((item) => item.id === id)
+    return sport ? sportLabel(sport, lang) : id
+  }
 
   return (
     <div className="training-page">
       <section className="training-head">
         <p className="eyebrow">
-          <Dumbbell size={15} /> локальный календарь
+          <Dumbbell size={15} /> {t('training.kicker')}
         </p>
-        <h1>Тренировки</h1>
-        <p className="intro">Отмечаешь день — и он остаётся здесь навсегда. Даты считаются по времени {city.name}.</p>
+        <h1>{t('training.title')}</h1>
+        <p className="intro">{t('training.intro', undefined, { city: city.name })}</p>
       </section>
 
-      <section className="training-stats" aria-label="Статистика тренировок">
+      <section className="training-stats" aria-label={t('training.statsAria')}>
         <div className="stat">
-          <span>всего</span>
+          <span>{t('training.statTotal')}</span>
           <strong>{stats.total}</strong>
         </div>
         <div className="stat">
-          <span>подряд</span>
+          <span>{t('training.statStreak')}</span>
           <strong>{stats.streak}</strong>
         </div>
         <div className="stat">
-          <span>в этом месяце</span>
+          <span>{t('training.statMonth')}</span>
           <strong>{stats.month}</strong>
         </div>
         <div className="stat">
-          <span>последняя</span>
+          <span>{t('training.statLast')}</span>
           <strong className="stat-date">
-            {stats.last ? monthTitle(Number(stats.last.slice(0, 4)), Number(stats.last.slice(5, 7)) - 1).split(' ')[0] : '—'}
+            {stats.last ? monthTitle(Number(stats.last.slice(0, 4)), Number(stats.last.slice(5, 7)) - 1, locale).split(' ')[0] : '—'}
           </strong>
         </div>
       </section>
 
       {totals.length > 0 && (
-        <section className="training-totals" aria-label="Тренировки по видам">
+        <section className="training-totals" aria-label={t('training.totalsAria')}>
           {totals.map(({ sport, count }) => (
             <span className="training-total" key={sport.id}>
               <i style={{ background: sport.color }} />
-              {sport.label} <strong>{count}</strong>
+              {sportLabel(sport, lang)} <strong>{count}</strong>
             </span>
           ))}
         </section>
@@ -114,12 +119,12 @@ export const TrainingPage = () => {
       <section className="today-training" aria-live="polite">
         <div className="training-today-icon">{todayKinds.length ? <Check size={22} /> : <Dumbbell size={22} />}</div>
         <div>
-          <div className="card-kicker">сегодня</div>
-          <h2>{todayKinds.length ? todayKinds.map(sportLabel).join(' + ') : 'Тренировок не было'}</h2>
+          <div className="card-kicker">{t('training.today.kicker')}</div>
+          <h2>{todayKinds.length ? todayKinds.map(labelOf).join(' + ') : t('training.today.none')}</h2>
           <p>
             {stats.streak > 0
-              ? `Подряд уже ${stats.streak} ${stats.streak === 1 ? 'день' : stats.streak < 5 ? 'дня' : 'дней'}.`
-              : 'Отметь день, и появится отметка в календаре.'}
+              ? t('training.today.streak', undefined, { count: countText('training.day', stats.streak, lang) })
+              : t('training.today.empty')}
           </p>
         </div>
         <div className="today-sports">
@@ -133,7 +138,7 @@ export const TrainingPage = () => {
                 onClick={() => toggleSport(today, sport.id)}
                 aria-pressed={on}
               >
-                {sportIcon(sport.id)} {sport.label}
+                {sportIcon(sport.id)} {sportLabel(sport, lang)}
               </button>
             )
           })}
@@ -143,10 +148,10 @@ export const TrainingPage = () => {
       <section className="training-settings">
         <div className="training-settings-head">
           <div className="card-kicker">
-            <Settings2 size={14} /> настройки
+            <Settings2 size={14} /> {t('training.settings.kicker')}
           </div>
-          <h2>Виды тренировок</h2>
-          <p>Включи то, чем реально занимаешься. Каждому виду — свой цвет, и в дне с несколькими видами календарь покажет их сразу.</p>
+          <h2>{t('training.settings.title')}</h2>
+          <p>{t('training.settings.note')}</p>
         </div>
 
         <div className="sport-settings">
@@ -156,15 +161,19 @@ export const TrainingPage = () => {
                 <span className="switch-text">
                   <span className="sport-name">
                     <i style={{ background: sport.color }} />
-                    {sport.label}
+                    {sportLabel(sport, lang)}
                   </span>
-                  {sport.custom && <small>свой вид</small>}
+                  {sport.custom && <small>{t('training.settings.custom')}</small>}
                 </span>
                 <input type="checkbox" checked={sport.enabled} onChange={() => setSportEnabled(sport.id, !sport.enabled)} />
                 <i className="switch" aria-hidden="true" />
               </label>
               {sport.custom && (
-                <button className="sport-remove" onClick={() => removeSport(sport.id)} aria-label={`Удалить ${sport.label}`}>
+                <button
+                  className="sport-remove"
+                  onClick={() => removeSport(sport.id)}
+                  aria-label={t('training.settings.removeAria', undefined, { label: sportLabel(sport, lang) })}
+                >
                   <Trash2 size={15} />
                 </button>
               )}
@@ -176,7 +185,7 @@ export const TrainingPage = () => {
           <input
             type="text"
             value={name}
-            placeholder="Свой спорт, например плавание"
+            placeholder={t('training.settings.placeholder')}
             onChange={(event) => setName(event.target.value)}
             maxLength={24}
           />
@@ -188,29 +197,29 @@ export const TrainingPage = () => {
                 className={`sport-swatch${color === item ? ' is-on' : ''}`}
                 style={{ background: item }}
                 onClick={() => setColor(item)}
-                aria-label={`Цвет ${item}`}
+                aria-label={t('training.settings.colorAria', undefined, { color: item })}
                 aria-pressed={color === item}
               />
             ))}
           </div>
           <button className="add-button" type="submit" disabled={!name.trim()}>
-            <Plus size={16} /> Добавить
+            <Plus size={16} /> {t('common.add')}
           </button>
         </form>
       </section>
 
-      <section className="calendar" aria-label="Календарь тренировок">
+      <section className="calendar" aria-label={t('training.calendarAria')}>
         <div className="calendar-bar">
-          <button className="calendar-nav" onClick={() => shift(-1)} aria-label="Предыдущий месяц">
+          <button className="calendar-nav" onClick={() => shift(-1)} aria-label={t('training.calendarPrev')}>
             <ChevronLeft size={17} />
           </button>
-          <h2>{monthTitle(cursor.year, cursor.month)}</h2>
-          <button className="calendar-nav" onClick={() => shift(1)} aria-label="Следующий месяц">
+          <h2>{monthTitle(cursor.year, cursor.month, locale)}</h2>
+          <button className="calendar-nav" onClick={() => shift(1)} aria-label={t('training.calendarNext')}>
             <ChevronRight size={17} />
           </button>
         </div>
         <div className="calendar-week">
-          {weekDays.map((day) => (
+          {weekDayLabels(locale).map((day) => (
             <span key={day}>{day}</span>
           ))}
         </div>
@@ -228,7 +237,10 @@ export const TrainingPage = () => {
                 onClick={() => !future && setPicked(picked === cell.key ? '' : cell.key)}
                 disabled={future}
                 aria-pressed={kinds.length > 0}
-                aria-label={`${cell.day} — ${kinds.length ? kinds.map(sportLabel).join(', ') : 'тренировки не было'}`}
+                aria-label={t('training.calendarDayAria', undefined, {
+                  day: cell.day,
+                  kinds: kinds.length ? kinds.map(labelOf).join(', ') : t('training.calendarDayEmpty'),
+                })}
               >
                 <span>{cell.day}</span>
                 {kinds.length > 0 && (
@@ -244,7 +256,7 @@ export const TrainingPage = () => {
         </div>
         {picked && (
           <div className="calendar-picker">
-            <span className="calendar-picker-date">{formatShortDate(picked)}</span>
+            <span className="calendar-picker-date">{formatShortDate(picked, locale)}</span>
             <div className="calendar-picker-sports">
               {sports.map((sport) => {
                 const on = daySports(days, picked).includes(sport.id)
@@ -256,7 +268,7 @@ export const TrainingPage = () => {
                     onClick={() => toggleSport(picked, sport.id)}
                     aria-pressed={on}
                   >
-                    {sportIcon(sport.id)} {sport.label}
+                    {sportIcon(sport.id)} {sportLabel(sport, lang)}
                   </button>
                 )
               })}
@@ -264,17 +276,17 @@ export const TrainingPage = () => {
           </div>
         )}
         <p className="calendar-note">
-          <Flame size={14} /> Будущие дни не отмечаются: календарь помнит только то, что уже было.
+          <Flame size={14} /> {t('training.calendarNote')}
         </p>
       </section>
 
       <section className="copy-row">
         <div>
-          <div className="card-kicker">выгрузить</div>
-          <p>Скопировать весь список тренировок текстом — можно вставить в заметки или в файл.</p>
+          <div className="card-kicker">{t('training.copy.kicker')}</div>
+          <p>{t('training.copy.note')}</p>
         </div>
         <button className="copy-button" onClick={copyReport}>
-          <ClipboardCopy size={15} /> {copyFailed ? 'Не получилось' : copied ? 'Скопировано' : 'Копировать'}
+          <ClipboardCopy size={15} /> {copyFailed ? t('common.copyFailed') : copied ? t('common.copied') : t('common.copy')}
         </button>
       </section>
     </div>

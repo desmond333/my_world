@@ -32,7 +32,7 @@ export type BlockKey = 'animal' | 'today' | 'weather' | 'wish' | 'occasion' | 't
 export type Blocks = Record<BlockKey, boolean>
 
 export type AnimalScope = 'all' | 'home'
-export type ThemeMode = 'dark' | 'light'
+export type ThemeMode = 'system' | 'dark' | 'light'
 
 export type TrainingSport = {
   id: string
@@ -61,7 +61,12 @@ export type SearchCandidate = {
   score: string | null
 }
 
-export type CollectionItem = SearchCandidate & { addedAt: string }
+export type CollectionItem = SearchCandidate & {
+  addedAt: string
+  review?: string
+  enjoyment?: number
+  enjoymentReaction?: 'fire' | 'love' | 'good' | 'meh' | 'bad'
+}
 
 export type PeriodOption = { id: string; label: string; from: number | null; to: number | null }
 
@@ -76,11 +81,14 @@ export type CollectionDetails = {
 
 export type ProductivityKind = 'task' | 'goal' | 'dream'
 
+export type RepeatInterval = 'none' | 'daily' | 'weekdays' | 'weekly' | 'monthly'
+
 export type ProductivityItem = {
   id: string
   kind: ProductivityKind
   title: string
   date: string
+  repeat?: RepeatInterval
   done: boolean
   createdAt: string
   doneAt: string | null

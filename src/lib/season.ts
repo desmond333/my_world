@@ -6,13 +6,30 @@ export const getSeason = (date: Date, timezone: string) => {
   return 'winter'
 }
 
-export const seasonName = (season: string) =>
-  season === 'spring' ? 'весенняя' : season === 'summer' ? 'летняя' : season === 'autumn' ? 'осенняя' : 'зимняя'
+export const seasonName = (season: string, lang: 'ru' | 'en' = 'ru') => {
+  if (lang === 'en') {
+    return season === 'spring' ? 'spring' : season === 'summer' ? 'summer' : season === 'autumn' ? 'autumn' : 'winter'
+  }
+  return season === 'spring' ? 'весенняя' : season === 'summer' ? 'летняя' : season === 'autumn' ? 'осенняя' : 'зимняя'
+}
 
-export const seasonPhrase = (season: string) =>
-  ({
-    spring: 'нежная весна',
-    summer: 'прекрасное лето',
-    autumn: 'золотая осень',
-    winter: 'красивая зима',
-  })[season] ?? season
+export const seasonPhrase = (season: string, lang: 'ru' | 'en' = 'ru') => {
+  if (lang === 'en') {
+    return (
+      {
+        spring: 'gentle spring',
+        summer: 'beautiful summer',
+        autumn: 'golden autumn',
+        winter: 'crisp winter',
+      }[season] ?? season
+    )
+  }
+  return (
+    {
+      spring: 'нежная весна',
+      summer: 'прекрасное лето',
+      autumn: 'золотая осень',
+      winter: 'красивая зима',
+    }[season] ?? season
+  )
+}

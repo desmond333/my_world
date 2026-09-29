@@ -23,7 +23,8 @@ export const useDailyStore = create<DailyState>()(
       recent: [],
       cityId: 'moscow',
       scope: 'all',
-      themeMode: 'dark',
+      themeMode: 'system',
+      lang: 'ru',
       blocks: defaultBlocks,
       extraTab: false,
       chooseForToday: (date, scope) =>
@@ -47,6 +48,8 @@ export const useDailyStore = create<DailyState>()(
       setCity: (city) => set({ cityId: city.id }),
       setScope: (scope) => set({ scope }),
       setThemeMode: (themeMode) => set({ themeMode }),
+      setLang: (lang) => set({ lang }),
+      toggleLang: () => set((state) => ({ lang: (state.lang ?? 'ru') === 'ru' ? 'en' : 'ru' })),
       toggleBlock: (key) =>
         set((state) => {
           const blocks = { ...defaultBlocks, ...state.blocks }

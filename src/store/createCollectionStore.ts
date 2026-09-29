@@ -40,6 +40,10 @@ export const createCollectionStore = (storageKey: string) =>
               ? { wishlist: reorderItems(state.wishlist, orderedIds) }
               : { watched: reorderItems(state.watched, orderedIds) },
           ),
+        updateItem: (list, id, patch) =>
+          set((state) => ({
+            [list]: state[list].map((item) => (item.id === id ? { ...item, ...patch } : item)),
+          })),
       }),
       { name: storageKey, version: COLLECTION_VERSION },
     ),

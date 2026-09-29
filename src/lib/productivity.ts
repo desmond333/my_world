@@ -1,4 +1,4 @@
-import type { KindCounts, MonthPoints, ProductivityItem, ProductivityKind } from '../data'
+import type { KindCounts, MonthPoints, ProductivityItem, ProductivityKind, RepeatInterval } from '../data'
 import { formatShortDate, sortByNewestKey } from './date'
 import { plural } from './plural'
 
@@ -91,3 +91,94 @@ export const todayCount = (items: ProductivityItem[], today: string) => items.fi
 export const kindCount = (items: ProductivityItem[], kind: ProductivityKind) => itemsOf(items, kind).filter((item) => item.done).length
 
 export const kindPoints = (items: ProductivityItem[], kind: ProductivityKind) => countPoints(kind, kindCount(items, kind))
+
+export type RepeatOption = {
+  id: RepeatInterval
+  label: string
+  short: string
+  hint: string
+}
+
+export const REPEAT_OPTIONS: RepeatOption[] = [
+  { id: 'none', label: 'Однократно', short: '', hint: 'Один раз' },
+  { id: 'daily', label: 'Каждый день', short: 'каждый день', hint: 'Ежедневно' },
+  { id: 'weekdays', label: 'По будням', short: 'по будням', hint: 'Пн — Пт' },
+  { id: 'weekly', label: 'Раз в неделю', short: 'раз в неделю', hint: 'Каждые 7 дней' },
+  { id: 'monthly', label: 'Раз в месяц', short: 'раз в месяц', hint: 'Раз в месяц' },
+]
+
+export const getRepeatLabel = (repeat?: RepeatInterval, lang: 'ru' | 'en' = 'ru'): string => {
+  if (!repeat || repeat === 'none') return ''
+  if (lang === 'en') {
+    switch (repeat) {
+      case 'daily':
+        return 'daily'
+      case 'weekdays':
+        return 'weekdays'
+      case 'weekly':
+        return 'weekly'
+      case 'monthly':
+        return 'monthly'
+    }
+  }
+  const found = REPEAT_OPTIONS.find((option) => option.id === repeat)
+  return found?.short ?? ''
+}
+
+export const computeNextRepeatDate = (baseDate: string, repeat: RepeatInterval, referenceToday: string): string => {
+  if (!repeat || repeat === 'none') return baseDate
+  const anchor = baseDate && baseDate >= referenceToday ? baseDate : referenceToday
+  if (!anchor) return ''
+
+  if (repeat === 'daily') {
+    return shiftDate(anchor, 1)
+  }
+
+  if (repeat === 'weekdays') {
+    let next = shiftDate(anchor, 1)
+    const dayOfWeek = new Date(`${next}T12:00:00Z`).getUTCDay()
+    if (dayOfWeek === 6) {
+      next = shiftDate(next, 2)
+    } else if (dayOfWeek === 0) {
+      next = shiftDate(next, 1)
+    }
+    return next
+  }
+
+  if (repeat === 'weekly') {
+    return shiftDate(anchor, 7)
+  }
+
+  if (repeat === 'monthly') {
+    const [yStr, mStr, dStr] = anchor.split('-')
+    const y = Number(yStr)
+    const m = Number(mStr)
+    const d = Number(dStr)
+    if (!y || !m || !d) return shiftDate(anchor, 30)
+
+    let nextYear = y
+    let nextMonth = m + 1
+    if (nextMonth > 12) {
+      nextMonth = 1
+      nextYear += 1
+    }
+    const daysInNextMonth = new Date(Date.UTC(nextYear, nextMonth, 0)).getUTCDate()
+    const targetDay = Math.min(d, daysInNextMonth)
+
+    return `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`
+  }
+
+  return anchor
+}
+
+export type DayTagKind = 'today' | 'tomorrow' | 'yesterday' | 'overdue' | 'future' | 'undated'
+
+export const dayTagKind = (key: string, today: string): DayTagKind => {
+  if (!key) return 'undated'
+  const gap = Math.round((new Date(`${key}T12:00:00Z`).getTime() - new Date(`${today}T12:00:00Z`).getTime()) / 86400000)
+  if (gap === 0) return 'today'
+  if (gap === 1) return 'tomorrow'
+  if (gap === -1) return 'yesterday'
+  if (gap < -1) return 'overdue'
+  return 'future'
+}

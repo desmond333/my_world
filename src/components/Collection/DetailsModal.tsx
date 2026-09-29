@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { ExternalLink, Loader2, SearchX, X } from 'lucide-react'
 import type { CollectionDetails } from '../../data'
+import { useTranslation } from '../../lib/i18n'
 
 export type DetailsModalProps = {
   open: boolean
@@ -14,6 +15,7 @@ export type DetailsModalProps = {
 }
 
 export const DetailsModal = ({ open, title, imageUrl, loading, error, details, onClose }: DetailsModalProps) => {
+  const { t } = useTranslation()
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -38,10 +40,10 @@ export const DetailsModal = ({ open, title, imageUrl, loading, error, details, o
         className="details-modal"
         role="dialog"
         aria-modal="true"
-        aria-label={`Подробнее: ${title}`}
+        aria-label={t('collection.details.aria', undefined, { title })}
         onClick={(event) => event.stopPropagation()}
       >
-        <button ref={closeRef} type="button" className="modal-close" onClick={onClose} aria-label="Закрыть">
+        <button ref={closeRef} type="button" className="modal-close" onClick={onClose} aria-label={t('common.close')}>
           <X size={18} />
         </button>
 
@@ -50,7 +52,7 @@ export const DetailsModal = ({ open, title, imageUrl, loading, error, details, o
 
         {loading && (
           <p className="search-status details-status">
-            <Loader2 size={15} className="spin" /> Собираем детали…
+            <Loader2 size={15} className="spin" /> {t('collection.details.loading')}
           </p>
         )}
 
@@ -62,7 +64,9 @@ export const DetailsModal = ({ open, title, imageUrl, loading, error, details, o
 
         {!loading && !error && details && (
           <div className="details-body">
-            <div className="details-media">{imageUrl ? <img src={imageUrl} alt="" /> : <span className="poster-missing">нет</span>}</div>
+            <div className="details-media">
+              {imageUrl ? <img src={imageUrl} alt="" /> : <span className="poster-missing">{t('collection.details.noPoster')}</span>}
+            </div>
             <div className="details-content">
               {details.facts.length > 0 && (
                 <dl className="details-facts">

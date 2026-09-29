@@ -1,5 +1,6 @@
 import { BookOpen, Gamepad2, Clapperboard } from 'lucide-react'
 import type { SectionTab } from '../../../components/SectionTabs/SectionTabs'
+import { getTranslation, type Lang } from '../../../lib/i18n'
 
 export type MediaTabKey = 'movies' | 'books' | 'games'
 
@@ -20,9 +21,9 @@ export const isMediaTab = (value: string): value is MediaTabKey => mediaTabs.som
 
 export const DEFAULT_MEDIA_TAB: MediaTabKey = 'movies'
 
-export const toMediaTab = (tab: MediaTab): SectionTab => ({
+export const toMediaTab = (tab: MediaTab, lang: Lang): SectionTab => ({
   to: `/extra/media/${tab.key}`,
-  label: tab.label,
-  hint: tab.hint,
+  label: getTranslation(`media.tab.${tab.key}`, lang, tab.label),
+  hint: getTranslation(`media.tab.${tab.key}Hint`, lang, tab.hint),
   icon: tab.icon,
 })

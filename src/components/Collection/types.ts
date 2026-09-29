@@ -76,6 +76,7 @@ export type SortableItemRowProps = {
   lists: CollectionListOption[]
   onRemove: (list: CollectionListKey, id: string) => void
   onMove: (id: string, to: CollectionListKey) => void
+  onUpdateItem?: (list: CollectionListKey, id: string, patch: Partial<CollectionItem>) => void
   online?: CollectionLinkConfig
 }
 
@@ -95,4 +96,5 @@ export type CollectionBoardProps = {
   onRemove: (list: CollectionListKey, id: string) => void
   onMove: (id: string, to: CollectionListKey) => void
   onReorder: (orderedIds: string[]) => void
+  onUpdateItem?: (list: CollectionListKey, id: string, patch: Partial<CollectionItem>) => void
 }

@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Cake, Trash2, X } from 'lucide-react'
 import { findCity } from '../../data'
-import { birthdayInfo, displayBirthday } from '../../lib'
+import { birthdayInfo, birthdayStatusLabel, displayBirthday } from '../../lib'
+import { countText, useTranslation } from '../../lib/i18n'
 import { useBirthdayStore, useDailyStore } from '../../store'
 import type { BirthdayModalProps, SortedBirthday } from './types'
 import './BirthdayModal.css'
 
 export const BirthdayModal = ({ onClose }: BirthdayModalProps) => {
+  const { lang, t } = useTranslation()
   const ownBirthday = useBirthdayStore((state) => state.ownBirthday)
   const birthdays = useBirthdayStore((state) => state.birthdays)
   const setOwnBirthday = useBirthdayStore((state) => state.setOwnBirthday)
@@ -26,7 +28,7 @@ export const BirthdayModal = ({ onClose }: BirthdayModalProps) => {
 
   const saveBirthday = () => {
     if (!name.trim() || !date) {
-      setFormError('Укажи имя и дату рождения.')
+      setFormError(t('birthday.error'))
       return
     }
     addBirthday(name.trim(), date)
@@ -46,61 +48,63 @@ export const BirthdayModal = ({ onClose }: BirthdayModalProps) => {
       <section className="birthday-modal" role="dialog" aria-modal="true" aria-labelledby="birthday-title">
         <div className="settings-heading">
           <div>
-            <span className="card-kicker">память с заботой</span>
-            <h2 id="birthday-title">Дни рождения</h2>
+            <span className="card-kicker">{t('birthday.kicker')}</span>
+            <h2 id="birthday-title">{t('birthday.title')}</h2>
           </div>
-          <button className="close-button" onClick={onClose} aria-label="Закрыть">
+          <button className="close-button" onClick={onClose} aria-label={t('birthday.close')}>
             <X size={18} />
           </button>
         </div>
         <div className="own-birthday">
           <div>
             <span className="birthday-label">
-              <Cake size={14} /> твой день
+              <Cake size={14} /> {t('birthday.yourDay')}
             </span>
-            <strong>{ownBirthday ? displayBirthday(ownBirthday) : 'Дата ещё не добавлена'}</strong>
+            <strong>{ownBirthday ? displayBirthday(ownBirthday, lang) : t('birthday.notAdded')}</strong>
           </div>
           <label className="birthday-date-input">
-            <span>{ownBirthday ? 'Изменить' : 'Добавить'}</span>
+            <span>{ownBirthday ? t('birthday.change') : t('common.add')}</span>
             <input type="date" value={ownBirthday} onChange={(event) => setOwnBirthday(event.target.value)} />
           </label>
         </div>
         <div className="birthday-add">
           <label>
-            <span>Имя</span>
-            <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Например, Лена" />
+            <span>{t('birthday.name')}</span>
+            <input value={name} onChange={(event) => setName(event.target.value)} placeholder={t('birthday.namePlaceholder')} />
           </label>
           <label>
-            <span>Дата рождения</span>
+            <span>{t('birthday.date')}</span>
             <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
           </label>
           <button className="add-button" onClick={saveBirthday}>
-            Добавить
+            {t('common.add')}
           </button>
         </div>
         {formError && <p className="form-error">{formError}</p>}
         <div className="reminder-list">
           <div className="list-heading">
-            <span>не забыть поздравить</span>
-            <small>
-              {birthdays.length} {birthdays.length === 1 ? 'дата' : 'дат'}
-            </small>
+            <span>{t('birthday.listHeading')}</span>
+            <small>{countText('birthday.form', birthdays.length, lang)}</small>
           </div>
           {sortedBirthdays.length ? (
             sortedBirthdays.map(({ id, name: birthdayName, date: birthdayDate, status }) => (
               <div className="birthday-row" key={id}>
                 <div>
                   <strong>{birthdayName}</strong>
-                  <span>{status}</span>
+                  <span>{birthdayStatusLabel(status, lang)}</span>
                 </div>
-                <time>{displayBirthday(birthdayDate)}</time>
-                <button className="delete-button" onClick={() => removeBirthday(id)} aria-label={`Удалить ${birthdayName}`}>
+                <time>{displayBirthday(birthdayDate, lang)}</time>
+                <button
+                  className="delete-button"
+                  onClick={() => removeBirthday(id)}
+                  aria-label={t('birthday.deleteAria', undefined, { name: birthdayName })}
+                >
                   <Trash2 size={15} />
                 </button>
               </div>
             ))
           ) : (
-            <p className="empty-birthdays">Добавь дни рождения близких, чтобы приложение напомнило о них вовремя.</p>
+            <p className="empty-birthdays">{t('birthday.empty')}</p>
           )}
         </div>
       </section>

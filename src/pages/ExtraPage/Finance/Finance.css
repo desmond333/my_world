@@ -380,16 +380,18 @@
   .finance-rates,
   .finance-months,
   .finance-years {
-    padding: 24px 18px 26px;
+    padding: 20px 14px 22px;
   }
   .finance-balance-field input {
-    font-size: 30px;
+    font-size: 26px;
+    width: 100%;
+    min-width: 0;
   }
   .finance-month-split {
     grid-template-columns: 1fr;
   }
   .entry-form {
-    padding: 14px;
+    padding: 14px 12px;
   }
   .entry-actions {
     width: 100%;
@@ -461,8 +463,12 @@
   .finance-rate-inputs {
     grid-template-columns: minmax(0, 1fr);
   }
-  .finance-year-grid,
+  .finance-year-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
   .finance-month-grid {
+    grid-template-columns: minmax(0, 1fr);
     gap: 9px;
   }
   .entry-actions {

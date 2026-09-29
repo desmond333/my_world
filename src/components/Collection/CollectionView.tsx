@@ -19,6 +19,7 @@ export const CollectionView = ({ descriptor, store }: CollectionViewProps) => {
   const remove = useStore((state) => state.remove)
   const move = useStore((state) => state.move)
   const reorder = useStore((state) => state.reorder)
+  const updateItem = useStore((state) => state.updateItem)
 
   const [list, setList] = useState<CollectionListKey>('wishlist')
   const [query, setQuery] = useState('')
@@ -94,6 +95,7 @@ export const CollectionView = ({ descriptor, store }: CollectionViewProps) => {
         onRemove={remove}
         onMove={move}
         onReorder={handleReorder}
+        onUpdateItem={updateItem}
       />
     </>
   )
