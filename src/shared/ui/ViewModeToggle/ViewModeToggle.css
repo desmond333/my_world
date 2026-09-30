@@ -1,0 +1,129 @@
+.view-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+  user-select: none;
+}
+
+.view-mode-toggle.size-sm {
+  padding: 1px;
+}
+
+.view-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  cursor: pointer;
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.view-mode-toggle.size-sm .view-mode-btn {
+  font-size: 10px;
+  padding: 3px 7px;
+  gap: 4px;
+}
+
+.view-mode-btn:hover {
+  color: var(--fg);
+}
+
+.view-mode-btn.is-active {
+  background: var(--accent);
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.view-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+  font:
+    600 12px 'DM Mono',
+    monospace;
+  color: var(--fg);
+}
+
+.view-mode-switch.size-sm {
+  font-size: 11px;
+  gap: 7px;
+}
+
+.view-mode-switch-track {
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  transition: all 0.2s ease;
+}
+
+.view-mode-switch.size-sm .view-mode-switch-track {
+  width: 36px;
+  height: 20px;
+}
+
+.view-mode-switch.is-normal .view-mode-switch-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.view-mode-switch-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transform: translateX(0);
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.view-mode-switch.size-sm .view-mode-switch-thumb {
+  width: 14px;
+  height: 14px;
+}
+
+.view-mode-switch.is-normal .view-mode-switch-thumb {
+  transform: translateX(20px);
+  background: var(--ink);
+  color: var(--accent);
+}
+
+.view-mode-switch.size-sm.is-normal .view-mode-switch-thumb {
+  transform: translateX(16px);
+}
+
+.view-mode-switch-label {
+  letter-spacing: 0.03em;
+}

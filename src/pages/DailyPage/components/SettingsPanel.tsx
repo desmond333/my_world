@@ -1,5 +1,5 @@
 import { Cake, X } from 'lucide-react'
-import { blockOptions, cities, findCity } from '../../../data'
+import { blockOptions, cities, findCity, startPageOptions } from '../../../data'
 import { useTranslation } from '../../../lib/i18n'
 import type { SettingsPanelProps } from '../types'
 
@@ -10,12 +10,14 @@ export const SettingsPanel = ({
   blocks,
   season,
   extraTab,
+  startPage,
   onClose,
   onCity,
   onScope,
   onTheme,
   onToggleBlock,
   onToggleExtraTab,
+  onStartPage,
   onOpenBirthday,
 }: SettingsPanelProps) => {
   const { t } = useTranslation()
@@ -53,6 +55,17 @@ export const SettingsPanel = ({
             </label>
           </div>
         </fieldset>
+        <label className="setting-field">
+          <span>{t('settings.startPage')}</span>
+          <select value={startPage} onChange={(event) => onStartPage(event.target.value)}>
+            {startPageOptions.map((option) => (
+              <option key={option.path} value={option.path}>
+                {t(option.key, option.fallback)}
+              </option>
+            ))}
+          </select>
+          <small className="theme-season-note">{t('settings.startPageHint')}</small>
+        </label>
       </div>
       <fieldset className="setting-field blocks-field">
         <legend>{t('settings.blocks')}</legend>

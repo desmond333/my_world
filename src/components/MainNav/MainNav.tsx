@@ -9,13 +9,15 @@ export const MainNav = () => {
 
   return (
     <nav className="main-nav" aria-label={t('nav.today')}>
-      <NavLink to="/" end>
+      <NavLink to="/today" end>
         {t('nav.today')}
       </NavLink>
       <NavLink to="/favorites">
         {t('nav.favorites')}
         {favoritesCount > 0 && <span className="nav-badge">{favoritesCount}</span>}
       </NavLink>
+      <NavLink to="/notes">{t('nav.notes')}</NavLink>
+      <NavLink to="/shop">{t('nav.shop')}</NavLink>
       {extraTab && (
         <>
           <NavLink to="/extra">{t('nav.useful')}</NavLink>

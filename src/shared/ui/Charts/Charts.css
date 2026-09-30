@@ -33,22 +33,27 @@
 }
 
 .ui-barchart-svg {
-  width: 100%;
-  height: auto;
   display: block;
+  max-width: none;
+  overflow: visible;
 }
 
-@media (max-width: 600px) {
-  .ui-barchart-svg {
-    min-width: 320px;
-  }
+.ui-barchart-group.is-clickable {
+  cursor: pointer;
+}
+
+.ui-barchart-group:focus-visible {
+  outline: none;
+}
+
+.ui-barchart-group:focus-visible .ui-barchart-bar {
+  filter: brightness(1.2);
 }
 
 .ui-barchart-bar {
   transition:
     opacity 0.18s ease,
-    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform-origin: bottom;
+    filter 0.2s ease;
   cursor: pointer;
 }
 
@@ -76,6 +81,11 @@
 .ui-barchart-grid-line {
   stroke: rgba(255, 255, 255, 0.08);
   stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+.ui-barchart-slot {
+  pointer-events: all;
 }
 
 /* Progress Ring */
@@ -127,16 +137,23 @@
   flex-wrap: wrap;
 }
 
+.ui-donut-chart > .ui-progress-ring {
+  flex: 0 0 auto;
+}
+
 .ui-donut-slice {
   cursor: pointer;
   transition:
-    transform 0.18s ease,
-    opacity 0.18s ease;
-  transform-origin: 50% 50%;
+    opacity 0.18s ease,
+    stroke-width 0.18s ease;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
-.ui-donut-slice:hover {
-  transform: scale(1.04);
+.ui-donut-slice:hover,
+.ui-donut-slice:focus-visible {
+  transform: scale(1.03);
+  outline: none;
 }
 
 .ui-chart-legend {

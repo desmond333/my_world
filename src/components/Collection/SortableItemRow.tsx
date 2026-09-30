@@ -1,10 +1,15 @@
 import { memo, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ArrowLeftRight, Check, Flame, GripVertical, Heart, ImageOff, MessageSquare, Star, Trash2, Tv, X } from 'lucide-react'
+import { ArrowLeftRight, CalendarDays, Check, Flame, GripVertical, Heart, ImageOff, MessageSquare, Star, Trash2, Tv, X } from 'lucide-react'
 import { otherCollectionList, yearLabel } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
 import type { SortableItemRowProps } from './types'
+
+const todayIso = () => {
+  const now = new Date()
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10)
+}
 
 const ENJOYMENT_EMOJI: Record<number, string> = {
   10: '🔥',
@@ -32,8 +37,14 @@ const ENJOYMENT_FALLBACK: Record<number, string> = {
   1: 'Зря потратил время',
 }
 
+const formatFinished = (iso: string, locale: string) => {
+  const parsed = new Date(`${iso}T00:00:00`)
+  if (Number.isNaN(parsed.getTime())) return iso
+  return parsed.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUpdateItem, online }: SortableItemRowProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
   const target = otherCollectionList(list)
   const targetLabel = lists.find((option) => option.key === target)?.label ?? target
@@ -41,11 +52,13 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [feelings, setFeelings] = useState(item.review ?? '')
   const [rating, setRating] = useState<number>(item.enjoyment ?? 9)
+  const [finishedAt, setFinishedAt] = useState(item.finishedAt ?? todayIso())
 
   const handleSaveReview = () => {
     onUpdateItem?.(list, item.id, {
       review: feelings.trim() || undefined,
       enjoyment: rating,
+      finishedAt: finishedAt || undefined,
     })
     setIsReviewOpen(false)
   }
@@ -88,8 +101,13 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
             {item.tags.length ? ` · ${item.tags.join(', ')}` : ''}
           </p>
 
-          {list === 'watched' && (item.enjoyment || item.review) && (
+          {list === 'watched' && (item.finishedAt || item.enjoyment || item.review) && (
             <div className="row-review-badge">
+              {item.finishedAt && (
+                <span className="finished-pill">
+                  <CalendarDays size={11} /> {formatFinished(item.finishedAt, locale)}
+                </span>
+              )}
               {item.enjoyment && (
                 <span className="enjoyment-pill">
                   {ENJOYMENT_EMOJI[item.enjoyment] ?? '⭐'} {item.enjoyment}/10{' '}
@@ -171,6 +189,36 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="review-date-row">
+            <label htmlFor={`finished-at-${item.id}`} className="review-date-label">
+              <CalendarDays size={14} /> {t('collection.row.finishedLabel')}
+            </label>
+            <div className="review-date-controls">
+              <input
+                id={`finished-at-${item.id}`}
+                type="date"
+                className="review-date-input"
+                value={finishedAt}
+                max={todayIso()}
+                onChange={(e) => setFinishedAt(e.target.value)}
+              />
+              {item.finishedAt && (
+                <button
+                  type="button"
+                  className="review-date-clear"
+                  onClick={() => {
+                    setFinishedAt('')
+                    onUpdateItem?.(list, item.id, { finishedAt: undefined })
+                  }}
+                  title={t('collection.row.finishedClear')}
+                >
+                  {t('collection.row.finishedClear')}
+                </button>
+              )}
+            </div>
+            <small className="review-date-hint">{t('collection.row.finishedHint')}</small>
           </div>
 
           <div className="review-text-row">

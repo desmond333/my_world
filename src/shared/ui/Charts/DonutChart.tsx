@@ -57,34 +57,40 @@ export const DonutChart = ({
   return (
     <div className={`ui-donut-chart ${className ?? ''}`.trim()}>
       <div className="ui-progress-ring" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Donut Chart" style={{ overflow: 'visible' }}>
-          {computedSegments.map((segment) => {
-            const isHovered = hoveredId === segment.id
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={centerLabel ?? 'Donut chart'}>
+          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--line)" strokeWidth={strokeWidth} opacity={0.4} />
+          <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+            {computedSegments.map((segment) => {
+              const isHovered = hoveredId === segment.id
 
-            return (
-              <circle
-                key={segment.id}
-                className="ui-donut-slice"
-                cx={size / 2}
-                cy={size / 2}
-                r={radius}
-                fill="transparent"
-                stroke={segment.color}
-                strokeWidth={isHovered ? strokeWidth + 3 : strokeWidth}
-                strokeDasharray={segment.strokeDasharray}
-                strokeDashoffset={segment.strokeDashoffset}
-                transform={`rotate(-90 ${size / 2} ${size / 2})`}
-                onMouseEnter={() => setHoveredId(segment.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                onClick={() => onSegmentClick?.(segment)}
-                style={{
-                  opacity: hoveredId !== null && !isHovered ? 0.5 : 1,
-                }}
-              >
-                <title>{`${segment.label}: ${segment.value} (${Math.round(segment.percent * 100)}%)`}</title>
-              </circle>
-            )
-          })}
+              return (
+                <circle
+                  key={segment.id}
+                  className="ui-donut-slice"
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={radius}
+                  fill="transparent"
+                  stroke={segment.color}
+                  strokeDasharray={segment.strokeDasharray}
+                  strokeDashoffset={segment.strokeDashoffset}
+                  onMouseEnter={() => setHoveredId(segment.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  onFocus={() => setHoveredId(segment.id)}
+                  onBlur={() => setHoveredId(null)}
+                  onClick={() => onSegmentClick?.(segment)}
+                  tabIndex={0}
+                  role={onSegmentClick ? 'button' : undefined}
+                  style={{
+                    strokeWidth: isHovered ? strokeWidth + 4 : strokeWidth,
+                    opacity: hoveredId !== null && !isHovered ? 0.45 : 1,
+                  }}
+                >
+                  <title>{`${segment.label}: ${segment.value} (${Math.round(segment.percent * 100)}%)`}</title>
+                </circle>
+              )
+            })}
+          </g>
         </svg>
 
         <div className="ui-progress-ring-content">

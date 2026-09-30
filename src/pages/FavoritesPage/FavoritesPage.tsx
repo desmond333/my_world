@@ -72,7 +72,7 @@ export const FavoritesPage = () => {
           <Star size={30} strokeWidth={1.4} />
           <h2>{t('favorites.empty')}</h2>
           <p>{t('favorites.emptyNote')}</p>
-          <Link className="add-button" to="/">
+          <Link className="add-button" to="/today">
             {t('favorites.goToAnimal')}
           </Link>
         </section>

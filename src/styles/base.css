@@ -244,3 +244,27 @@ input:focus-visible {
   --light-panel: #e4eaea;
   --ink: #18232f;
 }
+
+:root[data-theme-override='cyberpunk'] {
+  --bg: #090a14;
+  --fg: #e2f1fd;
+  --muted: #8292b8;
+  --line: #222b48;
+  --accent: #00f2fe;
+  --coral: #ff007f;
+  --panel: #13172c;
+  --light-panel: #1e2646;
+  --ink: #05060b;
+}
+
+:root[data-theme-override='midnight_gold'] {
+  --bg: #0d0c0a;
+  --fg: #fff9ea;
+  --muted: #a69c89;
+  --line: #383122;
+  --accent: #ffd700;
+  --coral: #e5a93c;
+  --panel: #1b1712;
+  --light-panel: #28231b;
+  --ink: #070705;
+}

@@ -552,6 +552,81 @@
   margin-top: 5px;
   flex-wrap: wrap;
 }
+.finished-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  border-radius: 999px;
+  background: rgba(125, 211, 252, 0.12);
+  color: #7dd3fc;
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  white-space: nowrap;
+}
+.review-date-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.review-date-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.review-date-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.review-date-input {
+  flex: 1 1 170px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--fg);
+  font:
+    500 13px 'DM Mono',
+    monospace;
+  color-scheme: dark;
+}
+.review-date-input:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+:root[data-theme='light'] .review-date-input {
+  color-scheme: light;
+}
+.review-date-clear {
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  transition: color 0.15s ease;
+}
+.review-date-clear:hover {
+  color: var(--coral);
+}
+.review-date-hint {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0.8;
+}
 .enjoyment-pill {
   display: inline-flex;
   align-items: center;

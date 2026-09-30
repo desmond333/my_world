@@ -47,9 +47,32 @@ export const countPoints = (kind: ProductivityKind, done: number) => POINTS[kind
 
 export const itemsOf = (items: ProductivityItem[], kind: ProductivityKind) => items.filter((item) => item.kind === kind)
 
-export const orderItems = (items: ProductivityItem[]) => [...items.filter((item) => !item.done), ...items.filter((item) => item.done)]
+export const PRIORITY_ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 }
+
+export const orderItems = (items: ProductivityItem[]) => {
+  const open = [...items.filter((item) => !item.done)].sort(
+    (a, b) => (PRIORITY_ORDER[a.priority ?? 'medium'] ?? 1) - (PRIORITY_ORDER[b.priority ?? 'medium'] ?? 1),
+  )
+  return [...open, ...items.filter((item) => item.done)]
+}
+
+export type KanbanColumn = { key: 'today' | 'scheduled' | 'undated'; label: string; items: ProductivityItem[] }
+
+export const kanbanGroups = (items: ProductivityItem[], today: string, lang: 'ru' | 'en' = 'ru'): KanbanColumn[] => {
+  const open = orderItems(items.filter((item) => !item.done))
+  const labels =
+    lang === 'en'
+      ? { today: 'Today', scheduled: 'Scheduled', undated: 'No date' }
+      : { today: 'Сегодня', scheduled: 'Запланировано', undated: 'Без даты' }
+  return [
+    { key: 'today', label: labels.today, items: open.filter((item) => item.date === today) },
+    { key: 'scheduled', label: labels.scheduled, items: open.filter((item) => item.date && item.date !== today) },
+    { key: 'undated', label: labels.undated, items: open.filter((item) => !item.date) },
+  ]
+}
 
 export const DAY_FORMS: [string, string, string] = ['день', 'дня', 'дней']
+export const DAY_FORMS_EN: [string, string, string] = ['day', 'days', 'days']
 
 export const shiftDate = (key: string, days: number) => {
   if (!key) return ''
@@ -58,18 +81,29 @@ export const shiftDate = (key: string, days: number) => {
   return date.toISOString().slice(0, 10)
 }
 
-export const dayLabel = (key: string, today: string) => {
+export const dayLabel = (key: string, today: string, lang: 'ru' | 'en' = 'ru') => {
   if (!key) return ''
   const gap = Math.round((new Date(`${key}T12:00:00Z`).getTime() - new Date(`${today}T12:00:00Z`).getTime()) / 86400000)
+  const locale = lang === 'en' ? 'en-US' : 'ru-RU'
+  if (lang === 'en') {
+    if (gap === 0) return 'today'
+    if (gap === 1) return 'tomorrow'
+    if (gap === -1) return 'yesterday'
+    if (gap < 0 && gap > -30) return `${-gap} days ago`
+    return formatShortDate(key, locale)
+  }
   if (gap === 0) return 'сегодня'
   if (gap === 1) return 'завтра'
   if (gap === -1) return 'вчера'
   const overdue = -gap
   if (overdue > 0 && overdue < 30) return `${overdue} ${plural(overdue, DAY_FORMS)} назад`
-  return formatShortDate(key)
+  return formatShortDate(key, locale)
 }
 
 export const UNTITLED_DAY = 'без даты'
+export const UNTITLED_DAY_EN = 'no date'
+
+export const undatedLabel = (lang: 'ru' | 'en' = 'ru') => (lang === 'en' ? UNTITLED_DAY_EN : UNTITLED_DAY)
 
 export type DayGroup = {
   key: string
@@ -77,12 +111,16 @@ export type DayGroup = {
   items: ProductivityItem[]
 }
 
-export const groupByDay = (items: ProductivityItem[], today: string) => {
+export const groupByDay = (items: ProductivityItem[], today: string, lang: 'ru' | 'en' = 'ru') => {
   const dated = items.filter((item) => item.date)
   const undated = items.filter((item) => !item.date)
   const keys = [...new Set(dated.map((item) => item.date))].sort()
-  const groups: DayGroup[] = keys.map((key) => ({ key, label: dayLabel(key, today), items: dated.filter((item) => item.date === key) }))
-  if (undated.length > 0) groups.push({ key: '', label: UNTITLED_DAY, items: undated })
+  const groups: DayGroup[] = keys.map((key) => ({
+    key,
+    label: dayLabel(key, today, lang),
+    items: dated.filter((item) => item.date === key),
+  }))
+  if (undated.length > 0) groups.push({ key: '', label: undatedLabel(lang), items: undated })
   return groups
 }
 
@@ -112,13 +150,13 @@ export const getRepeatLabel = (repeat?: RepeatInterval, lang: 'ru' | 'en' = 'ru'
   if (lang === 'en') {
     switch (repeat) {
       case 'daily':
-        return 'daily'
+        return 'every day'
       case 'weekdays':
         return 'weekdays'
       case 'weekly':
-        return 'weekly'
+        return 'every week'
       case 'monthly':
-        return 'monthly'
+        return 'every month'
     }
   }
   const found = REPEAT_OPTIONS.find((option) => option.id === repeat)

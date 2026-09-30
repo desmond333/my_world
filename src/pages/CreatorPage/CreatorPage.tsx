@@ -32,7 +32,7 @@ export const CreatorPage = () => {
         <p className="creator-note-line">{t('creator.thanks')}</p>
       </section>
 
-      <Link className="creator-back" to="/">
+      <Link className="creator-back" to="/today">
         <ArrowLeft size={16} /> {t('creator.back')}
       </Link>
     </main>

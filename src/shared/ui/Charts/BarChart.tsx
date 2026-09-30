@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import './Charts.css'
 
 export type BarChartItem = {
@@ -21,6 +21,31 @@ export type BarChartProps = {
   onBarClick?: (item: BarChartItem, index: number) => void
 }
 
+const PAD_X = 10
+const PAD_TOP = 18
+const LABEL_BAND = 24
+const MIN_SLOT = 30
+const MAX_BAR = 44
+const GRID_STEPS = 3
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+
+const NICE_STEPS = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]
+
+const niceMax = (value: number) => {
+  if (!Number.isFinite(value) || value <= 0) return 1
+  const exp = Math.floor(Math.log10(value))
+  const base = 10 ** exp
+  const scaled = value / base
+  const step = NICE_STEPS.find((candidate) => scaled <= candidate + 1e-9) ?? 10
+  return step * base
+}
+
+const fitLabel = (text: string, slot: number) => {
+  const maxChars = Math.max(1, Math.floor((slot - 4) / 6.4))
+  return text.length > maxChars ? `${text.slice(0, Math.max(1, maxChars - 1))}…` : text
+}
+
 export const BarChart = ({
   data,
   height = 160,
@@ -32,21 +57,37 @@ export const BarChart = ({
   showValues = true,
   onBarClick,
 }: BarChartProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [measuredWidth, setMeasuredWidth] = useState(0)
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const update = () => setMeasuredWidth(el.clientWidth)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   if (!data || data.length === 0) {
     return null
   }
 
-  const values = data.map((d) => d.value)
-  const maxValue = Math.max(...values, 0.0001)
+  const plotHeight = Math.max(height - PAD_TOP - LABEL_BAND, 24)
+  const minWidth = Math.max(data.length * MIN_SLOT, 200)
+  const width = Math.max(measuredWidth || minWidth, minWidth)
 
-  const chartHeight = height - 40
-  const paddingX = 24
-  const chartWidth = Math.max(data.length * 52, 300)
-  const availableWidth = chartWidth - paddingX * 2
-  const barWidth = Math.max(Math.min(availableWidth / data.length - 8, 36), 14)
-  const gap = data.length > 1 ? Math.max((availableWidth - barWidth * data.length) / (data.length - 1), 4) : 0
+  const slot = (width - PAD_X * 2) / data.length
+  const barWidth = clamp(slot - 10, 6, MAX_BAR)
+  const maxValue = niceMax(Math.max(...data.map((item) => Math.abs(item.value)), 0))
+  const valuesFit = showValues && slot >= 34
+
+  const ticks = Array.from({ length: GRID_STEPS + 1 }, (_, index) => {
+    const ratio = index / GRID_STEPS
+    return { ratio, y: PAD_TOP + plotHeight - ratio * plotHeight, value: maxValue * ratio }
+  })
 
   return (
     <div className={`ui-chart-container ${className ?? ''}`.trim()}>
@@ -57,33 +98,56 @@ export const BarChart = ({
         </div>
       )}
 
-      <div className="ui-barchart-scroll">
+      <div className="ui-barchart-scroll" ref={scrollRef}>
         <svg
           className="ui-barchart-svg"
-          viewBox={`0 0 ${chartWidth} ${height}`}
-          preserveAspectRatio="xMidYMid meet"
+          width={width}
+          height={height}
+          viewBox={`0 0 ${width} ${height}`}
           role="img"
-          aria-label="Bar chart"
+          aria-label={typeof title === 'string' ? title : 'Bar chart'}
         >
-          <line x1={paddingX / 2} y1={height - 24} x2={chartWidth - paddingX / 2} y2={height - 24} stroke="var(--line)" strokeWidth="1" />
+          {ticks.map((tick) => (
+            <line key={tick.ratio} className="ui-barchart-grid-line" x1={PAD_X} x2={width - PAD_X} y1={tick.y} y2={tick.y} />
+          ))}
 
           {data.map((item, index) => {
-            const barHeight = Math.max((item.value / maxValue) * (chartHeight - 16), item.value > 0 ? 4 : 0)
-            const x = data.length === 1 ? (chartWidth - barWidth) / 2 : paddingX + index * (barWidth + gap)
-            const y = height - 24 - barHeight
+            const ratio = maxValue > 0 ? Math.min(Math.abs(item.value) / maxValue, 1) : 0
+            const barHeight = item.value === 0 ? 0 : Math.max(ratio * plotHeight, 3)
+            const x = PAD_X + index * slot + (slot - barWidth) / 2
+            const y = PAD_TOP + plotHeight - barHeight
             const isHovered = hoveredIdx === index
             const fill = item.color || barColor
 
             return (
               <g
                 key={item.id ?? `${item.label}-${index}`}
-                className="ui-barchart-group"
+                className={`ui-barchart-group${onBarClick ? ' is-clickable' : ''}`}
                 onMouseEnter={() => setHoveredIdx(index)}
                 onMouseLeave={() => setHoveredIdx(null)}
+                onFocus={() => setHoveredIdx(index)}
+                onBlur={() => setHoveredIdx(null)}
                 onClick={() => onBarClick?.(item, index)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    onBarClick?.(item, index)
+                  }
+                }}
+                tabIndex={onBarClick ? 0 : undefined}
+                role={onBarClick ? 'button' : undefined}
               >
-                {showValues && item.value > 0 && (
-                  <text x={x + barWidth / 2} y={y - 6} className="ui-barchart-value" style={{ opacity: isHovered ? 1 : 0.8 }}>
+                <rect
+                  className="ui-barchart-slot"
+                  x={PAD_X + index * slot}
+                  y={PAD_TOP}
+                  width={slot}
+                  height={plotHeight + LABEL_BAND}
+                  fill="transparent"
+                />
+
+                {valuesFit && item.value > 0 && (
+                  <text x={x + barWidth / 2} y={y - 6} className="ui-barchart-value" style={{ opacity: isHovered ? 1 : 0.75 }}>
                     {formatValue(item.value)}
                   </text>
                 )}
@@ -96,15 +160,13 @@ export const BarChart = ({
                   fill={fill}
                   rx={2}
                   className="ui-barchart-bar"
-                  style={{
-                    opacity: hoveredIdx !== null && !isHovered ? 0.45 : 1,
-                  }}
+                  style={{ opacity: hoveredIdx !== null && !isHovered ? 0.4 : 1 }}
                 >
                   <title>{`${item.label}: ${formatValue(item.value)}${item.subLabel ? ` (${item.subLabel})` : ''}`}</title>
                 </rect>
 
-                <text x={x + barWidth / 2} y={height - 18} className="ui-barchart-label">
-                  {item.label}
+                <text x={PAD_X + index * slot + slot / 2} y={PAD_TOP + plotHeight + 8} className="ui-barchart-label">
+                  {fitLabel(item.label, slot)}
                 </text>
               </g>
             )

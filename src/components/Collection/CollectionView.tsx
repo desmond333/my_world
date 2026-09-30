@@ -3,7 +3,8 @@ import { anyPeriod, findPeriod, periodOptions } from '../../data'
 import type { CollectionListKey, SearchCandidate } from '../../data'
 import { useRemoteSearch } from '../../hooks'
 import { ANY_TAG, filterItems, tagOptions, toCollectionItem } from '../../lib'
-import type { CollectionStore } from '../../store'
+import { ViewModeToggle } from '../../shared/ui'
+import { type CollectionStore, usePageViewMode } from '../../store'
 import { CollectionBoard } from './CollectionBoard'
 import { SearchPanel } from './SearchPanel'
 import type { CollectionDescriptor, ItemLocation } from './types'
@@ -66,8 +67,14 @@ export const CollectionView = ({ descriptor, store }: CollectionViewProps) => {
     [list, reorder],
   )
 
+  const { isNormal, mode, setMode } = usePageViewMode('media')
+
   return (
     <>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '14px' }}>
+        <ViewModeToggle mode={mode} onChange={setMode} size="sm" />
+      </div>
+
       <SearchPanel
         query={query}
         results={search.items}
@@ -84,9 +91,9 @@ export const CollectionView = ({ descriptor, store }: CollectionViewProps) => {
         items={visible}
         counts={counts}
         lists={descriptor.lists}
-        tags={tags}
+        tags={isNormal ? tags : []}
         tag={tag}
-        periods={periodOptions}
+        periods={isNormal ? periodOptions : []}
         periodId={periodId}
         online={descriptor.search.online}
         onList={switchList}

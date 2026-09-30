@@ -13,7 +13,7 @@ export const AppTopbar = ({ children }: AppTopbarProps) => {
   return (
     <header className="topbar">
       <div className="topbar-main">
-        <Link className="brand" to="/" aria-label={t('brand.title')}>
+        <Link className="brand" to="/today" aria-label={t('brand.title')}>
           <span className="brand-mark">
             <Heart size={17} fill="currentColor" />
           </span>

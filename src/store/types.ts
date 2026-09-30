@@ -11,7 +11,9 @@ export type DailyState = {
   lang: 'ru' | 'en'
   blocks: Blocks
   extraTab: boolean
+  startPage: string
   chooseForToday: (date: string, scope: AnimalScope) => void
+  setStartPage: (path: string) => void
   setCity: (city: City) => void
   setScope: (scope: AnimalScope) => void
   setThemeMode: (mode: ThemeMode) => void

@@ -27,6 +27,7 @@ export const useDailyStore = create<DailyState>()(
       lang: 'ru',
       blocks: defaultBlocks,
       extraTab: false,
+      startPage: '/today',
       chooseForToday: (date, scope) =>
         set((state) => {
           if (state.date === date && state.scope === scope) return state
@@ -56,6 +57,7 @@ export const useDailyStore = create<DailyState>()(
           return { blocks: { ...blocks, [key]: !blocks[key] } }
         }),
       toggleExtraTab: () => set((state) => ({ extraTab: !state.extraTab })),
+      setStartPage: (startPage) => set({ startPage }),
     }),
     { name: 'animal-of-the-day' },
   ),

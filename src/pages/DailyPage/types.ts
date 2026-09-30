@@ -17,12 +17,14 @@ export type SettingsPanelProps = {
   blocks: Blocks
   season: string
   extraTab: boolean
+  startPage: string
   onClose: () => void
   onCity: (city: City) => void
   onScope: (scope: AnimalScope) => void
   onTheme: (mode: ThemeMode) => void
   onToggleBlock: (key: BlockKey) => void
   onToggleExtraTab: () => void
+  onStartPage: (path: string) => void
   onOpenBirthday: () => void
 }
 

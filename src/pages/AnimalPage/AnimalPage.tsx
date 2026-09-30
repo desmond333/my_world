@@ -24,7 +24,7 @@ export const AnimalPage = () => {
         <section className="favorites-empty">
           <h2>{t('animalPage.notFound')}</h2>
           <p>{t('animalPage.notFoundNote')}</p>
-          <Link className="add-button" to="/">
+          <Link className="add-button" to="/today">
             {t('common.home')}
           </Link>
         </section>

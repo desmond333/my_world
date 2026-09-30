@@ -5,7 +5,7 @@ import { getSeason, getThemedOccasion, getWish, hasTraining, seasonName, STRENGT
 import { useTranslation } from '../../lib/i18n'
 import { fetchHoliday } from '../../services/holidays'
 import { fetchWeather } from '../../services/weather'
-import { getDateForTimezone, useAnimalsStore, useDailyStore, useFavoritesStore, useTrainingStore } from '../../store'
+import { getDateForTimezone, useAnimalsStore, useDailyStore, useFavoritesStore, usePageViewMode, useTrainingStore } from '../../store'
 import { BirthdayModal } from '../../components/BirthdayModal/BirthdayModal'
 import {
   BreedCard,
@@ -37,6 +37,8 @@ export const DailyPage = () => {
   const setThemeMode = useDailyStore((state) => state.setThemeMode)
   const toggleBlock = useDailyStore((state) => state.toggleBlock)
   const toggleExtraTab = useDailyStore((state) => state.toggleExtraTab)
+  const startPage = useDailyStore((state) => state.startPage ?? '/today')
+  const setStartPage = useDailyStore((state) => state.setStartPage)
 
   const animals = useAnimalsStore((state) => state.animals)
   const favorites = useFavoritesStore((state) => state.favorites)
@@ -47,6 +49,7 @@ export const DailyPage = () => {
   const { copied, copyFailed, copy } = useCopyFeedback()
 
   const now = useNow(MINUTE_MS)
+  const { isNormal } = usePageViewMode('today')
   const [forecastOpen, setForecastOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [birthdayOpen, setBirthdayOpen] = useState(false)
@@ -69,7 +72,7 @@ export const DailyPage = () => {
   const season = seasonName(currentSeason, lang)
   const trainedToday = hasTraining(trainingDays, currentDate)
   const forecast = weather.data?.forecast ?? []
-  const infoCards = [show('animal'), show('today'), show('weather')].filter(Boolean).length
+  const infoCards = [isNormal && show('animal'), show('today'), show('weather')].filter(Boolean).length
 
   useEffect(() => {
     chooseForToday(currentDate, scope)
@@ -101,6 +104,8 @@ export const DailyPage = () => {
           onTheme={setThemeMode}
           onToggleBlock={toggleBlock}
           onToggleExtraTab={toggleExtraTab}
+          startPage={startPage}
+          onStartPage={setStartPage}
           onOpenBirthday={() => setBirthdayOpen(true)}
         />
       )}
@@ -109,7 +114,7 @@ export const DailyPage = () => {
 
       {infoCards > 0 && (
         <section className={`info-grid cards-${infoCards}`} aria-label={t('daily.infoAria')}>
-          {show('animal') && animal && <BreedCard animal={animal} />}
+          {isNormal && show('animal') && animal && <BreedCard animal={animal} />}
           {show('today') && <TodayCard timezone={city.timezone} zone={city.zone} season={currentSeason} />}
           {show('weather') && (
             <WeatherCard
@@ -124,9 +129,9 @@ export const DailyPage = () => {
         </section>
       )}
 
-      {forecastOpen && show('weather') && forecast.length > 0 && <ForecastStrip forecast={forecast} />}
+      {isNormal && forecastOpen && show('weather') && forecast.length > 0 && <ForecastStrip forecast={forecast} />}
 
-      {show('training') && (
+      {isNormal && show('training') && (
         <TrainingCard
           trainedToday={trainedToday}
           copied={copied}
@@ -138,7 +143,7 @@ export const DailyPage = () => {
 
       {show('wish') && <WishCard wish={wish} />}
 
-      {show('occasion') && (
+      {isNormal && show('occasion') && (
         <OccasionCard holiday={holiday.data ?? null} loading={holiday.loading} occasion={occasion} cityName={city.name} />
       )}
 

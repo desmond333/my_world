@@ -77,6 +77,81 @@
   letter-spacing: 0.02em;
 }
 
+.shop-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  padding: 0 10px;
+  min-height: 34px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.shop-link-btn:hover {
+  background: var(--line);
+  color: #f4b849;
+  border-color: rgba(244, 184, 73, 0.5);
+  transform: translateY(-1px);
+}
+
+.shop-link-btn.is-active {
+  background: linear-gradient(135deg, rgba(244, 184, 73, 0.25) 0%, rgba(244, 184, 73, 0.1) 100%);
+  border-color: rgba(244, 184, 73, 0.8);
+  color: #f4b849;
+  box-shadow: 0 2px 8px rgba(244, 184, 73, 0.2);
+}
+
+.shop-link-icon {
+  color: #f4b849;
+  display: grid;
+  place-items: center;
+}
+
+.shop-link-coins {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.settings-link-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.18s ease;
+}
+
+.settings-link-btn:hover {
+  color: var(--fg);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.settings-link-btn.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
 @media (max-width: 760px) {
   .topbar-controls {
     gap: 6px;
@@ -94,5 +169,15 @@
 
   .theme-cycle-label {
     display: none;
+  }
+
+  .shop-link-btn {
+    min-height: 32px;
+    padding: 0 8px;
+  }
+
+  .settings-link-btn {
+    width: 32px;
+    height: 32px;
   }
 }

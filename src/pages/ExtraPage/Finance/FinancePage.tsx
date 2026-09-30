@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChartNoAxesColumn, RefreshCw, RotateCcw, Wallet } from 'lucide-react'
 import type { RatesSource } from '../../../store'
-import { BarChart } from '../../../shared/ui'
+import { BarChart, ViewModeToggle } from '../../../shared/ui'
 import {
   CURRENCIES,
   CURRENCY_MARKS,
@@ -17,7 +17,7 @@ import {
 } from '../../../lib'
 import { fetchRates } from '../../../services'
 import { countText, useTranslation } from '../../../lib/i18n'
-import { useFinanceStore } from '../../../store'
+import { useFinanceStore, usePageViewMode } from '../../../store'
 import { MonthCard } from './MonthCard'
 import './Finance.css'
 
@@ -111,14 +111,21 @@ export const FinancePage = () => {
       })
   }, [visible, entries, currency, rates, locale, lang, current])
 
+  const { isNormal, mode, setMode } = usePageViewMode('finance')
+
   return (
     <>
       <section className="extra-head">
-        <p className="eyebrow">
-          <Wallet size={15} /> {t('finance.kicker')}
-        </p>
-        <h1>{t('finance.title')}</h1>
-        <p className="intro">{t('finance.intro')}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+          <div>
+            <p className="eyebrow">
+              <Wallet size={15} /> {t('finance.kicker')}
+            </p>
+            <h1>{t('finance.title')}</h1>
+            <p className="intro">{t('finance.intro')}</p>
+          </div>
+          <ViewModeToggle mode={mode} onChange={setMode} size="sm" />
+        </div>
       </section>
 
       <section className="finance-panel">
@@ -182,99 +189,103 @@ export const FinancePage = () => {
           </div>
         </div>
 
-        <div className="finance-rates">
-          <div className="finance-rates-head">
-            <h2>{t('finance.rates.title')}</h2>
-            <div className="finance-rates-actions">
-              <button type="button" className="mini-button" onClick={load} disabled={loading}>
-                <RefreshCw size={14} className={loading ? 'spin' : undefined} />{' '}
-                {loading ? t('finance.rates.refreshing') : t('finance.rates.refresh')}
-              </button>
-              <button
-                type="button"
-                className="mini-button mini-button--ghost"
-                onClick={() => {
-                  manual.current = true
-                  resetRates()
-                }}
-              >
-                <RotateCcw size={14} /> {t('finance.rates.reset')}
-              </button>
-            </div>
-          </div>
-          <p className={`finance-rates-state${ratesError ? ' is-error' : ''}`}>
-            {ratesError ||
-              (ratesUpdatedAt
-                ? t('finance.rates.updated', undefined, {
-                    source: t(RATES_SOURCE_LABELS[ratesSource]),
-                    stamp: formatStamp(ratesUpdatedAt, locale),
-                  })
-                : t('finance.rates.empty'))}
-          </p>
-          <div className="finance-rate-inputs">
-            {CURRENCIES.map((item) => (
-              <label className="finance-rate-row" key={item}>
-                <span>1 {CURRENCY_MARKS[item]} =</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={String(rates[item]).replace('.', ',')}
-                  onChange={(event) => {
+        {isNormal && (
+          <div className="finance-rates">
+            <div className="finance-rates-head">
+              <h2>{t('finance.rates.title')}</h2>
+              <div className="finance-rates-actions">
+                <button type="button" className="mini-button" onClick={load} disabled={loading}>
+                  <RefreshCw size={14} className={loading ? 'spin' : undefined} />{' '}
+                  {loading ? t('finance.rates.refreshing') : t('finance.rates.refresh')}
+                </button>
+                <button
+                  type="button"
+                  className="mini-button mini-button--ghost"
+                  onClick={() => {
                     manual.current = true
-                    const parsed = Number(event.target.value.replace(',', '.').replace(/\s/g, ''))
-                    if (Number.isFinite(parsed) && parsed > 0) setRate(item, parsed)
+                    resetRates()
                   }}
-                />
-                <span className="finance-rate-unit">₽</span>
-              </label>
-            ))}
-          </div>
-          <ul className="finance-rate-list">
-            {ratesTable.slice(0, 6).map((row) => (
-              <li key={`${row.from}-${row.to}`}>
-                1 {CURRENCY_MARKS[row.from]} = {row.value}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="finance-years">
-        <div className="finance-years-head">
-          <h2>{t('finance.years.title')}</h2>
-          <div className="entry-kinds">
-            <button type="button" className={`mini-button${yearFilter === null ? ' is-on' : ''}`} onClick={() => setYearFilter(null)}>
-              {t('common.all')}
-            </button>
-            {years.map((year) => (
-              <button
-                type="button"
-                key={year.year}
-                className={`mini-button${yearFilter === year.year ? ' is-on' : ''}`}
-                onClick={() => setYearFilter(yearFilter === year.year ? null : year.year)}
-              >
-                {year.year}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="finance-year-grid">
-          {years.map((year) => (
-            <div className="finance-year-card" key={year.year}>
-              <span className="finance-year-name">{year.year}</span>
-              <span className="finance-year-total">{formatMoney(year.total, currency, lang)}</span>
-              <span className="finance-year-months">{countText('finance.years.month', year.months, lang)}</span>
+                >
+                  <RotateCcw size={14} /> {t('finance.rates.reset')}
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
+            <p className={`finance-rates-state${ratesError ? ' is-error' : ''}`}>
+              {ratesError ||
+                (ratesUpdatedAt
+                  ? t('finance.rates.updated', undefined, {
+                      source: t(RATES_SOURCE_LABELS[ratesSource]),
+                      stamp: formatStamp(ratesUpdatedAt, locale),
+                    })
+                  : t('finance.rates.empty'))}
+            </p>
+            <div className="finance-rate-inputs">
+              {CURRENCIES.map((item) => (
+                <label className="finance-rate-row" key={item}>
+                  <span>1 {CURRENCY_MARKS[item]} =</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={String(rates[item]).replace('.', ',')}
+                    onChange={(event) => {
+                      manual.current = true
+                      const parsed = Number(event.target.value.replace(',', '.').replace(/\s/g, ''))
+                      if (Number.isFinite(parsed) && parsed > 0) setRate(item, parsed)
+                    }}
+                  />
+                  <span className="finance-rate-unit">₽</span>
+                </label>
+              ))}
+            </div>
+            <ul className="finance-rate-list">
+              {ratesTable.slice(0, 6).map((row) => (
+                <li key={`${row.from}-${row.to}`}>
+                  1 {CURRENCY_MARKS[row.from]} = {row.value}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
+
+      {isNormal && (
+        <section className="finance-years">
+          <div className="finance-years-head">
+            <h2>{t('finance.years.title')}</h2>
+            <div className="entry-kinds">
+              <button type="button" className={`mini-button${yearFilter === null ? ' is-on' : ''}`} onClick={() => setYearFilter(null)}>
+                {t('common.all')}
+              </button>
+              {years.map((year) => (
+                <button
+                  type="button"
+                  key={year.year}
+                  className={`mini-button${yearFilter === year.year ? ' is-on' : ''}`}
+                  onClick={() => setYearFilter(yearFilter === year.year ? null : year.year)}
+                >
+                  {year.year}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="finance-year-grid">
+            {years.map((year) => (
+              <div className="finance-year-card" key={year.year}>
+                <span className="finance-year-name">{year.year}</span>
+                <span className="finance-year-total">{formatMoney(year.total, currency, lang)}</span>
+                <span className="finance-year-months">{countText('finance.years.month', year.months, lang)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="finance-months">
         <h2>
           <ChartNoAxesColumn size={18} /> {t('finance.months.title')}
         </h2>
-        {chartData.length > 1 && (
+        {isNormal && chartData.length > 1 && (
           <div className="finance-chart-wrapper">
             <BarChart
               data={chartData}

@@ -63,6 +63,7 @@ export type SearchCandidate = {
 
 export type CollectionItem = SearchCandidate & {
   addedAt: string
+  finishedAt?: string
   review?: string
   enjoyment?: number
   enjoymentReaction?: 'fire' | 'love' | 'good' | 'meh' | 'bad'
@@ -83,6 +84,8 @@ export type ProductivityKind = 'task' | 'goal' | 'dream'
 
 export type RepeatInterval = 'none' | 'daily' | 'weekdays' | 'weekly' | 'monthly'
 
+export type TaskPriority = 'high' | 'medium' | 'low'
+
 export type ProductivityItem = {
   id: string
   kind: ProductivityKind
@@ -92,6 +95,8 @@ export type ProductivityItem = {
   done: boolean
   createdAt: string
   doneAt: string | null
+  priority?: TaskPriority
+  note?: string
 }
 
 export type KindCounts = Record<ProductivityKind, number>
