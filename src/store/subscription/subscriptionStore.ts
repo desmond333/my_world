@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { hybridPersistStorage } from '../../lib/storage'
+import { scheduleDebouncedSync } from '../../services/api/syncService'
 import type { Subscription } from '../../data'
 
 const STORAGE_KEY = 'animal-subscriptions'
@@ -20,14 +22,25 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
   persist(
     (set) => ({
       items: [],
-      add: (sub) => set((state) => ({ items: [...state.items, { ...sub, id: createId() }] })),
-      update: (id, patch) =>
+      add: (sub) => {
+        set((state) => ({ items: [...state.items, { ...sub, id: createId() }] }))
+        scheduleDebouncedSync()
+      },
+      update: (id, patch) => {
         set((state) => ({
           items: state.items.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)),
-        })),
-      remove: (id) => set((state) => ({ items: state.items.filter((entry) => entry.id !== id) })),
-      clear: () => set({ items: [] }),
+        }))
+        scheduleDebouncedSync()
+      },
+      remove: (id) => {
+        set((state) => ({ items: state.items.filter((entry) => entry.id !== id) }))
+        scheduleDebouncedSync()
+      },
+      clear: () => {
+        set({ items: [] })
+        scheduleDebouncedSync()
+      },
     }),
-    { name: STORAGE_KEY, version: 1 },
+    { name: STORAGE_KEY, storage: hybridPersistStorage, version: 1 },
   ),
 )

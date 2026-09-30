@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { hybridPersistStorage } from '../../lib/storage'
+import { scheduleDebouncedSync } from '../../services/api/syncService'
 import { fallbackAnimals } from '../../data'
 import type { Favorite } from '../../data'
 import { useAnimalsStore } from '../animals/animalsStore'
@@ -18,11 +20,16 @@ export const useFavoritesStore = create<FavoritesState>()(
             { id: animal.id, name: animal.name, breed: animal.breed, image: animal.image, addedAt: new Date().toISOString() },
           ],
         }))
+        scheduleDebouncedSync()
       },
-      removeFavorite: (id) => set((state) => ({ favorites: state.favorites.filter((favorite) => favorite.id !== id) })),
+      removeFavorite: (id) => {
+        set((state) => ({ favorites: state.favorites.filter((favorite) => favorite.id !== id) }))
+        scheduleDebouncedSync()
+      },
     }),
     {
       name: 'animal-favorites',
+      storage: hybridPersistStorage,
       version: 1,
       migrate: (state) => {
         const saved = state as { favorites?: Favorite[] }

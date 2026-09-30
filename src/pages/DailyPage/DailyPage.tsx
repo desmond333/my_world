@@ -6,7 +6,6 @@ import { useTranslation } from '../../lib/i18n'
 import { fetchHoliday } from '../../services/holidays'
 import { fetchWeather } from '../../services/weather'
 import { getDateForTimezone, useAnimalsStore, useDailyStore, useFavoritesStore, usePageViewMode, useTrainingStore } from '../../store'
-import { BirthdayModal } from '../../components/BirthdayModal/BirthdayModal'
 import {
   BreedCard,
   DailyFooter,
@@ -30,13 +29,11 @@ export const DailyPage = () => {
   const scope = useDailyStore((state) => state.scope)
   const themeMode = useDailyStore((state) => state.themeMode)
   const storedBlocks = useDailyStore((state) => state.blocks)
-  const extraTab = useDailyStore((state) => state.extraTab)
   const chooseForToday = useDailyStore((state) => state.chooseForToday)
   const setCity = useDailyStore((state) => state.setCity)
   const setScope = useDailyStore((state) => state.setScope)
   const setThemeMode = useDailyStore((state) => state.setThemeMode)
   const toggleBlock = useDailyStore((state) => state.toggleBlock)
-  const toggleExtraTab = useDailyStore((state) => state.toggleExtraTab)
   const startPage = useDailyStore((state) => state.startPage ?? '/today')
   const setStartPage = useDailyStore((state) => state.setStartPage)
 
@@ -52,7 +49,6 @@ export const DailyPage = () => {
   const { isNormal } = usePageViewMode('today')
   const [forecastOpen, setForecastOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [birthdayOpen, setBirthdayOpen] = useState(false)
 
   const city = findCity(cityId)
   const currentDate = getDateForTimezone(city.timezone)
@@ -97,16 +93,13 @@ export const DailyPage = () => {
           themeMode={themeMode}
           blocks={blocks}
           season={season}
-          extraTab={extraTab}
           onClose={() => setSettingsOpen(false)}
           onCity={setCity}
           onScope={setScope}
           onTheme={setThemeMode}
           onToggleBlock={toggleBlock}
-          onToggleExtraTab={toggleExtraTab}
           startPage={startPage}
           onStartPage={setStartPage}
-          onOpenBirthday={() => setBirthdayOpen(true)}
         />
       )}
 
@@ -149,7 +142,6 @@ export const DailyPage = () => {
 
       <DesktopHint />
       <DailyFooter />
-      {birthdayOpen && <BirthdayModal onClose={() => setBirthdayOpen(false)} />}
     </main>
   )
 }

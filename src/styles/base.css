@@ -268,3 +268,16 @@ input:focus-visible {
   --light-panel: #28231b;
   --ink: #070705;
 }
+
+@media (display-mode: standalone) {
+  @supports (padding-top: env(safe-area-inset-top)) {
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+    .page-shell {
+      padding-bottom: calc(34px + env(safe-area-inset-bottom));
+    }
+  }
+}

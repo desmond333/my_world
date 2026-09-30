@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Coins, Monitor, Moon, Settings, Sun } from 'lucide-react'
+import { Coins, Crown, Monitor, Moon, Settings, Sun, User, Users } from 'lucide-react'
 import { useTranslation } from '../../lib/i18n'
-import { useDailyStore, useShopStore } from '../../store'
+import { useAuthStore, useDailyStore, useFriendsStore, useShopStore } from '../../store'
 import './TopbarControls.css'
 
 export const TopbarControls = () => {
@@ -10,6 +10,9 @@ export const TopbarControls = () => {
   const themeMode = useDailyStore((state) => state.themeMode ?? 'system')
   const setThemeMode = useDailyStore((state) => state.setThemeMode)
   const coins = useShopStore((state) => state.coins)
+  const user = useAuthStore((state) => state.user)
+  const openFriendsModal = useFriendsStore((state) => state.openModal)
+  const incomingRequestsCount = useFriendsStore((state) => state.incoming.length)
 
   const cycleTheme = () => {
     if (themeMode === 'system') {
@@ -89,6 +92,30 @@ export const TopbarControls = () => {
         <span className="shop-link-coins">{coins.toLocaleString()}</span>
       </Link>
 
+      <button
+        type="button"
+        className="settings-link-btn"
+        onClick={() => openFriendsModal()}
+        title={t('friends.title')}
+        aria-label={t('friends.title')}
+        style={{ position: 'relative' }}
+      >
+        <Users size={15} />
+        {incomingRequestsCount > 0 && (
+          <span
+            style={{
+              position: 'absolute',
+              top: '4px',
+              right: '4px',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: 'var(--coral)',
+            }}
+          />
+        )}
+      </button>
+
       <Link
         to="/settings"
         className={`settings-link-btn ${location.pathname === '/settings' ? 'is-active' : ''}`}
@@ -96,6 +123,21 @@ export const TopbarControls = () => {
         aria-label={t('settings.title')}
       >
         <Settings size={15} />
+      </Link>
+
+      <Link
+        to={user?.role === 'admin' ? '/admin' : '/auth'}
+        className={`settings-link-btn ${location.pathname === '/auth' || location.pathname === '/admin' ? 'is-active' : ''}`}
+        title={
+          user
+            ? `${user.role === 'admin' ? '👑 Admin: ' : '👤 '}${user.email}`
+            : lang === 'en'
+              ? 'Cloud Sync & Sign In'
+              : 'Вход и синхронизация'
+        }
+        aria-label="Account"
+      >
+        {user?.role === 'admin' ? <Crown size={15} color="var(--accent)" /> : <User size={15} />}
       </Link>
     </div>
   )

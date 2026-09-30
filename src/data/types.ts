@@ -97,6 +97,8 @@ export type ProductivityItem = {
   doneAt: string | null
   priority?: TaskPriority
   note?: string
+  senderId?: string
+  senderName?: string
 }
 
 export type KindCounts = Record<ProductivityKind, number>
@@ -130,4 +132,38 @@ export type Subscription = {
   startedAt: string
   until: string
   note: string
+}
+
+export type FriendItem = {
+  id: string
+  friendshipId: string
+  email: string
+  allowFriendTasks: boolean
+  createdAt: string
+}
+
+export type FriendRequest = {
+  id: string
+  friendshipId: string
+  email: string
+  createdAt: string
+}
+
+export type FriendsData = {
+  friends: FriendItem[]
+  incoming: FriendRequest[]
+  outgoing: FriendRequest[]
+}
+
+export type SentFriendTask = {
+  id: string
+  recipientId: string
+  recipientEmail: string
+  title: string
+  date: string
+  done: boolean
+  doneAt: string | null
+  priority?: TaskPriority
+  note?: string
+  createdAt: string
 }

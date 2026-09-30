@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { hybridPersistStorage } from '../../lib/storage'
+import { scheduleDebouncedSync } from '../../services/api/syncService'
 import { defaultBlocks } from '../../data'
 import { seedFromDate } from '../../lib/date'
 import { useAnimalsStore } from '../animals/animalsStore'
@@ -28,6 +30,7 @@ export const useDailyStore = create<DailyState>()(
       blocks: defaultBlocks,
       extraTab: false,
       startPage: '/today',
+      allowFriendTasks: true,
       chooseForToday: (date, scope) =>
         set((state) => {
           if (state.date === date && state.scope === scope) return state
@@ -46,19 +49,46 @@ export const useDailyStore = create<DailyState>()(
           }
           return { date, scope, animalIndex: index, recent: [...(state.recent ?? []).slice(-14), index] }
         }),
-      setCity: (city) => set({ cityId: city.id }),
-      setScope: (scope) => set({ scope }),
-      setThemeMode: (themeMode) => set({ themeMode }),
-      setLang: (lang) => set({ lang }),
-      toggleLang: () => set((state) => ({ lang: (state.lang ?? 'ru') === 'ru' ? 'en' : 'ru' })),
-      toggleBlock: (key) =>
+      setCity: (city) => {
+        set({ cityId: city.id })
+        scheduleDebouncedSync()
+      },
+      setScope: (scope) => {
+        set({ scope })
+        scheduleDebouncedSync()
+      },
+      setThemeMode: (themeMode) => {
+        set({ themeMode })
+        scheduleDebouncedSync()
+      },
+      setLang: (lang) => {
+        set({ lang })
+        scheduleDebouncedSync()
+      },
+      toggleLang: () => {
+        set((state) => ({ lang: (state.lang ?? 'ru') === 'ru' ? 'en' : 'ru' }))
+        scheduleDebouncedSync()
+      },
+      toggleBlock: (key) => {
         set((state) => {
           const blocks = { ...defaultBlocks, ...state.blocks }
           return { blocks: { ...blocks, [key]: !blocks[key] } }
-        }),
-      toggleExtraTab: () => set((state) => ({ extraTab: !state.extraTab })),
-      setStartPage: (startPage) => set({ startPage }),
+        })
+        scheduleDebouncedSync()
+      },
+      toggleExtraTab: () => {
+        set((state) => ({ extraTab: !state.extraTab }))
+        scheduleDebouncedSync()
+      },
+      setStartPage: (startPage) => {
+        set({ startPage })
+        scheduleDebouncedSync()
+      },
+      setAllowFriendTasks: (allowFriendTasks) => {
+        set({ allowFriendTasks })
+        scheduleDebouncedSync()
+      },
     }),
-    { name: 'animal-of-the-day' },
+    { name: 'animal-of-the-day', storage: hybridPersistStorage },
   ),
 )

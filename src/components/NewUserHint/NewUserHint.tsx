@@ -53,8 +53,8 @@ export const NewUserHint = () => {
           <button type="button" className="hint-btn-primary" onClick={handleDismiss}>
             <Check size={14} /> {t('hint.gotIt')}
           </button>
-          <Link to="/misc/fun" className="hint-btn-secondary" onClick={handleDismiss}>
-            {t('hint.goFun')}
+          <Link to="/settings" className="hint-btn-secondary" onClick={handleDismiss}>
+            {t('hint.goSettings')}
           </Link>
         </div>
       </div>

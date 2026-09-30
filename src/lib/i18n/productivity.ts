@@ -32,6 +32,8 @@ export const productivity: Dictionary = {
     'productivity.mood.level.3': 'нормально',
     'productivity.mood.level.2': 'плохо',
     'productivity.mood.level.1': 'ужасно',
+    'productivity.tab.notes': 'Заметки',
+    'productivity.tab.notesHint': 'тексты и мысли',
     'productivity.tab.status': 'Статус',
     'productivity.tab.statusHint': 'баллы и месяцы',
 
@@ -213,6 +215,8 @@ export const productivity: Dictionary = {
     'productivity.mood.level.3': 'okay',
     'productivity.mood.level.2': 'bad',
     'productivity.mood.level.1': 'awful',
+    'productivity.tab.notes': 'Notes',
+    'productivity.tab.notesHint': 'texts & thoughts',
     'productivity.tab.status': 'Status',
     'productivity.tab.statusHint': 'points & months',
 

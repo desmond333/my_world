@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { hybridPersistStorage } from '../../lib/storage'
 import type { MonthPoints, ProductivityItem, ProductivityKind, RepeatInterval, TaskPriority } from '../../data'
 import { computeNextRepeatDate, emptyMonth, POINTS } from '../../lib/productivity'
 import { monthKey } from '../../lib/date'
@@ -205,6 +206,7 @@ export const useProductivityStore = create<ProductivityStore>()(
     }),
     {
       name: STORAGE_KEY,
+      storage: hybridPersistStorage,
       version: 4,
       migrate: (state) => {
         const saved = state as {

@@ -11,10 +11,24 @@ import { languages } from './languages'
 import { fun } from './fun'
 import { cat } from './cat'
 import { settings } from './settings'
+import { friends } from './friends'
 import { plural } from '../plural'
 import { useDailyStore } from '../../store'
 
-const DICTIONARIES: Dictionary[] = [nav, daily, training, finance, productivity, media, subscriptions, languages, fun, cat, settings]
+const DICTIONARIES: Dictionary[] = [
+  nav,
+  daily,
+  training,
+  finance,
+  productivity,
+  media,
+  subscriptions,
+  languages,
+  fun,
+  cat,
+  settings,
+  friends,
+]
 
 const merge = (lang: Lang): Translations => Object.assign({}, ...DICTIONARIES.map((item) => item[lang]))
 

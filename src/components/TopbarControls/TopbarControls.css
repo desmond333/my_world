@@ -181,3 +181,24 @@
     height: 32px;
   }
 }
+
+@media (max-width: 480px) {
+  .topbar-controls {
+    gap: 5px;
+  }
+
+  .lang-pill {
+    display: none;
+  }
+
+  .theme-cycle-btn {
+    min-height: 30px;
+    min-width: 30px;
+    padding: 0 7px;
+  }
+
+  .settings-link-btn {
+    width: 30px;
+    height: 30px;
+  }
+}

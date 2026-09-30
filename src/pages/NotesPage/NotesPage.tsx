@@ -164,7 +164,12 @@ const NoteEditor = ({ note, onChange, onDelete, isSimple }: NoteEditorProps) => 
   )
 }
 
-export const NotesPage = () => {
+export type NotesPageProps = {
+  fixedKind?: NoteKind
+  hideTopbar?: boolean
+}
+
+export const NotesPage = ({ fixedKind, hideTopbar = false }: NotesPageProps = {}) => {
   const { t, locale, lang } = useTranslation()
   const { isSimple } = usePageViewMode('notes')
   const notes = useNotesStore((state) => state.notes)
@@ -172,7 +177,9 @@ export const NotesPage = () => {
   const update = useNotesStore((state) => state.update)
   const remove = useNotesStore((state) => state.remove)
 
-  const [activeTab, setActiveTab] = useState<NoteKind>('note')
+  const [userTab, setUserTab] = useState<NoteKind>('note')
+  const activeTab = fixedKind ?? userTab
+  const setActiveTab = setUserTab
   const [activeId, setActiveId] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [copiedItemId, setCopiedItemId] = useState<string | null>(null)
@@ -277,10 +284,10 @@ export const NotesPage = () => {
   const isDream = activeTab === 'dream'
 
   return (
-    <div className="page-shell">
-      <AppTopbar />
+    <div className={hideTopbar ? 'notes-page-wrapper' : 'page-shell'}>
+      {!hideTopbar && <AppTopbar />}
 
-      <main className={`notes-page ${isDream ? 'theme-dream' : ''}`}>
+      <main className={`notes-page ${isDream ? 'theme-dream' : ''} ${hideTopbar ? 'is-embedded' : ''}`}>
         {toastMessage && (
           <div className="notes-toast" role="status" aria-live="polite">
             <Check size={14} />
@@ -295,27 +302,29 @@ export const NotesPage = () => {
               {isDream ? t('notes.kicker.dreams') : t('notes.kicker.notes')}
             </p>
 
-            <div className="notes-tabs">
-              <button
-                type="button"
-                className={`notes-tab-btn ${activeTab === 'note' ? 'is-active' : ''}`}
-                onClick={() => setActiveTab('note')}
-              >
-                <PenTool size={14} />
-                <span>{t('notes.tab.notes')}</span>
-                <span className="notes-tab-badge">{notesCount}</span>
-              </button>
+            {!fixedKind && (
+              <div className="notes-tabs">
+                <button
+                  type="button"
+                  className={`notes-tab-btn ${activeTab === 'note' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('note')}
+                >
+                  <PenTool size={14} />
+                  <span>{t('notes.tab.notes')}</span>
+                  <span className="notes-tab-badge">{notesCount}</span>
+                </button>
 
-              <button
-                type="button"
-                className={`notes-tab-btn ${activeTab === 'dream' ? 'is-active' : ''}`}
-                onClick={() => setActiveTab('dream')}
-              >
-                <Moon size={14} />
-                <span>{t('notes.tab.dreams')}</span>
-                <span className="notes-tab-badge">{dreamsCount}</span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  className={`notes-tab-btn ${activeTab === 'dream' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('dream')}
+                >
+                  <Moon size={14} />
+                  <span>{t('notes.tab.dreams')}</span>
+                  <span className="notes-tab-badge">{dreamsCount}</span>
+                </button>
+              </div>
+            )}
           </div>
 
           <h1>{isDream ? t('notes.title.dreams') : t('notes.title.notes')}</h1>

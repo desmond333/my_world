@@ -417,7 +417,7 @@ footer {
 
 @media (max-width: 760px) {
   .page-shell {
-    padding: max(16px, env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+    padding: 16px 16px 24px;
   }
   .topbar {
     display: flex;

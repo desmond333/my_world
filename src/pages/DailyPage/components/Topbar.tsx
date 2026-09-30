@@ -1,4 +1,4 @@
-import { Settings } from 'lucide-react'
+import { SlidersHorizontal } from 'lucide-react'
 import { AppTopbar } from '../../../components/AppTopbar/AppTopbar'
 import { formatFullDate } from '../../../lib'
 import { useTranslation } from '../../../lib/i18n'
@@ -11,15 +11,30 @@ export const Topbar = ({ city, now, settingsOpen, onToggleSettings }: TopbarProp
   const { mode, setMode } = usePageViewMode('today')
 
   return (
-    <AppTopbar>
-      <div className="date-stamp">
-        <span className="live-dot" /> {city.name} · {formatFullDate(now, city.timezone, locale)}
+    <>
+      <AppTopbar />
+      <div className="daily-toolbar" aria-label={t('daily.infoAria')}>
+        <div className="daily-toolbar-date">
+          <span className="live-dot" />
+          <span>
+            <strong>{city.name}</strong> · {formatFullDate(now, city.timezone, locale)}
+          </span>
+        </div>
+        <div className="daily-toolbar-actions">
+          <ViewModeToggle mode={mode} onChange={setMode} size="sm" />
+          <button
+            type="button"
+            className={`daily-settings-btn${settingsOpen ? ' is-active' : ''}`}
+            onClick={onToggleSettings}
+            aria-expanded={settingsOpen}
+            aria-controls="settings-panel"
+            title={t('topbar.settings')}
+          >
+            <SlidersHorizontal size={14} />
+            <span>{t('topbar.settings')}</span>
+          </button>
+        </div>
       </div>
-      <ViewModeToggle mode={mode} onChange={setMode} size="sm" />
-      <button className="settings-button" onClick={onToggleSettings} aria-expanded={settingsOpen} aria-controls="settings-panel">
-        <Settings size={17} />
-        <span>{t('topbar.settings')}</span>
-      </button>
-    </AppTopbar>
+    </>
   )
 }

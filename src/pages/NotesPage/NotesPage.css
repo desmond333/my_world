@@ -5,6 +5,11 @@
   position: relative;
 }
 
+.notes-page.is-embedded {
+  max-width: 100%;
+  padding: 20px 0 40px;
+}
+
 .notes-toast {
   position: fixed;
   bottom: 28px;

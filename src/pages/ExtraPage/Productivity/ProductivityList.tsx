@@ -13,9 +13,12 @@ import {
   Plus,
   Repeat,
   Search,
+  Send,
   Sparkles,
   Trash2,
   Undo2,
+  User,
+  Users,
   X,
 } from 'lucide-react'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
@@ -40,7 +43,7 @@ import {
 import type { Lang } from '../../../lib/i18n'
 import { useTranslation } from '../../../lib/i18n'
 import { ProgressRing, ViewModeToggle } from '../../../shared/ui'
-import { getDateForTimezone, useDailyStore, usePageViewMode, useProductivityStore } from '../../../store'
+import { getDateForTimezone, useDailyStore, useFriendsStore, usePageViewMode, useProductivityStore } from '../../../store'
 import type { ProductivitySnapshot } from '../../../store'
 
 export type ProductivityListProps = {
@@ -50,7 +53,7 @@ export type ProductivityListProps = {
   placeholder: string
 }
 
-export type ProductivityFilter = 'all' | 'today' | 'overdue' | 'repeating'
+export type ProductivityFilter = 'all' | 'today' | 'overdue' | 'repeating' | 'from_friends' | 'sent'
 export type ProductivityView = 'list' | 'kanban'
 
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
@@ -187,10 +190,17 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
   const pageId = kind === 'task' ? 'tasks' : kind === 'goal' ? 'goals' : 'dreams'
   const { isNormal, mode, setMode } = usePageViewMode(pageId)
 
+  const friends = useFriendsStore((state) => state.friends)
+  const assignTaskToFriend = useFriendsStore((state) => state.assignTask)
+  const sentTasks = useFriendsStore((state) => state.sentTasks)
+  const fetchSentTasks = useFriendsStore((state) => state.fetchSentTasks)
+
   const [draft, setDraft] = useState('')
   const [pickedDate, setPickedDate] = useState<string | null>(null)
   const [pickedPriority, setPickedPriority] = useState<TaskPriority | null>(null)
   const [pickedRepeat, setPickedRepeat] = useState<RepeatInterval | null>(null)
+  const [targetFriendId, setTargetFriendId] = useState<string>('')
+  const [friendFeedback, setFriendFeedback] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<ProductivityFilter>('all')
   const [view, setView] = useState<ProductivityView>(kind === 'task' ? 'kanban' : 'list')
@@ -308,6 +318,7 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
     if (filter === 'today') return filtered.filter((item) => item.date === today)
     if (filter === 'overdue') return filtered.filter((item) => !item.done && item.date && item.date < today)
     if (filter === 'repeating') return filtered.filter(isRepeating)
+    if (filter === 'from_friends') return filtered.filter((item) => Boolean(item.senderName))
     return filtered
   }, [filtered, filter, today])
 
@@ -322,6 +333,7 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
   const plannedTodayCount = useMemo(() => items.filter((item) => item.date === today && !item.done).length, [items, today])
   const repeatingCount = useMemo(() => items.filter(isRepeating).length, [items])
   const totalClosedCount = useMemo(() => items.filter((item) => item.done).length, [items])
+  const fromFriendsCount = useMemo(() => items.filter((item) => !item.done && Boolean(item.senderName)).length, [items])
 
   const pickDate = (value: string) => setPickedDate((prev) => (prev === value ? null : value))
   const pickPriority = (value: TaskPriority) => setPickedPriority((prev) => (prev === value ? null : value))
@@ -334,6 +346,32 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
 
   const submit = () => {
     if (!canSubmit) return
+
+    if (targetFriendId && kind === 'task') {
+      const target = friends.find((f) => f.id === targetFriendId)
+      const friendEmail = target?.email || ''
+      void assignTaskToFriend({
+        friendId: targetFriendId,
+        title: parsed.title,
+        date: effectiveDate,
+        priority: effectivePriority,
+      }).then((res) => {
+        if (res.success) {
+          setFriendFeedback(t('friends.task.sentSuccess', undefined, { friend: friendEmail }))
+          setTimeout(() => setFriendFeedback(null), 3500)
+        } else {
+          setFriendFeedback(res.message || 'Error')
+          setTimeout(() => setFriendFeedback(null), 3500)
+        }
+      })
+      setDraft('')
+      setPickedDate(null)
+      setPickedPriority(null)
+      setPickedRepeat(null)
+      setTargetFriendId('')
+      return
+    }
+
     add(kind, parsed.title, effectiveDate, kind === 'task' ? effectiveRepeat : 'none', effectivePriority)
     setDraft('')
     setPickedDate(null)
@@ -429,6 +467,27 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
               title={t('productivity.item.editAria', undefined, { title: item.title })}
             >
               {item.title}
+              {item.senderName && (
+                <span
+                  className="point-sender-badge"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    background: 'rgba(99, 102, 241, 0.12)',
+                    color: 'var(--accent)',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    marginLeft: '6px',
+                  }}
+                  title={item.senderName}
+                >
+                  <User size={10} />
+                  {t('friends.task.senderBadge', undefined, { name: item.senderName })}
+                </span>
+              )}
             </span>
           )}
 
@@ -663,6 +722,37 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
           </button>
         </div>
 
+        {kind === 'task' && friends.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', fontSize: '0.82rem', color: 'var(--muted)' }}>
+            <Users size={13} />
+            <span>{t('friends.task.assignTo')}</span>
+            <select
+              value={targetFriendId}
+              onChange={(e) => setTargetFriendId(e.target.value)}
+              style={{
+                padding: '3px 8px',
+                borderRadius: '6px',
+                border: '1px solid var(--line)',
+                background: targetFriendId ? 'rgba(99, 102, 241, 0.1)' : 'var(--bg)',
+                color: 'var(--fg)',
+                fontSize: '0.82rem',
+                outline: 'none',
+              }}
+            >
+              <option value="">{t('friends.task.toMe')}</option>
+              {friends.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.email}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {friendFeedback && (
+          <div style={{ fontSize: '0.82rem', color: 'var(--accent)', marginTop: '4px', fontWeight: 500 }}>{friendFeedback}</div>
+        )}
+
         {isNormal && <p className="point-quick-hint">{t('productivity.quick.hint')}</p>}
 
         {isNormal && picks.length > 0 && (
@@ -770,6 +860,29 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
               {t('productivity.filter.repeating')} ({repeatingCount})
             </button>
           )}
+          {kind === 'task' && (isNormal || fromFriendsCount > 0) && (
+            <button
+              type="button"
+              className={`mini-button${filter === 'from_friends' ? ' is-on' : ''}`}
+              onClick={() => setFilter('from_friends')}
+            >
+              <User size={11} style={{ marginRight: '3px' }} />
+              {t('friends.task.filterFromFriends')} ({fromFriendsCount})
+            </button>
+          )}
+          {kind === 'task' && isNormal && (
+            <button
+              type="button"
+              className={`mini-button${filter === 'sent' ? ' is-on' : ''}`}
+              onClick={() => {
+                setFilter('sent')
+                void fetchSentTasks()
+              }}
+            >
+              <Send size={11} style={{ marginRight: '3px' }} />
+              {t('friends.task.filterSent')} ({sentTasks.length})
+            </button>
+          )}
         </div>
 
         <div className="point-toolbar-right">
@@ -824,7 +937,65 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
         </div>
       </div>
 
-      {items.length === 0 ? (
+      {filter === 'sent' ? (
+        <section className="point-group">
+          <p className="point-group-title">
+            <Send size={13} />
+            <span className="point-group-name">{t('friends.task.sentTitle')}</span>
+            <span className="point-group-badge">{sentTasks.length}</span>
+          </p>
+          {sentTasks.length === 0 ? (
+            <p style={{ padding: '16px', color: 'var(--muted)', fontSize: '0.85rem' }}>{t('friends.task.sentEmpty')}</p>
+          ) : (
+            <ul className="point-list">
+              {sentTasks.map((st) => (
+                <li
+                  key={st.id}
+                  className="point-card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    background: 'var(--bg)',
+                    border: '1px solid var(--line)',
+                    borderRadius: '8px',
+                    margin: '4px 0',
+                  }}
+                >
+                  <div>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textDecoration: st.done ? 'line-through' : 'none',
+                        color: st.done ? 'var(--muted)' : 'var(--fg)',
+                      }}
+                    >
+                      {st.title}
+                    </span>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '2px' }}>
+                      {t('friends.task.recipient', undefined, { email: st.recipientEmail })}
+                      {st.date && ` • ${st.date}`}
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                      background: st.done ? 'rgba(34, 197, 94, 0.12)' : 'rgba(234, 179, 8, 0.12)',
+                      color: st.done ? '#16a34a' : '#ca8a04',
+                    }}
+                  >
+                    {st.done ? t('friends.task.statusDone') : t('friends.task.statusPending')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : items.length === 0 ? (
         <div className="point-empty-state">
           <Sparkles size={26} className="point-empty-icon" />
           <p className="point-empty">{empty}</p>

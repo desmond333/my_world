@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { hybridPersistStorage } from '../../lib/storage'
+import { scheduleDebouncedSync } from '../../services/api/syncService'
 
 const STORAGE_KEY = 'animal-lottery'
 
@@ -17,7 +19,7 @@ export const useLotteryStore = create<LotteryStore>()(
   persist(
     (set) => ({
       stats: empty(),
-      record: (id, won, prize) =>
+      record: (id, won, prize) => {
         set((state) => {
           const current = state.stats[id] ?? { spins: 0, wins: 0, earned: 0 }
           return {
@@ -30,9 +32,14 @@ export const useLotteryStore = create<LotteryStore>()(
               },
             },
           }
-        }),
-      reset: () => set({ stats: empty() }),
+        })
+        scheduleDebouncedSync()
+      },
+      reset: () => {
+        set({ stats: empty() })
+        scheduleDebouncedSync()
+      },
     }),
-    { name: STORAGE_KEY, version: 1 },
+    { name: STORAGE_KEY, storage: hybridPersistStorage, version: 1 },
   ),
 )

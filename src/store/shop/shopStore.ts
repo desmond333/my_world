@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { hybridPersistStorage } from '../../lib/storage'
 
 export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | 'theme_cyberpunk' | 'theme_midnight_gold' | 'sound_lofi'
 
@@ -126,6 +127,7 @@ export const useShopStore = create<ShopState>()(
     }),
     {
       name: STORAGE_KEY,
+      storage: hybridPersistStorage,
       version: 2,
     },
   ),

@@ -1,4 +1,4 @@
-import { Cake, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { blockOptions, cities, findCity, startPageOptions } from '../../../data'
 import { useTranslation } from '../../../lib/i18n'
 import type { SettingsPanelProps } from '../types'
@@ -9,16 +9,13 @@ export const SettingsPanel = ({
   themeMode,
   blocks,
   season,
-  extraTab,
   startPage,
   onClose,
   onCity,
   onScope,
   onTheme,
   onToggleBlock,
-  onToggleExtraTab,
   onStartPage,
-  onOpenBirthday,
 }: SettingsPanelProps) => {
   const { t } = useTranslation()
 
@@ -83,19 +80,6 @@ export const SettingsPanel = ({
         </div>
         <small className="theme-season-note">{t('settings.allOff')}</small>
       </fieldset>
-      <fieldset className="setting-field blocks-field">
-        <legend>{t('settings.tabs')}</legend>
-        <div className="block-toggles">
-          <label className="switch-row">
-            <span className="switch-text">
-              {t('settings.tabsLabel')}
-              <small>{t('settings.tabsHint')}</small>
-            </span>
-            <input type="checkbox" checked={extraTab} onChange={onToggleExtraTab} />
-            <i className="switch" aria-hidden="true" />
-          </label>
-        </div>
-      </fieldset>
       <fieldset className="setting-field theme-field">
         <legend>{t('settings.theme')}</legend>
         <div className="scope-options">
@@ -114,9 +98,6 @@ export const SettingsPanel = ({
           {season} {t('settings.palette')}
         </small>
       </fieldset>
-      <button className="birthday-menu-button" onClick={onOpenBirthday}>
-        <Cake size={16} /> {t('settings.birthday')}
-      </button>
       <p className="settings-note">{t('settings.note')}</p>
     </section>
   )

@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { hybridPersistStorage } from '../../lib/storage'
+import { scheduleDebouncedSync } from '../../services/api/syncService'
 import type { Currency, CurrencyRates, FinanceEntry } from '../../data'
 import { DEFAULT_CURRENCY, DEFAULT_RATES, isCurrency } from '../../lib/finance'
 
@@ -35,28 +37,40 @@ export const useFinanceStore = create<FinanceStore>()(
       rates: { ...DEFAULT_RATES },
       ratesSource: 'default',
       ratesUpdatedAt: null,
-      addEntry: (entry) =>
+      addEntry: (entry) => {
         set((state) => {
           if (!entry.amount || entry.amount <= 0) return state
           const created: FinanceEntry = { ...entry, id: createId(), createdAt: new Date().toISOString() }
           return { entries: [...state.entries, created] }
-        }),
-      updateEntry: (id, patch) =>
-        set((state) => ({ entries: state.entries.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)) })),
-      removeEntry: (id) => set((state) => ({ entries: state.entries.filter((entry) => entry.id !== id) })),
-      setBalance: (currency, amount) =>
-        set((state) => ({ balance: { ...state.balance, [currency]: Number.isFinite(amount) ? amount : 0 } })),
+        })
+        scheduleDebouncedSync()
+      },
+      updateEntry: (id, patch) => {
+        set((state) => ({ entries: state.entries.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)) }))
+        scheduleDebouncedSync()
+      },
+      removeEntry: (id) => {
+        set((state) => ({ entries: state.entries.filter((entry) => entry.id !== id) }))
+        scheduleDebouncedSync()
+      },
+      setBalance: (currency, amount) => {
+        set((state) => ({ balance: { ...state.balance, [currency]: Number.isFinite(amount) ? amount : 0 } }))
+        scheduleDebouncedSync()
+      },
       setCurrency: (currency) => set((state) => (isCurrency(currency) ? { currency } : state)),
-      setRate: (currency, value) =>
+      setRate: (currency, value) => {
         set((state) => {
           if (!Number.isFinite(value) || value <= 0) return state
           return { rates: { ...state.rates, [currency]: value }, ratesSource: 'manual', ratesUpdatedAt: new Date().toISOString() }
-        }),
+        })
+        scheduleDebouncedSync()
+      },
       applyRates: (rates, updatedAt) => set({ rates, ratesSource: 'server', ratesUpdatedAt: updatedAt }),
       resetRates: () => set({ rates: { ...DEFAULT_RATES }, ratesSource: 'default', ratesUpdatedAt: null }),
     }),
     {
       name: STORAGE_KEY,
+      storage: hybridPersistStorage,
       version: 2,
       migrate: (state) => {
         const previous = state as Partial<FinanceStore> | undefined

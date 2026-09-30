@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { idbPersistStorage } from '../../lib/storage'
+import { scheduleDebouncedSync } from '../../services/api/syncService'
 
 const STORAGE_KEY = 'animal-notes'
 
@@ -40,16 +42,23 @@ export const useNotesStore = create<NotesStore>()(
           updatedAt: now,
         }
         set((state) => ({ notes: [note, ...state.notes] }))
+        scheduleDebouncedSync()
         return note.id
       },
-      update: (id, patch) =>
+      update: (id, patch) => {
         set((state) => ({
           notes: state.notes.map((note) => (note.id === id ? { ...note, ...patch, updatedAt: new Date().toISOString() } : note)),
-        })),
-      remove: (id) => set((state) => ({ notes: state.notes.filter((note) => note.id !== id) })),
+        }))
+        scheduleDebouncedSync()
+      },
+      remove: (id) => {
+        set((state) => ({ notes: state.notes.filter((note) => note.id !== id) }))
+        scheduleDebouncedSync()
+      },
     }),
     {
       name: STORAGE_KEY,
+      storage: idbPersistStorage,
       version: 2,
       migrate: (persistedState) => {
         const state = persistedState as { notes?: Partial<Note>[] }

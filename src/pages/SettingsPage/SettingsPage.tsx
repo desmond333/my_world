@@ -1,7 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   AlertTriangle,
   Check,
+  Cloud,
+  Crown,
   Database,
   Download,
   Feather,
@@ -15,13 +18,23 @@ import {
   Sun,
   Trash2,
   Upload,
+  Users,
 } from 'lucide-react'
 import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
 import { cities, defaultBlocks } from '../../data'
 import { clearTemporaryCache, downloadBackupFile, getStorageStats, resetAllData, restoreBackupFromJSON, type StorageStats } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
 import { Card, ViewModeToggle } from '../../shared/ui'
-import { VIEW_PAGES, type ViewMode, type ViewPageId, useDailyStore, usePageViewMode, useViewModeStore } from '../../store'
+import {
+  VIEW_PAGES,
+  type ViewMode,
+  type ViewPageId,
+  useAuthStore,
+  useDailyStore,
+  useFriendsStore,
+  usePageViewMode,
+  useViewModeStore,
+} from '../../store'
 import './SettingsPage.css'
 
 export const SettingsPage = () => {
@@ -40,6 +53,11 @@ export const SettingsPage = () => {
   const setCity = useDailyStore((state) => state.setCity)
   const blocks = useDailyStore((state) => state.blocks ?? defaultBlocks)
   const toggleBlock = useDailyStore((state) => state.toggleBlock)
+  const allowFriendTasks = useDailyStore((state) => state.allowFriendTasks ?? true)
+  const setAllowFriendTasks = useDailyStore((state) => state.setAllowFriendTasks)
+  const user = useAuthStore((state) => state.user)
+  const openFriendsModal = useFriendsStore((state) => state.openModal)
+  const friendsCount = useFriendsStore((state) => state.friends.length)
 
   const [stats, setStats] = useState<StorageStats>(() => getStorageStats())
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
@@ -231,6 +249,51 @@ export const SettingsPage = () => {
         <section className="settings-section">
           <div className="settings-section-head">
             <div className="settings-section-title">
+              <Users size={18} className="settings-section-icon" />
+              <h2>{t('friends.settings.title')}</h2>
+            </div>
+            <p className="settings-section-desc">{t('friends.settings.allowTasksDesc')}</p>
+          </div>
+
+          <div className="page-modes-list">
+            <div className="page-mode-row">
+              <div className="page-mode-info">
+                <span className="page-mode-name">{t('friends.settings.allowTasks')}</span>
+                <span className="page-mode-hint">{t('friends.settings.allowTasksDesc')}</span>
+              </div>
+              <div className="page-mode-control">
+                <input
+                  type="checkbox"
+                  className="switch-checkbox"
+                  checked={allowFriendTasks}
+                  onChange={(e) => setAllowFriendTasks(e.target.checked)}
+                />
+              </div>
+            </div>
+
+            <div className="page-mode-row" style={{ marginTop: '8px' }}>
+              <div className="page-mode-info">
+                <span className="page-mode-name">{t('friends.settings.friendsCount', undefined, { count: friendsCount })}</span>
+                <span className="page-mode-hint">{user ? t('friends.title') : t('friends.loginPrompt')}</span>
+              </div>
+              <div className="page-mode-control">
+                <button
+                  type="button"
+                  className="add-button"
+                  style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+                  onClick={() => openFriendsModal()}
+                >
+                  <Users size={14} />
+                  <span>{t('friends.settings.manageBtn')}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div className="settings-section-head">
+            <div className="settings-section-title">
               <Database size={18} className="settings-section-icon" />
               <h2>{t('settings.data.title')}</h2>
             </div>
@@ -273,6 +336,35 @@ export const SettingsPage = () => {
           </div>
 
           <div className="settings-data-actions-grid">
+            <div className="settings-data-card">
+              <div className="data-card-info">
+                <strong>{isEn ? 'Cloud Sync & Account' : 'Облако и синхронизация'}</strong>
+                <p>
+                  {user
+                    ? isEn
+                      ? `Signed in as ${user.email} (${user.role})`
+                      : `Вы вошли как ${user.email} (${user.role === 'admin' ? 'Администратор' : 'Пользователь'})`
+                    : isEn
+                      ? 'Offline mode. Connect to Cloudflare D1 to backup and sync across devices.'
+                      : 'Офлайн-режим. Подключись к Cloudflare D1 для бэкапа и синхронизации.'}
+                </p>
+              </div>
+              <div className="data-card-btns">
+                <Link to="/auth" className="settings-action-btn is-primary" style={{ textDecoration: 'none' }}>
+                  <Cloud size={14} />
+                  <span>
+                    {user ? (isEn ? 'Manage Account' : 'Управление аккаунтом') : isEn ? 'Sign In / Register' : 'Войти / Создать аккаунт'}
+                  </span>
+                </Link>
+                {user?.role === 'admin' && (
+                  <Link to="/admin" className="settings-action-btn is-outline" style={{ textDecoration: 'none' }}>
+                    <Crown size={14} />
+                    <span>{isEn ? 'Admin Panel' : 'Админ-панель'}</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+
             <div className="settings-data-card">
               <div className="data-card-info">
                 <strong>{t('settings.data.backupTitle')}</strong>

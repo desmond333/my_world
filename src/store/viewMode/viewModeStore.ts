@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { hybridPersistStorage } from '../../lib/storage'
+import { scheduleDebouncedSync } from '../../services/api/syncService'
 
 export type ViewMode = 'simple' | 'normal'
 
@@ -38,24 +40,33 @@ export const useViewModeStore = create<ViewModeState>()(
       globalMode: 'simple',
       pageModes: {},
       avatarMode: 'simple',
-      setAvatarMode: (mode) => set({ avatarMode: mode }),
-      toggleAvatarMode: () =>
+      setAvatarMode: (mode) => {
+        set({ avatarMode: mode })
+        scheduleDebouncedSync()
+      },
+      toggleAvatarMode: () => {
         set((state) => ({
           avatarMode: (state.avatarMode ?? 'simple') === 'simple' ? 'normal' : 'simple',
-        })),
-      setPageMode: (pageId, mode) =>
+        }))
+        scheduleDebouncedSync()
+      },
+      setPageMode: (pageId, mode) => {
         set((state) => ({
           pageModes: { ...state.pageModes, [pageId as ViewPageId]: mode },
-        })),
-      togglePageMode: (pageId) =>
+        }))
+        scheduleDebouncedSync()
+      },
+      togglePageMode: (pageId) => {
         set((state) => {
           const current = (state.pageModes as Record<string, ViewMode>)[pageId] ?? state.globalMode ?? 'simple'
           const next: ViewMode = current === 'simple' ? 'normal' : 'simple'
           return {
             pageModes: { ...state.pageModes, [pageId as ViewPageId]: next },
           }
-        }),
-      setAllModes: (mode) =>
+        })
+        scheduleDebouncedSync()
+      },
+      setAllModes: (mode) => {
         set(() => {
           const updated: Partial<Record<ViewPageId, ViewMode>> = {}
           VIEW_PAGES.forEach((item) => {
@@ -66,10 +77,13 @@ export const useViewModeStore = create<ViewModeState>()(
             pageModes: updated,
             avatarMode: mode,
           }
-        }),
+        })
+        scheduleDebouncedSync()
+      },
     }),
     {
       name: STORAGE_KEY,
+      storage: hybridPersistStorage,
       version: 1,
     },
   ),

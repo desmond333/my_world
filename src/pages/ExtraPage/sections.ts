@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
-import { Clapperboard, Coins, Dumbbell, Languages, Laugh, Target, Ticket, Wallet } from 'lucide-react'
+import { Bell, Clapperboard, Coins, Dumbbell, Languages, Laugh, Moon, Target, Ticket, Wallet } from 'lucide-react'
 
-export type UsefulSectionKey = 'training' | 'finance' | 'productivity' | 'media'
+export type UsefulSectionKey = 'training' | 'finance' | 'productivity' | 'mind' | 'remind' | 'media'
 export type MiscSectionKey = 'subscriptions' | 'languages' | 'fun' | 'clowns' | 'lottery' | 'georgian'
 export type ExtraSectionKey = UsefulSectionKey | MiscSectionKey
 
@@ -16,6 +16,8 @@ export const usefulSections: ExtraSection<UsefulSectionKey>[] = [
   { key: 'training', label: 'Тренировки', hint: 'календарь и виды спорта', icon: Dumbbell },
   { key: 'finance', label: 'Финансы', hint: 'деньги и бюджет', icon: Coins },
   { key: 'productivity', label: 'Продуктивность', hint: 'планы и привычки', icon: Target },
+  { key: 'mind', label: 'Дневник', hint: 'сны и настроение', icon: Moon },
+  { key: 'remind', label: 'Напомнить', hint: 'дни рождения', icon: Bell },
   { key: 'media', label: 'Медиа', hint: 'фильмы, книги и игры', icon: Clapperboard },
 ]
 

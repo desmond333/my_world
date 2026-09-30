@@ -1,16 +1,69 @@
-.date-stamp {
+.daily-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 0 14px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.daily-toolbar-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: 'DM Mono', monospace;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 10px;
+  letter-spacing: 0.06em;
   color: var(--muted);
+}
+
+.daily-toolbar-date strong {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.daily-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.daily-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.daily-settings-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.daily-settings-btn.is-active {
+  background: var(--accent);
+  color: #121418;
+  border-color: var(--accent);
 }
 
 .settings-panel {
   background: var(--accent);
   color: var(--ink);
   padding: 27px 30px 24px;
-  margin: 24px 0 -20px;
+  margin: 16px 0 16px;
   animation: panel-in 0.25s ease both;
 }
 .settings-panel .card-kicker {
@@ -874,8 +927,12 @@ details[open] .plus {
 }
 
 @media (max-width: 760px) {
-  .date-stamp {
-    display: none;
+  .daily-toolbar {
+    padding: 10px 0;
+    gap: 10px;
+  }
+  .daily-toolbar-date {
+    font-size: 10px;
   }
   .settings-panel {
     margin-top: 18px;
@@ -993,5 +1050,17 @@ details[open] .plus {
   .forecast-event-badge {
     width: 15px;
     height: 15px;
+  }
+}
+
+@media (max-width: 520px) {
+  .daily-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .daily-toolbar-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }
