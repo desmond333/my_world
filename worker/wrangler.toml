@@ -1,6 +1,6 @@
 name = "today-animal-tmdb"
 main = "src/index.ts"
-compatibility_date = "2026-09-28"
+compatibility_date = "2026-08-22"
 workers_dev = true
 
 [observability]
@@ -8,3 +8,10 @@ enabled = true
 
 [vars]
 ALLOWED_ORIGIN = "*"
+FRONTEND_ORIGIN = "https://your-domain.pages.dev"
+ADMIN_EMAIL = "your@email.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "my-world-db"
+database_id = "REPLACE_WITH_YOUR_D1_ID"

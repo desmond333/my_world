@@ -1,128 +1,119 @@
-export interface Env {
-  TMDB_TOKEN: string
-  ALLOWED_ORIGIN: string
-}
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { secureHeaders } from 'hono/secure-headers'
+import { adminRouter } from './routes/admin'
+import { authRouter } from './routes/auth'
+import { birthdaysRouter } from './routes/birthdays'
+import { collectionRouter } from './routes/collection'
+import { favoritesRouter } from './routes/favorites'
+import { financeRouter } from './routes/finance'
+import { friendsRouter } from './routes/friends'
+import { lotteryRouter } from './routes/lottery'
+import { notesRouter } from './routes/notes'
+import { productivityRouter } from './routes/productivity'
+import { settingsRouter } from './routes/settings'
+import { shopRouter } from './routes/shop'
+import { subscriptionsRouter } from './routes/subscriptions'
+import { syncRouter } from './routes/sync'
+import { handleTmdbRequest, tmdbRouter } from './routes/tmdb'
+import { trainingRouter } from './routes/training'
+import { viewModesRouter } from './routes/viewModes'
+import type { Env } from './types'
 
-const TMDB_API = 'https://api.themoviedb.org/3'
-const LANGUAGE = 'ru-RU'
+export type { Env }
 
-const SEARCH_MIN_LENGTH = 2
-const SEARCH_MAX_LENGTH = 100
-const MAX_PAGE = 10
-const GENRE_CACHE_SECONDS = 86400
-const SEARCH_CACHE_SECONDS = 600
-const DETAILS_CACHE_SECONDS = 21600
+const app = new Hono<{ Bindings: Env }>()
 
-const ALLOWED_ENDPOINTS = ['/search/movie', '/genre/movie/list'] as const
-const MOVIE_DETAIL_PATTERN = /^\/movie\/(\d{1,9})$/
+app.use(
+  '*',
+  secureHeaders({
+    xFrameOptions: 'DENY',
+    xContentTypeOptions: 'nosniff',
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    strictTransportSecurity: 'max-age=31536000; includeSubDomains',
+  }),
+)
 
-const corsHeaders = (origin: string) => ({
-  'Access-Control-Allow-Origin': origin,
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Max-Age': '86400',
-  Vary: 'Origin',
+app.use('*', async (c, next) => {
+  const start = Date.now()
+  await next()
+  const durationMs = Date.now() - start
+  const status = c.res.status
+  if (status >= 400) {
+    const log = {
+      timestamp: new Date().toISOString(),
+      level: status >= 500 ? 'error' : 'warn',
+      method: c.req.method,
+      path: c.req.path,
+      status,
+      durationMs,
+      ip: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0].trim() || 'unknown',
+    }
+    console.warn(JSON.stringify(log))
+  }
 })
 
-const json = (body: unknown, status: number, origin?: string, extra: Record<string, string> = {}) => {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json; charset=utf-8', ...extra }
-  if (origin) Object.assign(headers, corsHeaders(origin))
-  return new Response(JSON.stringify(body), { status, headers })
-}
+app.use(
+  '*',
+  cors({
+    origin: (origin, c) => {
+      const allowed = (c.env.ALLOWED_ORIGIN ?? '').trim()
+      const frontend = (c.env.FRONTEND_ORIGIN ?? '').trim()
+      if (!origin) return '*'
+      if (allowed === '*' || allowed === '') return origin
+      const list = [...allowed.split(','), ...frontend.split(',')].map((s) => s.trim()).filter(Boolean)
+      if (list.includes('*') || list.includes(origin)) return origin
+      return list[0] || null
+    },
+    allowHeaders: ['Content-Type', 'Authorization'],
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    maxAge: 86400,
+  }),
+)
 
-const resolveOrigin = (request: Request, env: Env) => {
-  const allowed = (env.ALLOWED_ORIGIN ?? '').trim()
-  if (!allowed || allowed === '*') return '*'
-  const requestOrigin = request.headers.get('Origin') ?? ''
-  return allowed
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean)
-    .includes(requestOrigin)
-    ? requestOrigin
-    : ''
-}
+app.route('/auth', authRouter)
+app.route('/api/settings', settingsRouter)
+app.route('/api/training', trainingRouter)
+app.route('/api/finance', financeRouter)
+app.route('/api/productivity', productivityRouter)
+app.route('/api/subscriptions', subscriptionsRouter)
+app.route('/api/birthdays', birthdaysRouter)
+app.route('/api/collection', collectionRouter)
+app.route('/api/favorites', favoritesRouter)
+app.route('/api/friends', friendsRouter)
+app.route('/api/lottery', lotteryRouter)
+app.route('/api/notes', notesRouter)
+app.route('/api/shop', shopRouter)
+app.route('/api/view-modes', viewModesRouter)
+app.route('/api/sync', syncRouter)
+app.route('/admin', adminRouter)
+app.route('/tmdb', tmdbRouter)
 
-const readPage = (value: string | null) => {
-  const parsed = Number(value ?? '1')
-  if (!Number.isFinite(parsed)) return 1
-  return Math.min(Math.max(Math.trunc(parsed), 1), MAX_PAGE)
-}
+app.get('/search/movie', async (c) => handleTmdbRequest(c))
+app.get('/genre/movie/list', async (c) => handleTmdbRequest(c))
+app.get('/movie/:id', async (c) => handleTmdbRequest(c))
 
-const buildUpstreamParams = (path: string, url: URL) => {
-  if (path === '/genre/movie/list') return new URLSearchParams()
-  if (MOVIE_DETAIL_PATTERN.test(path)) return new URLSearchParams()
-  const query = (url.searchParams.get('query') ?? '').trim()
-  if (query.length < SEARCH_MIN_LENGTH || query.length > SEARCH_MAX_LENGTH) return null
-  return new URLSearchParams({ query, page: String(readPage(url.searchParams.get('page'))), include_adult: 'false' })
-}
+app.notFound((c) => {
+  return c.json({ error: 'Endpoint not found', code: 'NOT_FOUND' }, 404)
+})
 
-const cacheTtlFor = (path: string) => {
-  if (path === '/genre/movie/list') return GENRE_CACHE_SECONDS
-  if (MOVIE_DETAIL_PATTERN.test(path)) return DETAILS_CACHE_SECONDS
-  return SEARCH_CACHE_SECONDS
-}
+app.onError((err, c) => {
+  const errorLog = {
+    timestamp: new Date().toISOString(),
+    level: 'error',
+    method: c.req.method,
+    path: c.req.path,
+    ip: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0].trim() || 'unknown',
+    userAgent: c.req.header('user-agent') || 'unknown',
+    error: {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    },
+  }
+  console.error(JSON.stringify(errorLog))
+  return c.json({ error: err.message || 'Internal Server Error', code: 'SERVER_ERROR' }, 500)
+})
 
-const describeUpstreamFailure = (status: number) => {
-  if (status === 401 || status === 403) return 'TMDB отклонил токен воркера. Обнови TMDB_TOKEN через wrangler secret put.'
-  if (status === 429) return 'TMDB временно ограничил запросы. Попробуй позже.'
-  return `TMDB ответил ошибкой ${status}.`
-}
-
-export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    if (request.method === 'OPTIONS') {
-      const preflightOrigin = resolveOrigin(request, env)
-      if (!preflightOrigin) return new Response(null, { status: 403 })
-      return new Response(null, { status: 204, headers: corsHeaders(preflightOrigin) })
-    }
-
-    if (request.method !== 'GET') return json({ error: 'Метод не поддерживается' }, 405, '*', { Allow: 'GET, OPTIONS' })
-
-    const origin = resolveOrigin(request, env)
-    if (!origin) return json({ error: 'Источник запроса не разрешён' }, 403)
-
-    const url = new URL(request.url)
-    const path = url.pathname.replace(/\/+$/, '') || '/'
-    const isAllowed = ALLOWED_ENDPOINTS.includes(path as (typeof ALLOWED_ENDPOINTS)[number]) || MOVIE_DETAIL_PATTERN.test(path)
-    if (!isAllowed) return json({ error: 'Неизвестный endpoint' }, 404, origin)
-
-    if (!env.TMDB_TOKEN) return json({ error: 'В воркере не задан секрет TMDB_TOKEN' }, 500, origin)
-
-    const params = buildUpstreamParams(path, url)
-    if (!params) return json({ error: `Запрос должен быть от ${SEARCH_MIN_LENGTH} до ${SEARCH_MAX_LENGTH} символов` }, 400, origin)
-
-    const cache = caches.default
-    const cacheKey = new Request(url.toString(), { method: 'GET' })
-    const hit = await cache.match(cacheKey)
-    if (hit) {
-      const body = await hit.json()
-      return json(body, 200, origin, { 'X-Cache': 'HIT', 'Cache-Control': hit.headers.get('Cache-Control') ?? '' })
-    }
-
-    const upstream = new URL(`${TMDB_API}${path}`)
-    upstream.searchParams.set('language', LANGUAGE)
-    params.forEach((value, key) => upstream.searchParams.set(key, value))
-
-    let response: Response
-    try {
-      response = await fetch(upstream.toString(), {
-        headers: { Accept: 'application/json', Authorization: `Bearer ${env.TMDB_TOKEN}` },
-      })
-    } catch {
-      return json({ error: 'Не удалось связаться с TMDB' }, 502, origin)
-    }
-
-    if (!response.ok) return json({ error: describeUpstreamFailure(response.status) }, 502, origin)
-
-    const body = await response.json()
-    const ttl = cacheTtlFor(path)
-    const cacheable = new Response(JSON.stringify(body), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': `public, max-age=${ttl}` },
-    })
-    ctx.waitUntil(cache.put(cacheKey, cacheable.clone()))
-
-    return json(body, 200, origin, { 'X-Cache': 'MISS', 'Cache-Control': `public, max-age=${ttl}` })
-  },
-} satisfies ExportedHandler<Env>
+export default app
