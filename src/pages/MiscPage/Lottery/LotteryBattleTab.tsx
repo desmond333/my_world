@@ -77,7 +77,7 @@ export const LotteryBattleTab = () => {
   const { lang } = useTranslation()
   const { isSimple } = usePageViewMode('lottery')
 
-  const addCoins = useShopStore((state) => state.addCoins)
+  const credit = useShopStore((state) => state.credit)
 
   const [greenArmy, setGreenArmy] = useState<ArmyRoster>({ ...INITIAL_ARMY })
   const [purpleArmy, setPurpleArmy] = useState<ArmyRoster>({ ...INITIAL_ARMY })
@@ -191,7 +191,7 @@ export const LotteryBattleTab = () => {
       const winner: 'green' | 'purple' = roll < greenPower ? 'green' : 'purple'
       const reward = Math.floor(Math.random() * 30) + 35
 
-      addCoins(reward)
+      credit('battle', reward)
       playVictoryFanfare()
 
       setWins((w) => ({

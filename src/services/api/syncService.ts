@@ -231,6 +231,7 @@ export const applyRemoteSnapshot = (snapshot: SyncSnapshot): void => {
 }
 
 export const pushSync = async (): Promise<void> => {
+  await useShopStore.getState().flushOps()
   const snapshot = collectLocalSnapshot()
   try {
     await apiFetch('/api/sync', {
@@ -251,6 +252,7 @@ registerSyncTrigger(pushSync)
 export { scheduleDebouncedSync }
 
 export const pullSync = async (): Promise<SyncSnapshot> => {
+  await useShopStore.getState().flushOps()
   const raw = await apiFetch<unknown>('/api/sync')
   const snapshot = validateSyncSnapshot(raw)
   if (!snapshot) {

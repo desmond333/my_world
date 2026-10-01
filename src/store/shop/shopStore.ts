@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
+import { ApiError, apiFetch, getAuthToken } from '../../services/api/apiClient'
 
 export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | 'theme_cyberpunk' | 'theme_midnight_gold' | 'sound_lofi'
 
@@ -19,6 +20,17 @@ export const PART_PRICES: Record<ShopItemKey, number> = {
   sound_lofi: 200,
 }
 
+export type CoinOp = {
+  id: string
+  reason: string
+  amount: number
+}
+
+export type PurchaseResult = {
+  success: boolean
+  error?: 'insufficient' | 'offline' | 'invalid'
+}
+
 export type ShopState = {
   coins: number
   unlockedParts: Partial<Record<ShopItemKey, boolean>>
@@ -29,16 +41,20 @@ export type ShopState = {
   greetingTimestamp: number | null
   greetingRewardClaimed: boolean
   hasPendingGreetingReply: boolean
-  buyPart: (key: ShopItemKey) => boolean
+  pendingOps: CoinOp[]
+  buyPart: (key: ShopItemKey) => Promise<PurchaseResult>
   isUnlocked: (key: ShopItemKey) => boolean
   equipCatSkin: (skin: CatSkinId) => void
   equipThemeSkin: (theme: ThemeSkinId) => void
-  addCoins: (amount: number) => void
+  credit: (reason: string, amount: number) => void
+  flushOps: () => Promise<void>
   sendFriendGreeting: (friendName: string) => void
   claimFriendGreetingReply: () => number
 }
 
 const STORAGE_KEY = STORAGE_KEYS.shop
+
+const createOpId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
 export const useShopStore = create<ShopState>()(
   persist(
@@ -60,24 +76,28 @@ export const useShopStore = create<ShopState>()(
       greetingTimestamp: null,
       greetingRewardClaimed: false,
       hasPendingGreetingReply: false,
+      pendingOps: [],
 
       isUnlocked: (key) => SHOP_DEV_UNLOCK_ALL || Boolean(get().unlockedParts?.[key]),
 
-      buyPart: (key) => {
+      buyPart: async (key) => {
+        if (SHOP_DEV_UNLOCK_ALL) return { success: true }
         const state = get()
-        if (SHOP_DEV_UNLOCK_ALL) return true
-        const price = PART_PRICES[key] ?? 250
-        if (state.coins < price || state.unlockedParts?.[key]) {
-          return false
+        if (state.unlockedParts?.[key]) return { success: true }
+        if (!getAuthToken()) return { success: false, error: 'offline' }
+
+        try {
+          const res = await apiFetch<{ coins: number; unlockedParts: Partial<Record<ShopItemKey, boolean>> }>('/api/shop/buy', {
+            method: 'POST',
+            body: JSON.stringify({ key }),
+          })
+          set({ coins: res.coins, unlockedParts: res.unlockedParts })
+          return { success: true }
+        } catch (err: unknown) {
+          if (err instanceof ApiError && err.code === 'INSUFFICIENT_FUNDS') return { success: false, error: 'insufficient' }
+          if (err instanceof ApiError && err.code === 'INVALID_KEY') return { success: false, error: 'invalid' }
+          return { success: false, error: 'offline' }
         }
-        set({
-          coins: state.coins - price,
-          unlockedParts: {
-            ...state.unlockedParts,
-            [key]: true,
-          },
-        })
-        return true
       },
 
       equipCatSkin: (skin) => {
@@ -102,9 +122,27 @@ export const useShopStore = create<ShopState>()(
         }
       },
 
-      addCoins: (amount) => {
+      credit: (reason, amount) => {
         if (amount <= 0) return
-        set((state) => ({ coins: state.coins + amount }))
+        const op: CoinOp = { id: createOpId(), reason, amount }
+        set((state) => ({ coins: state.coins + amount, pendingOps: [...state.pendingOps, op] }))
+        void get().flushOps()
+      },
+
+      flushOps: async () => {
+        const ops = get().pendingOps
+        if (ops.length === 0 || !getAuthToken()) return
+
+        try {
+          const res = await apiFetch<{ coins: number; accepted: string[]; rejected: string[] }>('/api/shop/earn', {
+            method: 'POST',
+            body: JSON.stringify({ ops }),
+          })
+          const settled = new Set([...res.accepted, ...res.rejected])
+          set((state) => ({ coins: res.coins, pendingOps: state.pendingOps.filter((op) => !settled.has(op.id)) }))
+        } catch {
+          void 0
+        }
       },
 
       sendFriendGreeting: (friendName) => {
@@ -123,15 +161,15 @@ export const useShopStore = create<ShopState>()(
         set({
           hasPendingGreetingReply: false,
           greetingRewardClaimed: true,
-          coins: state.coins + 100,
         })
+        get().credit('greeting', 100)
         return 100
       },
     }),
     {
       name: STORAGE_KEY,
       storage: hybridPersistStorage,
-      version: 2,
+      version: 3,
     },
   ),
 )

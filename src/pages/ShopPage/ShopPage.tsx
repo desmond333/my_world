@@ -83,7 +83,7 @@ export const ShopPage = () => {
   const coins = useShopStore((state) => state.coins)
   const isUnlocked = useShopStore((state) => state.isUnlocked)
   const buyPart = useShopStore((state) => state.buyPart)
-  const addCoins = useShopStore((state) => state.addCoins)
+  const credit = useShopStore((state) => state.credit)
   const activeCatSkin = useShopStore((state) => state.activeCatSkin)
   const activeThemeSkin = useShopStore((state) => state.activeThemeSkin)
   const equipCatSkin = useShopStore((state) => state.equipCatSkin)
@@ -102,34 +102,46 @@ export const ShopPage = () => {
 
   const isEn = lang === 'en'
 
-  const handleBuyPart = (key: ShopItemKey) => {
-    const success = buyPart(key)
-    if (success) {
-      playVictoryFanfare()
-      let title = ''
-      if (key === 'lottery') {
-        title = isEn ? 'Medieval Battle Lottery unlocked!' : 'Средневековая лотерея разблокирована!'
-      } else if (key === 'statham') {
-        title = isEn ? 'Jason Statham section unlocked!' : 'Раздел Джейсона Стэтхэма разблокирован!'
-      } else if (key === 'cat_wizard') {
-        title = isEn ? 'Wizard Cat costume unlocked!' : 'Костюм Кота-Чародея открыт!'
-        equipCatSkin('wizard')
-      } else if (key === 'cat_cyber') {
-        title = isEn ? 'Cyber Cat costume unlocked!' : 'Костюм Кибер-Кота открыт!'
-        equipCatSkin('cyber')
-      } else if (key === 'theme_cyberpunk') {
-        title = isEn ? 'Cyberpunk VIP theme unlocked!' : 'VIP-тема Киберпанк активирована!'
-        equipThemeSkin('cyberpunk')
-      } else if (key === 'theme_midnight_gold') {
-        title = isEn ? 'Midnight Gold VIP theme unlocked!' : 'VIP-тема Королевское Золото активирована!'
-        equipThemeSkin('midnight_gold')
-      } else if (key === 'sound_lofi') {
-        title = isEn ? 'Lo-Fi Ambient Sound Box unlocked!' : 'Lo-Fi Шкатулка звуков открыта!'
-      }
-
-      setPurchaseSuccessNotice(title)
+  const handleBuyPart = async (key: ShopItemKey) => {
+    const result = await buyPart(key)
+    if (!result.success) {
+      const message =
+        result.error === 'insufficient'
+          ? isEn
+            ? 'Not enough coins for this purchase.'
+            : 'Недостаточно монет для покупки.'
+          : isEn
+            ? 'Purchase failed. Check your connection.'
+            : 'Не удалось купить. Проверьте соединение.'
+      setPurchaseSuccessNotice(message)
       setTimeout(() => setPurchaseSuccessNotice(null), 3000)
+      return
     }
+
+    playVictoryFanfare()
+    let title = ''
+    if (key === 'lottery') {
+      title = isEn ? 'Medieval Battle Lottery unlocked!' : 'Средневековая лотерея разблокирована!'
+    } else if (key === 'statham') {
+      title = isEn ? 'Jason Statham section unlocked!' : 'Раздел Джейсона Стэтхэма разблокирован!'
+    } else if (key === 'cat_wizard') {
+      title = isEn ? 'Wizard Cat costume unlocked!' : 'Костюм Кота-Чародея открыт!'
+      equipCatSkin('wizard')
+    } else if (key === 'cat_cyber') {
+      title = isEn ? 'Cyber Cat costume unlocked!' : 'Костюм Кибер-Кота открыт!'
+      equipCatSkin('cyber')
+    } else if (key === 'theme_cyberpunk') {
+      title = isEn ? 'Cyberpunk VIP theme unlocked!' : 'VIP-тема Киберпанк активирована!'
+      equipThemeSkin('cyberpunk')
+    } else if (key === 'theme_midnight_gold') {
+      title = isEn ? 'Midnight Gold VIP theme unlocked!' : 'VIP-тема Королевское Золото активирована!'
+      equipThemeSkin('midnight_gold')
+    } else if (key === 'sound_lofi') {
+      title = isEn ? 'Lo-Fi Ambient Sound Box unlocked!' : 'Lo-Fi Шкатулка звуков открыта!'
+    }
+
+    setPurchaseSuccessNotice(title)
+    setTimeout(() => setPurchaseSuccessNotice(null), 3000)
   }
 
   const handleSimulatePayment = () => {
@@ -137,7 +149,7 @@ export const ShopPage = () => {
     setPayModalProcessing(true)
 
     setTimeout(() => {
-      addCoins(activePack.coins)
+      credit(activePack.id, activePack.coins)
       playBattleHorn()
       setPayModalProcessing(false)
       const notice = isEn

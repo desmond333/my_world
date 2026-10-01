@@ -3,7 +3,6 @@ import { STORAGE_KEYS } from '../../lib/storage'
 import { persist } from 'zustand/middleware'
 import { apiFetch, getAuthToken, setAuthToken } from '../../services/api/apiClient'
 import { pullSync, pushSync } from '../../services/api/syncService'
-import { useShopStore } from '../shop/shopStore'
 
 export type UserProfile = {
   id: string
@@ -101,9 +100,6 @@ export const useAuthStore = create<AuthState>()(
 
           setAuthToken(res.accessToken)
           const reward = res.referralReward ?? 0
-          if (reward > 0) {
-            useShopStore.getState().addCoins(reward)
-          }
           set({
             user: res.user,
             token: res.accessToken,
@@ -114,7 +110,9 @@ export const useAuthStore = create<AuthState>()(
             referralStatus: res.referralStatus ?? 'none',
           })
 
-          void get().syncData('push')
+          void get()
+            .syncData('push')
+            .then(() => get().syncData('pull'))
           return true
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : 'Registration failed'

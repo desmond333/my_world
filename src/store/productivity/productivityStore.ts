@@ -131,7 +131,7 @@ export const useProductivityStore = create<ProductivityStore>()(
           if (!item) return state
           const done = !item.done
           if (done) {
-            useShopStore.getState().addCoins(POINTS[item.kind])
+            useShopStore.getState().credit(item.kind, POINTS[item.kind])
           }
           const stamp = new Date().toISOString()
           let items = state.items.map((entry) => (entry.id === id ? { ...entry, done, doneAt: done ? stamp : null } : entry))
