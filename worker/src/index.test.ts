@@ -131,4 +131,30 @@ describe('Worker App Endpoints', () => {
     expect(data.referralStatus).toBe('invalid')
     expect(data.referralReward).toBe(0)
   })
+
+  it('registers, logs in and returns the profile', async () => {
+    const headers = { 'content-type': 'application/json' }
+    const email = `auth-${Date.now()}@example.com`
+
+    const registerRes = await app.request(
+      '/auth/register',
+      { method: 'POST', headers, body: JSON.stringify({ email, password: 'secret123' }) },
+      testEnv,
+    )
+    expect(registerRes.status).toBe(201)
+
+    const loginRes = await app.request(
+      '/auth/login',
+      { method: 'POST', headers, body: JSON.stringify({ email, password: 'secret123' }) },
+      testEnv,
+    )
+    expect(loginRes.status).toBe(200)
+    const login = (await loginRes.json()) as { accessToken: string }
+    expect(login.accessToken).toBeTruthy()
+
+    const meRes = await app.request('/auth/me', { headers: { authorization: `Bearer ${login.accessToken}` } }, testEnv)
+    expect(meRes.status).toBe(200)
+    const profile = (await meRes.json()) as { email: string }
+    expect(profile.email).toBe(email)
+  })
 })
