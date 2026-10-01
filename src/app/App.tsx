@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter } from 'react-router-dom'
-import { useAnimalsStore, useAuthStore } from '../store'
+import { useAnimalsStore, useAuthStore, useDailyStore } from '../store'
+import { LangProvider } from '../lib/i18n'
 import { NewUserHint, FriendsModal } from '../features'
 import { CatAssistant } from '../widgets'
 import { initOfflineSync } from '../services/api/syncService'
@@ -24,18 +25,26 @@ const AuthLoader = () => {
   return null
 }
 
-export const App = () => (
-  <BrowserRouter>
-    <ThemeSync />
-    <AnimalsLoader />
-    <AuthLoader />
-    <NewUserHint />
-    <CatAssistant />
-    <FriendsModal />
-    <ErrorBoundary>
-      <AppRouter />
-    </ErrorBoundary>
-  </BrowserRouter>
-)
+export const App = () => {
+  const lang = useDailyStore((state) => state.lang ?? 'ru')
+  const setLang = useDailyStore((state) => state.setLang)
+  const toggleLang = useDailyStore((state) => state.toggleLang)
+
+  return (
+    <LangProvider lang={lang} setLang={setLang} toggleLang={toggleLang}>
+      <BrowserRouter>
+        <ThemeSync />
+        <AnimalsLoader />
+        <AuthLoader />
+        <NewUserHint />
+        <CatAssistant />
+        <FriendsModal />
+        <ErrorBoundary>
+          <AppRouter />
+        </ErrorBoundary>
+      </BrowserRouter>
+    </LangProvider>
+  )
+}
 
 export default App

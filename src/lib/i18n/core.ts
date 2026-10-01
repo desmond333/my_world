@@ -1,5 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import type { Dictionary, Lang, Translations } from './types'
+import { DEFAULT_LANG } from './types'
+import { useLang } from './LangContext'
 import { nav } from './nav'
 import { daily } from './daily'
 import { training } from './training'
@@ -15,7 +17,6 @@ import { friends } from './friends'
 import { together } from './together'
 import { help } from './help'
 import { plural } from '../plural'
-import { useDailyStore } from '../../store/daily/dailyStore'
 
 const DICTIONARIES: Dictionary[] = [
   nav,
@@ -41,7 +42,7 @@ export const translations: Record<Lang, Translations> = {
   en: merge('en'),
 }
 
-export const DEFAULT_LANG: Lang = 'ru'
+export { DEFAULT_LANG } from './types'
 
 export const localeOf = (lang: Lang = DEFAULT_LANG) => (lang === 'en' ? 'en-US' : 'ru-RU')
 
@@ -66,9 +67,7 @@ export const countText = (key: string, count: number, lang: Lang = DEFAULT_LANG)
   `${count} ${getTranslation(pluralKey(key, count), lang)}`
 
 export const useTranslation = () => {
-  const lang = useDailyStore((state) => state.lang ?? DEFAULT_LANG)
-  const setLang = useDailyStore((state) => state.setLang)
-  const toggleLang = useDailyStore((state) => state.toggleLang)
+  const { lang, setLang, toggleLang } = useLang()
 
   const t = useCallback(
     (key: string, fallback?: string, values?: Record<string, string | number>): string => {

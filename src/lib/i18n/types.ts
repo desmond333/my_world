@@ -1,5 +1,7 @@
 export type Lang = 'ru' | 'en'
 
+export const DEFAULT_LANG: Lang = 'ru'
+
 export type Translations = Record<string, string>
 
 export type Dictionary = Record<Lang, Translations>
