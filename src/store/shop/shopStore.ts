@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 
 export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | 'theme_cyberpunk' | 'theme_midnight_gold' | 'sound_lofi'
 
@@ -38,7 +38,7 @@ export type ShopState = {
   claimFriendGreetingReply: () => number
 }
 
-const STORAGE_KEY = 'tau-shop-economy'
+const STORAGE_KEY = STORAGE_KEYS.shop
 
 export const useShopStore = create<ShopState>()(
   persist(

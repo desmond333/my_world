@@ -1,3 +1,4 @@
 import { createCollectionStore } from './createCollectionStore'
+import { STORAGE_KEYS } from '../../lib/storage'
 
-export const useBooksStore = createCollectionStore('animal-books')
+export const useBooksStore = createCollectionStore(STORAGE_KEYS.books)

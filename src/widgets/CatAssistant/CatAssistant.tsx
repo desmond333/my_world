@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
+import { STORAGE_KEYS } from '../../lib/storage'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronRight, Crown, EyeOff } from 'lucide-react'
-import { storage } from '../../lib'
+import { usePersistentState } from '../../hooks'
 import { useTranslation } from '../../lib/i18n'
 import { useAvatarViewMode, useDailyStore } from '../../store'
 import { CatFace } from './CatFace'
@@ -10,7 +11,7 @@ import { CatPremiumPanel } from './CatPremiumPanel'
 import { playCatMeow, playCatPurr } from './catAudio'
 import './CatAssistant.css'
 
-const HIDDEN_KEY = 'tau_cat_hidden'
+const HIDDEN_KEY = STORAGE_KEYS.catHidden
 
 type CatTarget = { path: string; key: string; hint: string }
 
@@ -22,7 +23,7 @@ export const CatAssistant = () => {
   const hiddenSections = useDailyStore((state) => state.hiddenSections ?? [])
 
   const [open, setOpen] = useState(false)
-  const [hidden, setHidden] = useState(() => storage.get<boolean>(HIDDEN_KEY, false))
+  const [hidden, setHidden] = usePersistentState<boolean>(HIDDEN_KEY, false)
   const [isPetting, setIsPetting] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -92,7 +93,6 @@ export const CatAssistant = () => {
         className={`cat-restore ${isNormal ? 'is-premium' : ''}`}
         onClick={() => {
           setHidden(false)
-          storage.set(HIDDEN_KEY, false)
         }}
         title={t('cat.show')}
         aria-label={t('cat.show')}
@@ -170,7 +170,6 @@ export const CatAssistant = () => {
         className="cat-hide"
         onClick={() => {
           setHidden(true)
-          storage.set(HIDDEN_KEY, true)
         }}
         title={t('cat.hide')}
         aria-label={t('cat.hide')}

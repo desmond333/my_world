@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 
 export type ViewMode = 'simple' | 'normal'
@@ -30,7 +30,7 @@ export type ViewModeState = {
   setAllModes: (mode: ViewMode) => void
 }
 
-const STORAGE_KEY = 'app-view-modes'
+const STORAGE_KEY = STORAGE_KEYS.viewModes
 
 export const useViewModeStore = create<ViewModeState>()(
   persist(

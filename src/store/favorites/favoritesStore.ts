@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 import { fallbackAnimals } from '../../data'
 import type { Favorite } from '../../data'
@@ -28,7 +28,7 @@ export const useFavoritesStore = create<FavoritesState>()(
       },
     }),
     {
-      name: 'animal-favorites',
+      name: STORAGE_KEYS.favorites,
       storage: hybridPersistStorage,
       version: 1,
       migrate: (state) => {

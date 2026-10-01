@@ -1,4 +1,6 @@
-const TOKEN_KEY = 'tau-access-token'
+import { STORAGE_KEYS } from '../../lib/storage'
+
+const TOKEN_KEY = STORAGE_KEYS.accessToken
 
 let inMemoryToken: string | null = null
 

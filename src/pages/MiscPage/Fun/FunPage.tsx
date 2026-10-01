@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { STORAGE_KEYS } from '../../../lib/storage'
 import { Link } from 'react-router-dom'
 import { Award, Coins, Crown, Dices, Flame, Laugh, Lock, MessageCircle, RefreshCw, Sparkles, Ticket, Volume2 } from 'lucide-react'
 import { storage } from '../../../lib'
@@ -21,7 +22,7 @@ import {
 import { playSoundEffect, SOUND_ITEMS, type SoundEffectType } from './funSounds'
 import './Fun.css'
 
-const TROPHIES_STORAGE_KEY = 'statham-lottery-trophies'
+const TROPHIES_STORAGE_KEY = STORAGE_KEYS.stathamTrophies
 
 type FloatingWord = {
   id: number

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { STORAGE_KEYS } from '../../../lib/storage'
 import {
   ChevronDown,
   ChevronRight,
@@ -41,7 +42,7 @@ export type NotesSidebarTreeProps = {
   isDream?: boolean
 }
 
-const STORAGE_EXPANDED_KEY = 'animal-notes-tree-expanded'
+const STORAGE_EXPANDED_KEY = STORAGE_KEYS.notesTreeExpanded
 
 const loadExpandedIds = (): Set<string> => {
   try {

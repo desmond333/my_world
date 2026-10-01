@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
+import { STORAGE_KEYS } from '../../../../lib/storage'
 import { BookOpen, Check, ChevronDown, ChevronUp, Copy, GraduationCap, Search, Sparkles, Star, Volume2 } from 'lucide-react'
-import { useCopyFeedback, useSpeechSynthesis } from '../../../../hooks'
-import { storage } from '../../../../lib'
+import { useCopyFeedback, usePersistentState, useSpeechSynthesis } from '../../../../hooks'
 import { useTranslation } from '../../../../lib/i18n'
 import { GEORGIAN_CATEGORIES, GEORGIAN_PHRASES, type GeorgianPhrase, PRONUNCIATION_RULES } from './georgianData'
 import { LanguageTrainer, type TrainerItem } from '../trainer'
 import './GeorgianTab.css'
 
-const FAVORITES_STORAGE_KEY = 'georgian-favorite-phrases'
+const FAVORITES_STORAGE_KEY = STORAGE_KEYS.georgianFavorites
 
 export const GeorgianTab = () => {
   const { t } = useTranslation()
@@ -16,16 +16,14 @@ export const GeorgianTab = () => {
   const [rulesOpen, setRulesOpen] = useState(true)
   const [mode, setMode] = useState<'phrasebook' | 'trainer'>('phrasebook')
 
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => storage.get<string[]>(FAVORITES_STORAGE_KEY, []))
+  const [favoriteIds, setFavoriteIds] = usePersistentState<string[]>(FAVORITES_STORAGE_KEY, [])
 
   const { copied, copy } = useCopyFeedback()
   const { speak, playingId } = useSpeechSynthesis()
 
   const toggleFavorite = (id: string) => {
     setFavoriteIds((prev) => {
-      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-      storage.set(FAVORITES_STORAGE_KEY, next)
-      return next
+      return prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     })
   }
 

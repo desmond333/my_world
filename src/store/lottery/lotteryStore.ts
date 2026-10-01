@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 
-const STORAGE_KEY = 'animal-lottery'
+const STORAGE_KEY = STORAGE_KEYS.lottery
 
 export type LotteryStats = Record<string, { spins: number; wins: number; earned: number }>
 

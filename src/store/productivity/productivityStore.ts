@@ -1,12 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import type { MonthPoints, ProductivityItem, ProductivityKind, RepeatInterval, TaskPriority } from '../../data'
 import { computeNextRepeatDate, emptyMonth, POINTS } from '../../lib/productivity'
 import { monthKey } from '../../lib/date'
 import { useShopStore } from '../shop'
 
-const STORAGE_KEY = 'animal-productivity'
+const STORAGE_KEY = STORAGE_KEYS.productivity
 
 const bumpMonth = (months: Record<string, MonthPoints>, key: string, kind: ProductivityKind, sign: number) => {
   const current = months[key] ?? emptyMonth()

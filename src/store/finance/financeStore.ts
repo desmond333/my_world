@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 import type { Currency, CurrencyRates, Deposit, FinanceEntry, Loan } from '../../data'
 import { DEFAULT_CURRENCY, DEFAULT_RATES, isCurrency } from '../../lib/finance'
 
-const STORAGE_KEY = 'animal-finance'
+const STORAGE_KEY = STORAGE_KEYS.finance
 
 const createId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 

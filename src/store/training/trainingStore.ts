@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 import { BUILTIN_SPORTS, STRENGTH_ID, toggleIn } from '../../lib/training'
 import type { TrainingSport } from '../../data'
@@ -59,7 +59,7 @@ export const useTrainingStore = create<TrainingState>()(
       },
     }),
     {
-      name: 'animal-training',
+      name: STORAGE_KEYS.training,
       storage: hybridPersistStorage,
       version: 2,
       migrate: (persisted) => {

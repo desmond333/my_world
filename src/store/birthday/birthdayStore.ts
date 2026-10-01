@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 import type { BirthdayState } from '../types'
 
@@ -24,6 +24,6 @@ export const useBirthdayStore = create<BirthdayState>()(
         scheduleDebouncedSync()
       },
     }),
-    { name: 'animal-birthdays', storage: hybridPersistStorage },
+    { name: STORAGE_KEYS.birthdays, storage: hybridPersistStorage },
   ),
 )

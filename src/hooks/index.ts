@@ -1,6 +1,7 @@
 export * from './useAsyncResource'
 export * from './useCopyFeedback'
 export * from './useNow'
+export * from './usePersistentState'
 export * from './useRemoteSearch'
 export * from './useSpeechSynthesis'
 export * from './useToday'

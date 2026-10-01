@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 import { defaultBlocks } from '../../data'
 import { seedFromDate } from '../../lib/date'
@@ -118,6 +118,6 @@ export const useDailyStore = create<DailyState>()(
         scheduleDebouncedSync()
       },
     }),
-    { name: 'animal-of-the-day', storage: hybridPersistStorage },
+    { name: STORAGE_KEYS.daily, storage: hybridPersistStorage },
   ),
 )

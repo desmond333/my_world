@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { hybridPersistStorage } from '../../lib/storage'
+import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 
 export type PremiumSectionId = 'financeAdvice'
 
@@ -24,6 +24,6 @@ export const usePremiumStore = create<PremiumState>()(
 
       reset: () => set({ unlocked: {} }),
     }),
-    { name: 'tau-premium', storage: hybridPersistStorage },
+    { name: STORAGE_KEYS.premium, storage: hybridPersistStorage },
   ),
 )

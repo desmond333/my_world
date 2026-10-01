@@ -1,4 +1,5 @@
 import { idbClear, idbEntries } from '../storage/hybridStorage'
+import { STORAGE_KEYS } from '../storage/keys'
 
 export type StorageCategoryStat = {
   id: string
@@ -28,24 +29,24 @@ const formatBytes = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
 }
 
-const KNOWN_STORAGE_KEYS = [
-  'animal-of-the-day',
-  'animal-favorites',
-  'animal-finance',
-  'animal-productivity',
-  'animal-training',
-  'animal-subscriptions',
-  'animal-birthdays',
-  'animal-lottery',
-  'animal-movies',
-  'animal-books',
-  'animal-games',
-  'tau-shop-economy',
-  'app-view-modes',
-  'animal-notes',
-  'tau_cat_hidden',
-  'statham-lottery-trophies',
-  'georgian-favorite-phrases',
+const KNOWN_STORAGE_KEYS: string[] = [
+  STORAGE_KEYS.daily,
+  STORAGE_KEYS.favorites,
+  STORAGE_KEYS.finance,
+  STORAGE_KEYS.productivity,
+  STORAGE_KEYS.training,
+  STORAGE_KEYS.subscriptions,
+  STORAGE_KEYS.birthdays,
+  STORAGE_KEYS.lottery,
+  STORAGE_KEYS.movies,
+  STORAGE_KEYS.books,
+  STORAGE_KEYS.games,
+  STORAGE_KEYS.shop,
+  STORAGE_KEYS.viewModes,
+  STORAGE_KEYS.notes,
+  STORAGE_KEYS.catHidden,
+  STORAGE_KEYS.stathamTrophies,
+  STORAGE_KEYS.georgianFavorites,
 ]
 
 export const getStorageStats = async (): Promise<StorageStats> => {
@@ -66,51 +67,51 @@ export const getStorageStats = async (): Promise<StorageStats> => {
       nameRu: 'Заметки и сны',
       nameEn: 'Notes & Dreams',
       bytes: 0,
-      keys: ['animal-notes'],
+      keys: [STORAGE_KEYS.notes],
     },
     productivity: {
       nameRu: 'Продуктивность',
       nameEn: 'Productivity & Tasks',
       bytes: 0,
-      keys: ['animal-productivity'],
+      keys: [STORAGE_KEYS.productivity],
     },
     finance: {
       nameRu: 'Финансы',
       nameEn: 'Finance & Budget',
       bytes: 0,
-      keys: ['animal-finance'],
+      keys: [STORAGE_KEYS.finance],
     },
     media: {
       nameRu: 'Медиа-коллекции',
       nameEn: 'Media Collections',
       bytes: 0,
-      keys: ['animal-movies', 'animal-books', 'animal-games'],
+      keys: [STORAGE_KEYS.movies, STORAGE_KEYS.books, STORAGE_KEYS.games],
     },
     shop: {
       nameRu: 'Магазин и казна',
       nameEn: 'Shop & Treasury',
       bytes: 0,
-      keys: ['tau-shop-economy', 'statham-lottery-trophies'],
+      keys: [STORAGE_KEYS.shop, STORAGE_KEYS.stathamTrophies],
     },
     training: {
       nameRu: 'Тренировки',
       nameEn: 'Workouts',
       bytes: 0,
-      keys: ['animal-training'],
+      keys: [STORAGE_KEYS.training],
     },
     settings: {
       nameRu: 'Настройки и вид',
       nameEn: 'Settings & Views',
       bytes: 0,
       keys: [
-        'animal-of-the-day',
-        'app-view-modes',
-        'animal-favorites',
-        'animal-subscriptions',
-        'animal-birthdays',
-        'animal-lottery',
-        'tau_cat_hidden',
-        'georgian-favorite-phrases',
+        STORAGE_KEYS.daily,
+        STORAGE_KEYS.viewModes,
+        STORAGE_KEYS.favorites,
+        STORAGE_KEYS.subscriptions,
+        STORAGE_KEYS.birthdays,
+        STORAGE_KEYS.lottery,
+        STORAGE_KEYS.catHidden,
+        STORAGE_KEYS.georgianFavorites,
       ],
     },
   }

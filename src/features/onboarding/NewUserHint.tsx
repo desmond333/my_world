@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { STORAGE_KEYS } from '../../lib/storage'
 import { Link } from 'react-router-dom'
 import { Check, Sparkles, X } from 'lucide-react'
 import { storage } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
 import './NewUserHint.css'
 
-const ONBOARDING_KEY = 'tau_onboarding_hint_seen'
+const ONBOARDING_KEY = STORAGE_KEYS.onboardingHint
 
 export const NewUserHint = () => {
   const { t } = useTranslation()
