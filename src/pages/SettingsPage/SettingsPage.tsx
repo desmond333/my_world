@@ -27,6 +27,9 @@ import { AppTopbar } from '../../widgets'
 import { cities, defaultBlocks, type ThemePaletteId } from '../../data'
 import { extraSections } from '../ExtraPage/sections'
 import {
+  APP_BUILT_AT,
+  APP_COMMIT,
+  APP_VERSION,
   clearTemporaryCache,
   downloadBackupFile,
   getStorageStats,
@@ -731,6 +734,21 @@ export const SettingsPage = () => {
                 </button>
               )
             })}
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div className="settings-section-head">
+            <h2>{t('settings.about.title')}</h2>
+          </div>
+          <div className="settings-grid">
+            <Card className="settings-pref-card">
+              <span className="settings-pref-label">{t('settings.about.version')}</span>
+              <span className="settings-about-value">
+                TAU v{APP_VERSION} · {APP_COMMIT}
+                {APP_BUILT_AT ? ` · ${APP_BUILT_AT}` : ''}
+              </span>
+            </Card>
           </div>
         </section>
       </main>

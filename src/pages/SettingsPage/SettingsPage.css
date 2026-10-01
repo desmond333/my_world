@@ -721,3 +721,10 @@
   background: var(--panel);
   color: var(--accent);
 }
+
+.settings-about-value {
+  font:
+    600 13px 'DM Mono',
+    monospace;
+  color: var(--fg);
+}

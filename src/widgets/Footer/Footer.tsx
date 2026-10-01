@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { APP_BUILT_AT, APP_COMMIT, APP_VERSION } from '../../lib/version'
 import { CreatorNote } from './CreatorNote'
 import './Footer.css'
 
@@ -16,10 +15,6 @@ export const Footer = ({ leftText, note, children, className = '' }: FooterProps
       {leftText && <span>{leftText}</span>}
       {note && <span className="footer-note">{note}</span>}
       {children}
-      <span className="footer-version">
-        TAU v{APP_VERSION} · {APP_COMMIT}
-        {APP_BUILT_AT ? ` · ${APP_BUILT_AT}` : ''}
-      </span>
       <CreatorNote />
     </footer>
   )

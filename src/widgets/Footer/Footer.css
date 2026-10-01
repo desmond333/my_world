@@ -57,12 +57,3 @@ footer {
     padding: 10px 0;
   }
 }
-
-.footer-version {
-  color: var(--muted);
-  opacity: 0.65;
-  font:
-    500 10px 'DM Mono',
-    monospace;
-  white-space: nowrap;
-}
