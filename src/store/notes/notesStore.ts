@@ -1,26 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { idbPersistStorage } from '../../lib/storage'
+import { idbPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
+import type { Note, NoteKind, NotePatch } from '../../entities/note/model/types'
 
-const STORAGE_KEY = 'animal-notes'
+export type { Note, NoteKind, NotePatch }
+
+const STORAGE_KEY = STORAGE_KEYS.notes
 
 const createId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
-
-export type NoteKind = 'note' | 'dream'
-
-export type Note = {
-  id: string
-  kind: NoteKind
-  title: string
-  body: string
-  parentId?: string | null
-  icon?: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export type NotePatch = Partial<Omit<Note, 'id' | 'createdAt'>>
 
 export type NotesStore = {
   notes: Note[]

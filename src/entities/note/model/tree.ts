@@ -1,4 +1,4 @@
-import type { Note } from '../../../store/notes/notesStore'
+import type { Note } from './types'
 
 export type NoteTreeNode = Note & {
   children: NoteTreeNode[]
