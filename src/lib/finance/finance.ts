@@ -34,6 +34,12 @@ const money = (value: number, lang: Lang = 'ru') =>
 
 export const formatMoney = (amount: number, currency: Currency, lang: Lang = 'ru') => `${money(amount, lang)} ${CURRENCY_MARKS[currency]}`
 
+export const formatCompactNumber = (value: number, lang: Lang = 'ru') =>
+  new Intl.NumberFormat(localeOf(lang), { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+
+export const formatCompactMoney = (amount: number, currency: Currency, lang: Lang = 'ru') =>
+  `${formatCompactNumber(amount, lang)} ${CURRENCY_MARKS[currency]}`
+
 export const formatConverted = (amount: number, from: Currency, to: Currency, rates: CurrencyRates, lang: Lang = 'ru') =>
   formatMoney(convert(amount, from, to, rates), to, lang)
 

@@ -7,6 +7,7 @@ import {
   CURRENCY_MARKS,
   currencyName,
   convert,
+  formatCompactNumber,
   formatMoney,
   groupByYear,
   monthKey,
@@ -274,13 +275,7 @@ export const FinanceOperationsTab = () => {
         </h2>
         {isNormal && chartData.length > 1 && (
           <div className="finance-chart-wrapper">
-            <BarChart
-              data={chartData}
-              height={170}
-              formatValue={(val) =>
-                val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${Math.round(val / 1000)}k` : String(val)
-              }
-            />
+            <BarChart data={chartData} height={170} formatValue={(val) => formatCompactNumber(val, lang)} />
           </div>
         )}
         {visible.length === 0 ? (
