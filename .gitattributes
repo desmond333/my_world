@@ -1,0 +1,18 @@
+# Нормализация переводов строк: в репозитории — LF
+* text=auto eol=lf
+
+# Явно бинарные файлы
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+
+# Скрипты и конфиги — LF
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
