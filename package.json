@@ -1,7 +1,7 @@
 {
   "name": "tau",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,6 +17,9 @@
     "check": "npm run format:check && npm run lint && npm run typecheck",
     "test": "vitest",
     "test:run": "vitest run",
+    "release:patch": "npm version patch -m \"chore(release): v%s\" && git push --follow-tags",
+    "release:minor": "npm version minor -m \"chore(release): v%s\" && git push --follow-tags",
+    "release:major": "npm version major -m \"chore(release): v%s\" && git push --follow-tags",
     "prepare": "husky"
   },
   "lint-staged": {

@@ -2,8 +2,18 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { version as appVersion } from './package.json'
+
+declare const process: { env: Record<string, string | undefined> }
+
+const appCommit = (process.env.VITE_APP_COMMIT || process.env.CF_PAGES_COMMIT_SHA || '').slice(0, 7)
 
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+    __APP_COMMIT__: JSON.stringify(appCommit || 'dev'),
+    __APP_BUILT_AT__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+  },
   plugins: [
     react(),
     visualizer({
@@ -13,7 +23,8 @@ export default defineConfig({
       brotliSize: true,
     }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      injectRegister: false,
       manifest: {
         name: 'TAU',
         short_name: 'TAU',

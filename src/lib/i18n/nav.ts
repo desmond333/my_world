@@ -185,6 +185,10 @@ export const nav: Dictionary = {
     'creator.thanks': 'Спасибо, что пользуешься.',
     'creator.back': 'Вернуться к животному дня',
     'common.cancel': 'Отмена',
+
+    'pwa.updateReady': 'Доступна новая версия приложения',
+    'pwa.updateAction': 'Обновить',
+    'pwa.dismiss': 'Скрыть',
     'common.close': 'Закрыть',
     'common.back': 'Назад',
     'common.copied': 'Скопировано!',
@@ -403,6 +407,10 @@ export const nav: Dictionary = {
     'creator.thanks': 'Thanks for using it.',
     'creator.back': 'Back to the animal of the day',
     'common.cancel': 'Cancel',
+
+    'pwa.updateReady': 'A new app version is available',
+    'pwa.updateAction': 'Update',
+    'pwa.dismiss': 'Dismiss',
     'common.close': 'Close',
     'common.back': 'Back',
     'common.copied': 'Copied!',

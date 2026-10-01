@@ -5,7 +5,7 @@ import { LangProvider } from '../lib/i18n'
 import { NewUserHint, FriendsModal } from '../features'
 import { CatAssistant } from '../widgets'
 import { initOfflineSync } from '../services/api/syncService'
-import { ErrorBoundary, ThemeSync } from './providers'
+import { ErrorBoundary, PwaUpdater, ThemeSync } from './providers'
 import { AppRouter } from './router'
 
 const AnimalsLoader = () => {
@@ -39,6 +39,7 @@ export const App = () => {
         <NewUserHint />
         <CatAssistant />
         <FriendsModal />
+        <PwaUpdater />
         <ErrorBoundary>
           <AppRouter />
         </ErrorBoundary>
