@@ -5,6 +5,7 @@ export interface Env {
   FRONTEND_ORIGIN?: string
   ADMIN_EMAIL?: string
   JWT_SECRET?: string
+  ENVIRONMENT?: string
 }
 
 export type UserRole = 'user' | 'admin'

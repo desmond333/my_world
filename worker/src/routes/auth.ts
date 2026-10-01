@@ -27,6 +27,14 @@ const authLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 })
 const REFRESH_TOKEN_COOKIE = 'refresh_token'
 const REFRESH_TOKEN_DAYS = 30
 
+const resolveJwtSecret = (env: Env): string | null => {
+  const secret = (env.JWT_SECRET || '').trim()
+  if (secret) return secret
+  // В продакшене секрет обязателен: фиксированный fallback позволяет подделать JWT.
+  if ((env.ENVIRONMENT || '').toLowerCase() === 'production') return null
+  return 'fallback-secret-key-replace-in-production'
+}
+
 const setRefreshTokenCookie = (c: { header: (key: string, value: string) => void }, token: string) => {
   setCookie(c as never, REFRESH_TOKEN_COOKIE, token, {
     httpOnly: true,
@@ -99,7 +107,10 @@ authRouter.post(
       void 0
     }
 
-    const secret = c.env.JWT_SECRET || 'fallback-secret-key-replace-in-production'
+    const secret = resolveJwtSecret(c.env)
+    if (!secret) {
+      return c.json({ error: 'Server misconfigured: JWT_SECRET is required', code: 'SERVER_MISCONFIGURED' }, 500)
+    }
     const accessToken = await createAccessToken(userId, role, secret)
 
     const refreshToken = generateSecureToken()
@@ -153,7 +164,10 @@ authRouter.post(
       return c.json({ error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }, 401)
     }
 
-    const secret = c.env.JWT_SECRET || 'fallback-secret-key-replace-in-production'
+    const secret = resolveJwtSecret(c.env)
+    if (!secret) {
+      return c.json({ error: 'Server misconfigured: JWT_SECRET is required', code: 'SERVER_MISCONFIGURED' }, 500)
+    }
     const role = (user.role as UserRole) || 'user'
     const accessToken = await createAccessToken(user.id, role, secret)
 
@@ -221,7 +235,10 @@ authRouter.post('/refresh', async (c) => {
     return c.json({ error: 'User not found', code: 'USER_NOT_FOUND' }, 401)
   }
 
-  const secret = c.env.JWT_SECRET || 'fallback-secret-key-replace-in-production'
+  const secret = resolveJwtSecret(c.env)
+  if (!secret) {
+    return c.json({ error: 'Server misconfigured: JWT_SECRET is required', code: 'SERVER_MISCONFIGURED' }, 500)
+  }
   const role = (user.role as UserRole) || 'user'
   const accessToken = await createAccessToken(user.id, role, secret)
 

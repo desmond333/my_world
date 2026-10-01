@@ -7,9 +7,16 @@ workers_dev = true
 enabled = true
 
 [vars]
+# Локальная разработка: "*" разрешает любой источник. В продакшене укажите конкретные домены через запятую.
 ALLOWED_ORIGIN = "*"
+# Адрес фронтенда (для CORS/cookie). Замените перед деплоем.
 FRONTEND_ORIGIN = "https://your-domain.pages.dev"
+# Email администратора. Замените перед деплоем.
 ADMIN_EMAIL = "your@email.com"
+# development для локальной работы; перед деплоем поменяйте на production.
+# В production обязателен секрет JWT_SECRET (wrangler secret put JWT_SECRET),
+# иначе авторизация вернёт 500 SERVER_MISCONFIGURED.
+ENVIRONMENT = "development"
 
 [[d1_databases]]
 binding = "DB"

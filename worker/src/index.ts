@@ -61,9 +61,12 @@ app.use(
     origin: (origin, c) => {
       const allowed = (c.env.ALLOWED_ORIGIN ?? '').trim()
       const frontend = (c.env.FRONTEND_ORIGIN ?? '').trim()
+      const isProduction = (c.env.ENVIRONMENT ?? '').toLowerCase() === 'production'
       if (!origin) return '*'
-      if (allowed === '*' || allowed === '') return origin
+      if (allowed === '*') return origin
       const list = [...allowed.split(','), ...frontend.split(',')].map((s) => s.trim()).filter(Boolean)
+      // В продакшене без явно настроенных доменов блокируем CORS, а не открываем всем.
+      if (list.length === 0) return isProduction ? null : origin
       if (list.includes('*') || list.includes(origin)) return origin
       return list[0] || null
     },

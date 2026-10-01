@@ -454,6 +454,8 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
   }
 
   if (snapshot.shop) {
+    // coins и unlockedParts — серверные (начисление через /api/shop/earn и /api/shop/buy),
+    // из клиентского снимка синхронизируется только косметика и приветствия.
     statements.push(
       db
         .prepare(
@@ -461,10 +463,8 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
             user_id, coins, unlocked_parts_json, active_cat_skin, active_theme_skin,
             greeting_sent, greeting_friend_name, greeting_timestamp,
             greeting_reward_claimed, has_pending_greeting_reply
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, 1000, '{}', ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(user_id) DO UPDATE SET
-            coins = excluded.coins,
-            unlocked_parts_json = excluded.unlocked_parts_json,
             active_cat_skin = excluded.active_cat_skin,
             active_theme_skin = excluded.active_theme_skin,
             greeting_sent = excluded.greeting_sent,
@@ -475,8 +475,6 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
         )
         .bind(
           userId,
-          snapshot.shop.coins ?? 1000,
-          JSON.stringify(snapshot.shop.unlockedParts || {}),
           snapshot.shop.activeCatSkin || 'classic',
           snapshot.shop.activeThemeSkin || 'default',
           snapshot.shop.greetingSent ? 1 : 0,
