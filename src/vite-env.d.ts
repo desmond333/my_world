@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_TMDB_TOKEN?: string
   readonly VITE_GOOGLE_BOOKS_API_KEY?: string
   readonly VITE_RAWG_API_KEY?: string
+  readonly VITE_SHOP_DEV_UNLOCK_ALL?: string
+  readonly VITE_PREMIUM_DEV_UNLOCK_ALL?: string
 }
 
 interface ImportMeta {

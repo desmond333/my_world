@@ -4,7 +4,7 @@ import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 
 export type PremiumSectionId = 'financeAdvice'
 
-export const PREMIUM_DEV_UNLOCK_ALL = true
+export const PREMIUM_DEV_UNLOCK_ALL = import.meta.env.DEV || import.meta.env.VITE_PREMIUM_DEV_UNLOCK_ALL === 'true'
 
 export type PremiumState = {
   unlocked: Partial<Record<PremiumSectionId, boolean>>

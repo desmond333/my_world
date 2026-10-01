@@ -8,7 +8,7 @@ export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | '
 export type CatSkinId = 'classic' | 'wizard' | 'cyber'
 export type ThemeSkinId = 'default' | 'cyberpunk' | 'midnight_gold'
 
-export const SHOP_DEV_UNLOCK_ALL = true
+export const SHOP_DEV_UNLOCK_ALL = import.meta.env.DEV || import.meta.env.VITE_SHOP_DEV_UNLOCK_ALL === 'true'
 
 export const PART_PRICES: Record<ShopItemKey, number> = {
   lottery: 250,
