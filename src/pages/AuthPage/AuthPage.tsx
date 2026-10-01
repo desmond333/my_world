@@ -25,8 +25,7 @@ import { useAuthStore, useBirthdayStore } from '../../store'
 import './AuthPage.css'
 
 export const AuthPage = () => {
-  const { lang } = useTranslation()
-  const isEn = lang === 'en'
+  const { lang, t, locale } = useTranslation()
 
   const user = useAuthStore((state) => state.user)
   const status = useAuthStore((state) => state.status)
@@ -42,6 +41,7 @@ export const AuthPage = () => {
   const lastReferralReward = useAuthStore((state) => state.lastReferralReward)
   const referralStatus = useAuthStore((state) => state.referralStatus)
   const fetchReferral = useAuthStore((state) => state.fetchReferral)
+  const claimReferralReward = useAuthStore((state) => state.claimReferralReward)
   const clearReferralReward = useAuthStore((state) => state.clearReferralReward)
   const ownBirthday = useBirthdayStore((state) => state.ownBirthday)
   const setOwnBirthday = useBirthdayStore((state) => state.setOwnBirthday)
@@ -54,6 +54,7 @@ export const AuthPage = () => {
   const [password, setPassword] = useState('')
   const [referralCode, setReferralCode] = useState(() => searchParams.get('ref')?.trim() ?? '')
   const [referralCopied, setReferralCopied] = useState(false)
+  const [claimingId, setClaimingId] = useState<string | null>(null)
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null)
 
   useEffect(() => {
@@ -66,6 +67,22 @@ export const AuthPage = () => {
     setReferralCopied(true)
     window.setTimeout(() => setReferralCopied(false), 2000)
   }
+
+  const handleClaim = async (id: string, type: 'coins' | 'premium') => {
+    setClaimingId(id)
+    const ok = await claimReferralReward(id, type)
+    setClaimingId(null)
+    if (!ok) {
+      setSyncFeedback(t('premium.referral.claimError'))
+      window.setTimeout(() => setSyncFeedback(null), 4000)
+    }
+  }
+
+  const premiumLabel = user?.premium
+    ? referralStats?.premiumUntil
+      ? t('premium.status.active', undefined, { date: new Date(referralStats.premiumUntil).toLocaleDateString(locale) })
+      : t('premium.status.lifetime')
+    : t('premium.status.none')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,15 +100,15 @@ export const AuthPage = () => {
     setSyncFeedback(null)
     const ok = await syncData('push')
     if (ok) {
-      setSyncFeedback(isEn ? 'Sync completed successfully!' : 'Синхронизация успешно завершена!')
+      setSyncFeedback(t('auth.sync.success'))
     } else {
-      setSyncFeedback(isEn ? 'Sync failed. Check connection.' : 'Ошибка синхронизации. Проверь сеть.')
+      setSyncFeedback(t('auth.sync.failed'))
     }
   }
 
   const formatDate = (dateStr?: string | null) => {
-    if (!dateStr) return isEn ? 'Never' : 'Никогда'
-    return new Date(dateStr).toLocaleString(isEn ? 'en-US' : 'ru-RU', {
+    if (!dateStr) return t('auth.date.never')
+    return new Date(dateStr).toLocaleString(locale, {
       dateStyle: 'medium',
       timeStyle: 'short',
     })
@@ -105,30 +122,20 @@ export const AuthPage = () => {
         <div className="auth-card">
           <div className="auth-header">
             <div className="auth-icon-badge">{user ? <ShieldCheck size={26} /> : <User size={26} />}</div>
-            <h1 className="auth-title">
-              {user ? (isEn ? 'Your Account' : 'Личный кабинет') : isEn ? 'Cloud Sync & Account' : 'Аккаунт и облачная синхронизация'}
-            </h1>
-            <p className="auth-subtitle">
-              {user
-                ? isEn
-                  ? 'Your data is connected and synchronized with Cloudflare D1.'
-                  : 'Твои данные подключены и синхронизируются с облаком Cloudflare D1.'
-                : isEn
-                  ? 'Sign in to sync your tasks, notes, habits, and finance across all devices.'
-                  : 'Войди, чтобы синхронизировать задачи, заметки, тренировки и финансы между всеми устройствами.'}
-            </p>
+            <h1 className="auth-title">{user ? t('auth.account.title') : t('auth.title.guest')}</h1>
+            <p className="auth-subtitle">{user ? t('auth.subtitle.account') : t('auth.subtitle.guest')}</p>
           </div>
 
           {user ? (
             <div className="account-profile-box">
               <div className="account-info-grid">
                 <div className="account-info-item">
-                  <span className="account-info-label">{isEn ? 'Email' : 'Почта'}</span>
+                  <span className="account-info-label">{t('auth.field.emailShort')}</span>
                   <span className="account-info-value">{user.email}</span>
                 </div>
 
                 <div className="account-info-item">
-                  <span className="account-info-label">{isEn ? 'Role' : 'Роль'}</span>
+                  <span className="account-info-label">{t('auth.field.role')}</span>
                   <div className={`role-pill ${user.role}`}>
                     {user.role === 'admin' ? <Crown size={13} /> : <User size={13} />}
                     <span>{user.role.toUpperCase()}</span>
@@ -136,7 +143,7 @@ export const AuthPage = () => {
                 </div>
 
                 <div className="account-info-item">
-                  <span className="account-info-label">{isEn ? 'Last Synced' : 'Синхронизировано'}</span>
+                  <span className="account-info-label">{t('auth.field.lastSynced')}</span>
                   <span className="account-info-value">{formatDate(lastSyncedAt)}</span>
                 </div>
               </div>
@@ -150,17 +157,8 @@ export const AuthPage = () => {
               {lastReferralReward > 0 && (
                 <div className="auth-notice-box auth-referral-reward" role="status">
                   <Gift size={16} />
-                  <span>
-                    {isEn
-                      ? `You received ${lastReferralReward} coins for joining by invitation!`
-                      : `Тебе начислено ${lastReferralReward} коинов за регистрацию по приглашению!`}
-                  </span>
-                  <button
-                    type="button"
-                    className="auth-referral-dismiss"
-                    onClick={clearReferralReward}
-                    aria-label={isEn ? 'Dismiss' : 'Скрыть'}
-                  >
+                  <span>{t('premium.refereeReward', undefined, { coins: lastReferralReward })}</span>
+                  <button type="button" className="auth-referral-dismiss" onClick={clearReferralReward} aria-label={t('common.dismiss')}>
                     ×
                   </button>
                 </div>
@@ -169,17 +167,8 @@ export const AuthPage = () => {
               {referralStatus === 'invalid' && (
                 <div className="auth-notice-box auth-referral-invalid" role="status">
                   <Gift size={16} />
-                  <span>
-                    {isEn
-                      ? 'Friend referral code was not found — the account was created without the bonus.'
-                      : 'Код друга не найден — аккаунт создан без бонуса.'}
-                  </span>
-                  <button
-                    type="button"
-                    className="auth-referral-dismiss"
-                    onClick={clearReferralReward}
-                    aria-label={isEn ? 'Dismiss' : 'Скрыть'}
-                  >
+                  <span>{t('premium.refereeInvalid')}</span>
+                  <button type="button" className="auth-referral-dismiss" onClick={clearReferralReward} aria-label={t('common.dismiss')}>
                     ×
                   </button>
                 </div>
@@ -189,61 +178,88 @@ export const AuthPage = () => {
                 <div className="auth-referral-box">
                   <div className="auth-referral-head">
                     <Gift size={16} />
-                    <strong>{isEn ? 'Invite friends' : 'Пригласи друзей'}</strong>
+                    <strong>{t('premium.referral.title')}</strong>
+                    <span className={`auth-premium-badge${user?.premium ? ' is-on' : ''}`}>
+                      <Crown size={12} /> {premiumLabel}
+                    </span>
                   </div>
-                  <p className="auth-referral-desc">
-                    {isEn
-                      ? 'A friend signs up with your code — you get 250 coins, they get 100. Rewarded once they actually register.'
-                      : 'Друг регистрируется с твоим кодом — ты получаешь 250 коинов, он 100. Награда начисляется, когда друг реально создаёт аккаунт.'}
-                  </p>
+                  <p className="auth-referral-desc">{t('premium.referral.desc', undefined, { coins: 1000, months: 2 })}</p>
+
                   <div className="auth-referral-code-row">
                     <code className="auth-referral-code">{referralStats.code}</code>
                     <button
                       type="button"
                       className="auth-referral-copy"
                       onClick={handleCopyReferral}
-                      title={isEn ? 'Copy code' : 'Скопировать код'}
+                      title={t('premium.referral.copyCode')}
                     >
                       {referralCopied ? <Check size={14} /> : <Copy size={14} />}
                     </button>
                     <button
                       type="button"
                       className="auth-referral-share"
-                      title={isEn ? 'Copy invite link' : 'Скопировать ссылку-приглашение'}
+                      title={t('premium.referral.copyLink')}
                       onClick={() => void copy(`${window.location.origin}/auth?ref=${referralStats.code}`)}
                     >
                       <Share2 size={14} />
                     </button>
                   </div>
+
                   <div className="auth-referral-stats">
-                    <span>
-                      {isEn ? 'Invited' : 'Приглашено'}: <strong>{referralStats.invited}</strong>
-                    </span>
-                    <span>
-                      {isEn ? 'Earned' : 'Заработано'}: <strong>{referralStats.earned} 🪙</strong>
-                    </span>
+                    <span>{t('premium.referral.invited', undefined, { count: referralStats.invited })}</span>
+                    <span>{t('premium.referral.earned', undefined, { count: referralStats.earned })}</span>
                   </div>
+
+                  {referralStats.pending.length > 0 ? (
+                    <div className="auth-referral-claims">
+                      <span className="auth-referral-claims-title">
+                        {t('premium.referral.pendingTitle', undefined, { count: referralStats.pending.length })}
+                      </span>
+                      {referralStats.pending.map((item) => (
+                        <div key={item.id} className="auth-referral-claim-row">
+                          <button
+                            type="button"
+                            className="auth-referral-claim-btn"
+                            disabled={claimingId === item.id}
+                            onClick={() => void handleClaim(item.id, 'coins')}
+                          >
+                            {claimingId === item.id
+                              ? t('premium.referral.claiming')
+                              : t('premium.referral.claimCoins', undefined, { coins: 1000 })}
+                          </button>
+                          <button
+                            type="button"
+                            className="auth-referral-claim-btn is-premium"
+                            disabled={claimingId === item.id}
+                            onClick={() => void handleClaim(item.id, 'premium')}
+                          >
+                            {t('premium.referral.claimPremium', undefined, { months: 2 })}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="auth-referral-empty">{t('premium.referral.empty')}</p>
+                  )}
                 </div>
               )}
 
               <div className="account-actions">
                 <button type="button" className="sync-action-btn" onClick={handleSync} disabled={isSyncing}>
                   <RefreshCw size={16} className={isSyncing ? 'spin-icon' : ''} />
-                  <span>
-                    {isSyncing ? (isEn ? 'Synchronizing...' : 'Синхронизация...') : isEn ? 'Sync Data Now' : 'Синхронизировать сейчас'}
-                  </span>
+                  <span>{isSyncing ? t('auth.sync.syncing') : t('auth.sync.now')}</span>
                 </button>
 
                 {user.role === 'admin' && (
                   <Link to="/admin" className="admin-link-btn">
                     <Crown size={16} />
-                    <span>{isEn ? 'Open Admin Control Panel' : 'Открыть Панель Администратора'}</span>
+                    <span>{t('auth.adminPanel')}</span>
                   </Link>
                 )}
 
                 <button type="button" className="logout-action-btn" onClick={() => void logout()}>
                   <LogOut size={16} />
-                  <span>{isEn ? 'Sign Out' : 'Выйти из аккаунта'}</span>
+                  <span>{t('auth.logout')}</span>
                 </button>
               </div>
             </div>
@@ -258,7 +274,7 @@ export const AuthPage = () => {
                     clearError()
                   }}
                 >
-                  {isEn ? 'Sign In' : 'Вход'}
+                  {t('auth.tab.login')}
                 </button>
                 <button
                   type="button"
@@ -268,7 +284,7 @@ export const AuthPage = () => {
                     clearError()
                   }}
                 >
-                  {isEn ? 'Create Account' : 'Регистрация'}
+                  {t('auth.tab.register')}
                 </button>
               </div>
 
@@ -276,7 +292,7 @@ export const AuthPage = () => {
 
               <form className="auth-form" onSubmit={handleSubmit}>
                 <div className="auth-field">
-                  <label htmlFor="auth-email">{isEn ? 'Email Address' : 'Электронная почта'}</label>
+                  <label htmlFor="auth-email">{t('auth.field.email')}</label>
                   <div className="auth-input-wrapper">
                     <Mail size={16} className="auth-input-icon" />
                     <input
@@ -292,7 +308,7 @@ export const AuthPage = () => {
                 </div>
 
                 <div className="auth-field">
-                  <label htmlFor="auth-password">{isEn ? 'Password' : 'Пароль'}</label>
+                  <label htmlFor="auth-password">{t('auth.field.password')}</label>
                   <div className="auth-input-wrapper">
                     <Lock size={16} className="auth-input-icon" />
                     <input
@@ -310,7 +326,7 @@ export const AuthPage = () => {
 
                 {tab === 'register' && (
                   <div className="auth-field">
-                    <label htmlFor="auth-referral">{isEn ? 'Friend referral code (optional)' : 'Код друга (необязательно)'}</label>
+                    <label htmlFor="auth-referral">{t('premium.referral.inputLabel')}</label>
                     <div className="auth-input-wrapper">
                       <Gift size={16} className="auth-input-icon" />
                       <input
@@ -335,25 +351,17 @@ export const AuthPage = () => {
                   )}
                   <span>
                     {status === 'loading'
-                      ? isEn
-                        ? 'Processing...'
-                        : 'Обработка...'
+                      ? t('auth.submit.processing')
                       : tab === 'login'
-                        ? isEn
-                          ? 'Sign In'
-                          : 'Войти'
-                        : isEn
-                          ? 'Create Account'
-                          : 'Зарегистрироваться'}
+                        ? t('auth.submit.login')
+                        : t('auth.submit.register')}
                   </span>
                 </button>
               </form>
 
               <div className="auth-notice-box">
                 <Cloud size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
-                {isEn
-                  ? 'Offline-first design: all your data stays stored locally in your browser. Registration connects your device to Cloudflare D1 for safe backups and cross-device sync.'
-                  : 'Офлайн-first: все данные сохраняются локально в твоём браузере. Регистрация подключает устройство к Cloudflare D1 для бэкапа и синхронизации.'}
+                {t('auth.notice.offline')}
               </div>
             </>
           )}
@@ -366,20 +374,16 @@ export const AuthPage = () => {
                 <Cake size={22} />
               </div>
               <div>
-                <h2 className="auth-birthday-title">{isEn ? 'My Birthday' : 'Мой день рождения'}</h2>
-                <p className="auth-birthday-subtitle">
-                  {isEn
-                    ? 'Used for personal celebration on the daily dashboard and special event tags.'
-                    : 'Используется для персонального поздравления на главном экране и праздничных отметок.'}
-                </p>
+                <h2 className="auth-birthday-title">{t('auth.birthday.title')}</h2>
+                <p className="auth-birthday-subtitle">{t('auth.birthday.desc')}</p>
               </div>
             </div>
           </div>
 
           <div className="auth-birthday-body">
             <div className="auth-birthday-current">
-              <span className="auth-birthday-label">{isEn ? 'Current date' : 'Установленная дата'}</span>
-              <strong>{ownBirthday ? displayBirthday(ownBirthday, lang) : isEn ? 'Not specified yet' : 'Пока не указана'}</strong>
+              <span className="auth-birthday-label">{t('auth.birthday.current')}</span>
+              <strong>{ownBirthday ? displayBirthday(ownBirthday, lang) : t('auth.birthday.none')}</strong>
             </div>
 
             <div className="auth-birthday-controls">
@@ -394,9 +398,9 @@ export const AuthPage = () => {
                   type="button"
                   className="auth-birthday-clear-btn"
                   onClick={() => setOwnBirthday('')}
-                  title={isEn ? 'Remove date' : 'Сбросить дату'}
+                  title={t('auth.birthday.remove')}
                 >
-                  {isEn ? 'Clear' : 'Сбросить'}
+                  {t('auth.birthday.clear')}
                 </button>
               )}
             </div>

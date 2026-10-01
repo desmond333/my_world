@@ -482,3 +482,32 @@
   white-space: pre-wrap;
   word-break: break-all;
 }
+
+.admin-premium-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.admin-premium-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.admin-premium-btn.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}

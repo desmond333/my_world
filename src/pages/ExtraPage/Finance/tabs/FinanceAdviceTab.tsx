@@ -4,7 +4,7 @@ import { Crown } from 'lucide-react'
 import { CatFace } from '../../../../widgets'
 import { PremiumGate } from '../../../../shared/ui'
 import { useTranslation } from '../../../../lib/i18n'
-import { usePremiumStore } from '../../../../store'
+import { useAuthStore, usePremiumStore } from '../../../../store'
 import { ADVICE_ITEMS, type AdviceItem } from '../adviceData'
 import './FinanceAdvice.css'
 
@@ -27,7 +27,9 @@ export const FinanceAdviceTab = () => {
   const { lang, t } = useTranslation()
   const navigate = useNavigate()
   const [personaId, setPersonaId] = useState<Persona['id']>('curious')
-  const unlocked = usePremiumStore((state) => state.isUnlocked('financeAdvice'))
+  const unlockedLocally = usePremiumStore((state) => state.isUnlocked('financeAdvice'))
+  const accountPremium = useAuthStore((state) => state.user?.premium ?? false)
+  const unlocked = accountPremium || unlockedLocally
 
   const persona = PERSONAS.find((item) => item.id === personaId) ?? PERSONAS[0]
 

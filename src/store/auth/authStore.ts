@@ -9,12 +9,20 @@ export type UserProfile = {
   email: string
   role: 'user' | 'admin'
   createdAt?: string
+  premium?: boolean
+}
+
+export type PendingReferral = {
+  id: string
+  createdAt: string
 }
 
 export type ReferralStats = {
   code: string
   invited: number
   earned: number
+  pending: PendingReferral[]
+  premiumUntil: string | null
 }
 
 export type AuthState = {
@@ -33,6 +41,7 @@ export type AuthState = {
   checkAuth: () => Promise<boolean>
   syncData: (direction?: 'push' | 'pull') => Promise<boolean>
   fetchReferral: () => Promise<void>
+  claimReferralReward: (id: string, type: 'coins' | 'premium') => Promise<boolean>
   clearReferralReward: () => void
   clearError: () => void
 }
@@ -105,7 +114,7 @@ export const useAuthStore = create<AuthState>()(
             token: res.accessToken,
             status: 'authenticated',
             error: null,
-            referralStats: res.referralCode ? { code: res.referralCode, invited: 0, earned: 0 } : null,
+            referralStats: res.referralCode ? { code: res.referralCode, invited: 0, earned: 0, pending: [], premiumUntil: null } : null,
             lastReferralReward: reward,
             referralStatus: res.referralStatus ?? 'none',
           })
@@ -190,6 +199,22 @@ export const useAuthStore = create<AuthState>()(
           set({ referralStats: stats })
         } catch {
           void 0
+        }
+      },
+
+      claimReferralReward: async (id, type) => {
+        if (!get().user) return false
+        try {
+          const res = await apiFetch<{ type: 'coins' | 'premium'; stats: ReferralStats }>('/auth/referral/claim', {
+            method: 'POST',
+            body: JSON.stringify({ id, type }),
+          })
+          set({ referralStats: res.stats })
+          void get().checkAuth()
+          void get().syncData('pull')
+          return true
+        } catch {
+          return false
         }
       },
     }),

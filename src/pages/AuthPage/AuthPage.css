@@ -535,3 +535,88 @@
 .auth-referral-invalid span {
   flex: 1;
 }
+
+.auth-premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.auth-premium-badge.is-on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.auth-referral-claims {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.auth-referral-claims-title {
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.auth-referral-claim-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.auth-referral-claim-btn {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.auth-referral-claim-btn:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.auth-referral-claim-btn.is-premium {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.auth-referral-claim-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.auth-referral-empty {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 480px) {
+  .auth-referral-claim-row {
+    grid-template-columns: 1fr;
+  }
+}
