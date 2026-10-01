@@ -6,13 +6,14 @@ import { getDb } from '../db/client'
 import { refreshTokens, users } from '../db/schema'
 import {
   REFEREE_REWARD,
-  REFERRER_REWARD,
-  applyReferralRewards,
+  claimReferralReward,
   findUserByReferralCode,
   getOrCreateReferralCode,
   getReferralStats,
   normalizeReferralCode,
+  registerReferral,
 } from '../db/queries/referrals'
+import { isPremiumActive } from '../lib/premium'
 import { generateSecureToken, hashPassword, hashToken, verifyPassword } from '../lib/crypto'
 import { createAccessToken } from '../lib/jwt'
 import { loginSchema, registerSchema } from '../lib/validation'
@@ -76,6 +77,7 @@ authRouter.post(
       passwordHash,
       role,
       createdAt,
+      isPremium: role === 'admin' ? 1 : 0,
     })
 
     let referralReward = 0
@@ -85,12 +87,10 @@ authRouter.post(
       try {
         const referrer = await findUserByReferralCode(c.env.DB, referralCode)
         if (referrer && referrer.id !== userId) {
-          await applyReferralRewards(c.env.DB, {
+          await registerReferral(c.env.DB, {
             referrerId: referrer.id,
             refereeId: userId,
             code: normalizeReferralCode(referralCode),
-            referrerReward: REFERRER_REWARD,
-            refereeReward: REFEREE_REWARD,
           })
           referralReward = REFEREE_REWARD
           referralStatus = 'applied'
@@ -129,7 +129,7 @@ authRouter.post(
 
     return c.json(
       {
-        user: { id: userId, email, role },
+        user: { id: userId, email, role, premium: role === 'admin' },
         accessToken,
         referralCode: ownReferralCode,
         referralReward,
@@ -186,7 +186,12 @@ authRouter.post(
     setRefreshTokenCookie(c, refreshToken)
 
     return c.json({
-      user: { id: user.id, email: user.email, role },
+      user: {
+        id: user.id,
+        email: user.email,
+        role,
+        premium: isPremiumActive({ isPremium: user.isPremium, premiumUntil: user.premiumUntil }, new Date().toISOString()),
+      },
       accessToken,
     })
   },
@@ -254,6 +259,8 @@ authRouter.get('/me', authMiddleware, async (c) => {
       email: users.email,
       role: users.role,
       createdAt: users.createdAt,
+      isPremium: users.isPremium,
+      premiumUntil: users.premiumUntil,
     })
     .from(users)
     .where(eq(users.id, userContext.userId))
@@ -268,6 +275,8 @@ authRouter.get('/me', authMiddleware, async (c) => {
     email: user.email,
     role: user.role,
     createdAt: user.createdAt,
+    premium: isPremiumActive({ isPremium: user.isPremium, premiumUntil: user.premiumUntil }, new Date().toISOString()),
+    premiumUntil: user.premiumUntil ?? null,
   })
 })
 
@@ -279,4 +288,22 @@ authRouter.get('/referral', authMiddleware, async (c) => {
   } catch {
     return c.json({ error: 'Failed to load referral stats', code: 'REFERRAL_ERROR' }, 500)
   }
+})
+
+authRouter.post('/referral/claim', authMiddleware, async (c) => {
+  const userContext = c.get('user')
+  const body = await c.req.json<{ id?: string; type?: string }>().catch(() => ({}) as { id?: string; type?: string })
+
+  if (!body.id || !body.type) {
+    return c.json({ error: 'id and type are required', code: 'INVALID_INPUT' }, 400)
+  }
+
+  const result = await claimReferralReward(c.env.DB, userContext.userId, body.id, body.type)
+  if (!result.ok) {
+    const status = result.error === 'NOT_FOUND' ? 404 : result.error === 'ALREADY_CLAIMED' ? 409 : 400
+    return c.json({ error: result.error, code: result.error }, status)
+  }
+
+  const stats = await getReferralStats(c.env.DB, userContext.userId)
+  return c.json({ ...result, stats })
 })

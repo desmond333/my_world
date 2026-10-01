@@ -22,7 +22,7 @@
   - Access Token: JWT (Web Crypto API `HMAC SHA-256`), срок жизни 15 минут, передаётся в заголовке `Authorization: Bearer <token>`.
   - Refresh Token: криптографический случайный токен, хэш которого хранится в таблице `refresh_tokens`, срок жизни 30 дней, передаётся в `httpOnly`, `Secure`, `SameSite=Lax` куке `refresh_token`.
   - Хеширование паролей: PBKDF2 (`Web Crypto API`, 100 000 итераций, соль 16 байт, SHA-256).
-- **Деплой и миграции**: Wrangler CLI (`wrangler.toml`, `migrations/0001_init.sql`, `migrations/0002_friends_and_tasks.sql`, `migrations/0003_notes_parent_id.sql`, `migrations/0004_availability_windows.sql`, `migrations/0005_referrals.sql`, `migrations/0006_coin_ops.sql`).
+- **Деплой и миграции**: Wrangler CLI (`wrangler.toml`, `migrations/0001_init.sql`, `migrations/0002_friends_and_tasks.sql`, `migrations/0003_notes_parent_id.sql`, `migrations/0004_availability_windows.sql`, `migrations/0005_referrals.sql`, `migrations/0006_coin_ops.sql`, `migrations/0007_premium.sql`, `migrations/0008_premium_referrals.sql`).
 - **Безопасность**:
   - `secureHeaders` middleware (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy).
   - Rate Limiting middleware (`src/middleware/rateLimit.ts`): скользящее окно запросов для `/auth/login` и `/auth/register` для защиты от перебора паролей (brute force) со стандартными заголовками `X-RateLimit-*` и `Retry-After: <seconds>`.
@@ -47,7 +47,9 @@ worker/
 │   ├── 0003_notes_parent_id.sql # Иерархические заметки (parent_id, icon)
 │   ├── 0004_availability_windows.sql # Таблица availability_windows (окна доступности)
 │   ├── 0005_referrals.sql     # Реферальные коды и таблица referrals
-│   └── 0006_coin_ops.sql      # Журнал серверных начислений (идемпотентность)
+│   ├── 0006_coin_ops.sql      # Журнал серверных начислений (идемпотентность)
+│   ├── 0007_premium.sql       # Флаг пожизненного премиума у users
+│   └── 0008_premium_referrals.sql # premium_until + reward_type/claimed у referrals
 ├── vitest.config.ts           # Настройка @cloudflare/vitest-pool-workers
 ├── src/
 │   ├── index.ts               # Точка входа Hono, цепочка роутов, AppType для Hono RPC
@@ -111,32 +113,32 @@ worker/
 
 Схема определена строго в `worker/src/db/schema.ts`:
 
-| Таблица                | Назначение                                    | Ключевые поля в Drizzle                                                                                                          |
-| :--------------------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
-| `users`                | Учётные записи пользователей                  | `id`, `email`, `password_hash`, `role` (`user` \| `admin`), `created_at`                                                         |
-| `refresh_tokens`       | Сессии и refresh-токены                       | `id`, `user_id`, `token_hash`, `expires_at`                                                                                      |
-| `settings`             | Глобальные настройки интерфейса               | `user_id`, `lang`, `theme_mode`, `city_id`, `scope`, `extra_tab`, `start_page`, `blocks_json`, `allow_friend_tasks`              |
-| `training_days`        | Отметки тренировок по дням                    | `id`, `user_id`, `date`, `sports_json`                                                                                           |
-| `training_sports`      | Пользовательские виды спорта                  | `id`, `user_id`, `label`, `color`, `enabled`, `custom`, `sort_order`                                                             |
-| `finance_entries`      | Транзакции (доходы/расходы)                   | `id`, `user_id`, `month`, `kind`, `amount`, `currency`, `note`, `created_at`                                                     |
-| `finance_balance`      | Текущие остатки по валютам                    | `user_id`, `rub`, `usd`, `gel`                                                                                                   |
-| `finance_rates`        | Курсы валют пользователя                      | `user_id`, `rub`, `usd`, `gel`, `source`, `updated_at`                                                                           |
-| `productivity_items`   | Задачи, цели, мечты                           | `id`, `user_id`, `kind`, `title`, `date`, `repeat`, `done`, `done_at`, `priority`, `note`, `sender_id`, `sender_name`            |
-| `productivity_months`  | Счётчики и баллы за месяцы                    | `user_id`, `month_key`, `points`, `task_count`, `goal_count`, `dream_count`                                                      |
-| `productivity_mood`    | Дневник настроения по датам                   | `user_id`, `date`, `level` (1-5), `note`                                                                                         |
-| `subscriptions`        | Подписки и регулярные платежи                 | `id`, `user_id`, `name`, `price`, `currency`, `period`, `started_at`, `until`, `note`                                            |
-| `birthdays`            | Памятные даты и дни рождения                  | `id`, `user_id`, `name`, `date`                                                                                                  |
-| `own_birthday`         | Дата рождения пользователя                    | `user_id`, `date`                                                                                                                |
-| `collection_items`     | Медиатека (movies/books/games)                | `id`, `user_id`, `collection`, `list_key` (`wishlist` \| `watched`), `title`, `year`, `score`, `image_url`, `tags_json`          |
-| `favorites`            | Избранные животные                            | `id`, `user_id`, `animal_id`, `name`, `breed`, `image`, `added_at`                                                               |
-| `lottery_stats`        | Статистика колеса лотереи                     | `user_id`, `sector_id`, `spins`, `wins`, `earned`                                                                                |
-| `notes`                | Заметки и дневник снов (иерархическое дерево) | `id`, `user_id`, `kind` (`note` \| `dream`), `title`, `body`, `parent_id`, `icon`, `created_at`, `updated_at`                    |
-| `shop_state`           | Казна, скины, покупки, приветствия            | `user_id`, `coins`, `unlocked_parts_json`, `active_cat_skin`, `active_theme_skin`, `greeting_*`                                  |
-| `view_modes`           | Состояние режимов simple/normal               | `user_id`, `global_mode`, `page_modes_json`, `avatar_mode`                                                                       |
-| `friendships`          | Связи друзей и заявки                         | `id`, `user_id`, `friend_id`, `status` (`pending` \| `accepted`), `created_at`, `updated_at`                                     |
-| `availability_windows` | Окна доступности пользователя                 | `id`, `user_id`, `scope` (`weekly` \| `date`), `day_of_week`, `date`, `start_min`, `end_min`, `note`, `created_at`, `updated_at` |
-| `referrals`            | Рефералы (кто кого пригласил)                 | `id`, `referrer_id`, `referee_id` (UNIQUE), `code`, `referrer_reward`, `referee_reward`, `created_at`                            |
-| `shop_coin_ops`        | Журнал серверных начислений монет             | `id` (PRIMARY KEY, идемпотентность), `user_id`, `reason`, `amount`, `created_at`                                                 |
+| Таблица                | Назначение                                    | Ключевые поля в Drizzle                                                                                                                                    |
+| :--------------------- | :-------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `users`                | Учётные записи пользователей                  | `id`, `email`, `password_hash`, `role` (`user` \| `admin`), `referral_code`, `is_premium` (пожизненный), `premium_until` (до даты), `created_at`           |
+| `refresh_tokens`       | Сессии и refresh-токены                       | `id`, `user_id`, `token_hash`, `expires_at`                                                                                                                |
+| `settings`             | Глобальные настройки интерфейса               | `user_id`, `lang`, `theme_mode`, `city_id`, `scope`, `extra_tab`, `start_page`, `blocks_json`, `allow_friend_tasks`                                        |
+| `training_days`        | Отметки тренировок по дням                    | `id`, `user_id`, `date`, `sports_json`                                                                                                                     |
+| `training_sports`      | Пользовательские виды спорта                  | `id`, `user_id`, `label`, `color`, `enabled`, `custom`, `sort_order`                                                                                       |
+| `finance_entries`      | Транзакции (доходы/расходы)                   | `id`, `user_id`, `month`, `kind`, `amount`, `currency`, `note`, `created_at`                                                                               |
+| `finance_balance`      | Текущие остатки по валютам                    | `user_id`, `rub`, `usd`, `gel`                                                                                                                             |
+| `finance_rates`        | Курсы валют пользователя                      | `user_id`, `rub`, `usd`, `gel`, `source`, `updated_at`                                                                                                     |
+| `productivity_items`   | Задачи, цели, мечты                           | `id`, `user_id`, `kind`, `title`, `date`, `repeat`, `done`, `done_at`, `priority`, `note`, `sender_id`, `sender_name`                                      |
+| `productivity_months`  | Счётчики и баллы за месяцы                    | `user_id`, `month_key`, `points`, `task_count`, `goal_count`, `dream_count`                                                                                |
+| `productivity_mood`    | Дневник настроения по датам                   | `user_id`, `date`, `level` (1-5), `note`                                                                                                                   |
+| `subscriptions`        | Подписки и регулярные платежи                 | `id`, `user_id`, `name`, `price`, `currency`, `period`, `started_at`, `until`, `note`                                                                      |
+| `birthdays`            | Памятные даты и дни рождения                  | `id`, `user_id`, `name`, `date`                                                                                                                            |
+| `own_birthday`         | Дата рождения пользователя                    | `user_id`, `date`                                                                                                                                          |
+| `collection_items`     | Медиатека (movies/books/games)                | `id`, `user_id`, `collection`, `list_key` (`wishlist` \| `watched`), `title`, `year`, `score`, `image_url`, `tags_json`                                    |
+| `favorites`            | Избранные животные                            | `id`, `user_id`, `animal_id`, `name`, `breed`, `image`, `added_at`                                                                                         |
+| `lottery_stats`        | Статистика колеса лотереи                     | `user_id`, `sector_id`, `spins`, `wins`, `earned`                                                                                                          |
+| `notes`                | Заметки и дневник снов (иерархическое дерево) | `id`, `user_id`, `kind` (`note` \| `dream`), `title`, `body`, `parent_id`, `icon`, `created_at`, `updated_at`                                              |
+| `shop_state`           | Казна, скины, покупки, приветствия            | `user_id`, `coins`, `unlocked_parts_json`, `active_cat_skin`, `active_theme_skin`, `greeting_*`                                                            |
+| `view_modes`           | Состояние режимов simple/normal               | `user_id`, `global_mode`, `page_modes_json`, `avatar_mode`                                                                                                 |
+| `friendships`          | Связи друзей и заявки                         | `id`, `user_id`, `friend_id`, `status` (`pending` \| `accepted`), `created_at`, `updated_at`                                                               |
+| `availability_windows` | Окна доступности пользователя                 | `id`, `user_id`, `scope` (`weekly` \| `date`), `day_of_week`, `date`, `start_min`, `end_min`, `note`, `created_at`, `updated_at`                           |
+| `referrals`            | Рефералы: отложенная награда пригласившему    | `id`, `referrer_id`, `referee_id` (UNIQUE), `code`, `referrer_reward`, `referee_reward`, `reward_type` (`coins`\|`premium`\|NULL), `claimed`, `created_at` |
+| `shop_coin_ops`        | Журнал серверных начислений монет             | `id` (PRIMARY KEY, идемпотентность), `user_id`, `reason`, `amount`, `created_at`                                                                           |
 
 ---
 
@@ -144,14 +146,15 @@ worker/
 
 ### 4.1. Аутентификация (`/auth`)
 
-| Метод  | URL              | Доступ | Валидатор (Valibot) | Назначение                    | Ответ                                       |
-| :----- | :--------------- | :----- | :------------------ | :---------------------------- | :------------------------------------------ |
-| `POST` | `/auth/register` | Public | `registerSchema`    | Регистрация нового аккаунта   | `{ user, accessToken }` + кука `refresh...` |
-| `POST` | `/auth/login`    | Public | `loginSchema`       | Авторизация по email и паролю | `{ user, accessToken }` + кука `refresh...` |
-| `POST` | `/auth/refresh`  | Cookie | —                   | Обновление токена доступа     | `{ accessToken }`                           |
-| `POST` | `/auth/logout`   | Public | —                   | Выход и инвалидация сессии    | `{ success: true }`                         |
-| `GET`  | `/auth/me`       | Bearer | —                   | Текущий профиль пользователя  | `{ id, email, role, createdAt }`            |
-| `GET`  | `/auth/referral` | Bearer | —                   | Реферальный код и статистика  | `{ code, invited, earned }`                 |
+| Метод  | URL                    | Доступ | Валидатор (Valibot) | Назначение                                                   | Ответ                                              |
+| :----- | :--------------------- | :----- | :------------------ | :----------------------------------------------------------- | :------------------------------------------------- |
+| `POST` | `/auth/register`       | Public | `registerSchema`    | Регистрация нового аккаунта                                  | `{ user, accessToken }` + кука `refresh...`        |
+| `POST` | `/auth/login`          | Public | `loginSchema`       | Авторизация по email и паролю                                | `{ user, accessToken }` + кука `refresh...`        |
+| `POST` | `/auth/refresh`        | Cookie | —                   | Обновление токена доступа                                    | `{ accessToken }`                                  |
+| `POST` | `/auth/logout`         | Public | —                   | Выход и инвалидация сессии                                   | `{ success: true }`                                |
+| `GET`  | `/auth/me`             | Bearer | —                   | Текущий профиль пользователя                                 | `{ id, email, role, createdAt }`                   |
+| `GET`  | `/auth/referral`       | Bearer | —                   | Код, статистика и незабранные награды                        | `{ code, invited, earned, pending, premiumUntil }` |
+| `POST` | `/auth/referral/claim` | Bearer | —                   | Забрать награду за друга: `{ id, type: 'coins'\|'premium' }` | `{ type, coins\|premiumUntil, stats }`             |
 
 ### 4.2. Полная синхронизация состояния (`/api/sync`)
 
@@ -307,11 +310,12 @@ worker/
 
 ### 4.18. Панель администратора (`/admin`)
 
-| Метод    | URL                     | Доступ | Назначение                                                          |
-| :------- | :---------------------- | :----- | :------------------------------------------------------------------ |
-| `GET`    | `/admin/users`          | Admin  | Список всех зарегистрированных пользователей                        |
-| `GET`    | `/admin/users/:id/data` | Admin  | Полный слепок базы данных Cloudflare D1 для выбранного пользователя |
-| `DELETE` | `/admin/users/:id`      | Admin  | Безвозвратное удаление учётной записи и связанных данных            |
+| Метод    | URL                        | Доступ | Назначение                                                          |
+| :------- | :------------------------- | :----- | :------------------------------------------------------------------ |
+| `GET`    | `/admin/users`             | Admin  | Список всех зарегистрированных пользователей                        |
+| `POST`   | `/admin/users/:id/premium` | Admin  | Выдать/снять пожизненный премиум: `{ premium: boolean }`            |
+| `GET`    | `/admin/users/:id/data`    | Admin  | Полный слепок базы данных Cloudflare D1 для выбранного пользователя |
+| `DELETE` | `/admin/users/:id`         | Admin  | Безвозвратное удаление учётной записи и связанных данных            |
 
 ### 4.19. TMDB Прокси (`/tmdb` и корневые алиасы)
 

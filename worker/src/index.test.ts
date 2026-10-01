@@ -8,10 +8,10 @@ const testEnv = env as unknown as Env
 describe('Worker App Endpoints', () => {
   beforeAll(async () => {
     await testEnv.DB.exec(
-      'CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT "user", created_at TEXT NOT NULL, referral_code TEXT);' +
+      'CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT "user", created_at TEXT NOT NULL, referral_code TEXT, is_premium INTEGER NOT NULL DEFAULT 0, premium_until TEXT);' +
         'CREATE TABLE IF NOT EXISTS refresh_tokens (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT NOT NULL, expires_at TEXT NOT NULL);' +
         'CREATE TABLE IF NOT EXISTS shop_state (user_id TEXT PRIMARY KEY, coins INTEGER NOT NULL DEFAULT 1000, unlocked_parts_json TEXT NOT NULL DEFAULT "{}", active_cat_skin TEXT NOT NULL DEFAULT "classic", active_theme_skin TEXT NOT NULL DEFAULT "default", greeting_sent INTEGER NOT NULL DEFAULT 0, greeting_friend_name TEXT NOT NULL DEFAULT "", greeting_timestamp INTEGER, greeting_reward_claimed INTEGER NOT NULL DEFAULT 0, has_pending_greeting_reply INTEGER NOT NULL DEFAULT 0);' +
-        'CREATE TABLE IF NOT EXISTS referrals (id TEXT PRIMARY KEY, referrer_id TEXT NOT NULL, referee_id TEXT NOT NULL UNIQUE, code TEXT NOT NULL, referrer_reward INTEGER NOT NULL DEFAULT 0, referee_reward INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);' +
+        'CREATE TABLE IF NOT EXISTS referrals (id TEXT PRIMARY KEY, referrer_id TEXT NOT NULL, referee_id TEXT NOT NULL UNIQUE, code TEXT NOT NULL, referrer_reward INTEGER NOT NULL DEFAULT 0, referee_reward INTEGER NOT NULL DEFAULT 0, reward_type TEXT, claimed INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);' +
         'CREATE TABLE IF NOT EXISTS shop_coin_ops (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, reason TEXT NOT NULL, amount INTEGER NOT NULL, created_at TEXT NOT NULL);',
     )
   })
@@ -72,20 +72,16 @@ describe('Worker App Endpoints', () => {
     expect(res.status).toBe(426)
   })
 
-  it('grants referral rewards when registering with a friend code', async () => {
-    const headers = { 'content-type': 'application/json' }
+  it('registers a referral as a pending reward and claims it as coins or premium', async () => {
+    const headers = { 'content-type': 'application/json', 'cf-connecting-ip': '198.51.100.11' }
 
     const referrerRes = await app.request(
       '/auth/register',
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ email: `referrer-${Date.now()}@example.com`, password: 'secret123' }),
-      },
+      { method: 'POST', headers, body: JSON.stringify({ email: `referrer-${Date.now()}@example.com`, password: 'secret123' }) },
       testEnv,
     )
     expect(referrerRes.status).toBe(201)
-    const referrer = (await referrerRes.json()) as { referralCode: string; user: { id: string } }
+    const referrer = (await referrerRes.json()) as { referralCode: string; user: { id: string }; accessToken: string }
     expect(referrer.referralCode).toBeTruthy()
 
     const refereeRes = await app.request(
@@ -93,11 +89,7 @@ describe('Worker App Endpoints', () => {
       {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          email: `referee-${Date.now()}@example.com`,
-          password: 'secret123',
-          referralCode: referrer.referralCode,
-        }),
+        body: JSON.stringify({ email: `referee-${Date.now()}@example.com`, password: 'secret123', referralCode: referrer.referralCode }),
       },
       testEnv,
     )
@@ -106,15 +98,58 @@ describe('Worker App Endpoints', () => {
     expect(referee.referralReward).toBe(100)
     expect(referee.referralStatus).toBe('applied')
 
-    const referrerRow = await testEnv.DB.prepare('SELECT coins FROM shop_state WHERE user_id = ?')
+    const auth = { 'content-type': 'application/json', authorization: `Bearer ${referrer.accessToken}` }
+    const statsRes = await app.request('/auth/referral', { headers: auth }, testEnv)
+    const stats = (await statsRes.json()) as { invited: number; pending: { id: string }[]; earned: number }
+    expect(stats.invited).toBe(1)
+    expect(stats.pending).toHaveLength(1)
+    expect(stats.earned).toBe(0)
+
+    const referrerBefore = await testEnv.DB.prepare('SELECT coins FROM shop_state WHERE user_id = ?')
       .bind(referrer.user.id)
       .first<{ coins: number }>()
-    expect(referrerRow?.coins).toBe(1250)
+    expect(referrerBefore?.coins ?? 1000).toBe(1000)
 
-    const refereeRow = await testEnv.DB.prepare('SELECT coins FROM shop_state WHERE user_id = ?')
-      .bind(referee.user.id)
-      .first<{ coins: number }>()
-    expect(refereeRow?.coins).toBe(1100)
+    // claim as coins
+    const claimCoins = await app.request(
+      '/auth/referral/claim',
+      { method: 'POST', headers: auth, body: JSON.stringify({ id: stats.pending[0].id, type: 'coins' }) },
+      testEnv,
+    )
+    expect(claimCoins.status).toBe(200)
+    const claimCoinsData = (await claimCoins.json()) as { type: string; coins: number; stats: { pending: unknown[]; earned: number } }
+    expect(claimCoinsData.type).toBe('coins')
+    expect(claimCoinsData.coins).toBe(2000)
+    expect(claimCoinsData.stats.pending).toHaveLength(0)
+    expect(claimCoinsData.stats.earned).toBe(1000)
+
+    // second friend -> claim as premium
+    const secondRes = await app.request(
+      '/auth/register',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email: `referee2-${Date.now()}@example.com`, password: 'secret123', referralCode: referrer.referralCode }),
+      },
+      testEnv,
+    )
+    expect(secondRes.status).toBe(201)
+    const stats2Res = await app.request('/auth/referral', { headers: auth }, testEnv)
+    const stats2 = (await stats2Res.json()) as { pending: { id: string }[] }
+    expect(stats2.pending).toHaveLength(1)
+
+    const claimPremium = await app.request(
+      '/auth/referral/claim',
+      { method: 'POST', headers: auth, body: JSON.stringify({ id: stats2.pending[0].id, type: 'premium' }) },
+      testEnv,
+    )
+    expect(claimPremium.status).toBe(200)
+    const claimPremiumData = (await claimPremium.json()) as { type: string; premiumUntil: string }
+    expect(claimPremiumData.type).toBe('premium')
+    expect(claimPremiumData.premiumUntil).toBeTruthy()
+
+    const meRes = await app.request('/auth/me', { headers: auth }, testEnv)
+    expect(((await meRes.json()) as { premium: boolean }).premium).toBe(true)
   })
 
   it('ignores an unknown referral code without failing registration', async () => {
@@ -247,5 +282,37 @@ describe('Worker App Endpoints', () => {
     const state = (await res.json()) as { coins: number; activeThemeSkin: string }
     expect(state.coins).toBe(1000)
     expect(state.activeThemeSkin).toBe('cyberpunk')
+  })
+
+  it('marks admin as premium and lets admin grant premium to others', async () => {
+    const headers = { 'content-type': 'application/json', 'cf-connecting-ip': '198.51.100.7' }
+
+    const adminRes = await app.request(
+      '/auth/register',
+      { method: 'POST', headers, body: JSON.stringify({ email: 'your@email.com', password: 'secret123' }) },
+      testEnv,
+    )
+    expect(adminRes.status).toBe(201)
+    const admin = (await adminRes.json()) as { user: { premium: boolean }; accessToken: string }
+    expect(admin.user.premium).toBe(true)
+
+    const normalRes = await app.request(
+      '/auth/register',
+      { method: 'POST', headers, body: JSON.stringify({ email: `prem-${Date.now()}@example.com`, password: 'secret123' }) },
+      testEnv,
+    )
+    const normal = (await normalRes.json()) as { user: { id: string; premium: boolean } }
+    expect(normal.user.premium).toBe(false)
+
+    const grant = await app.request(
+      `/admin/users/${normal.user.id}/premium`,
+      { method: 'POST', headers: { ...headers, authorization: `Bearer ${admin.accessToken}` }, body: JSON.stringify({ premium: true }) },
+      testEnv,
+    )
+    expect(grant.status).toBe(200)
+    expect(((await grant.json()) as { premium: boolean }).premium).toBe(true)
+
+    const meRes = await app.request('/auth/me', { headers: { authorization: `Bearer ${admin.accessToken}` } }, testEnv)
+    expect(((await meRes.json()) as { premium: boolean }).premium).toBe(true)
   })
 })

@@ -1,10 +1,12 @@
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { getDb } from '../client'
 import { referrals, users } from '../schema'
 import { getShopState } from './shop'
+import { addMonths, isPremiumActive } from '../../lib/premium'
 
-export const REFERRER_REWARD = 250
 export const REFEREE_REWARD = 100
+export const REFERRAL_COINS = 1000
+export const REFERRAL_PREMIUM_MONTHS = 2
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const CODE_LENGTH = 8
@@ -56,48 +58,98 @@ const SHOP_UPSERT_COINS_SQL = `INSERT INTO shop_state (
 ) VALUES (?, ?, '{}', 'classic', 'default', 0, '', NULL, 0, 0)
 ON CONFLICT(user_id) DO UPDATE SET coins = excluded.coins`
 
-export const applyReferralRewards = async (
-  d1: D1Database,
-  input: { referrerId: string; refereeId: string; code: string; referrerReward: number; refereeReward: number },
-): Promise<void> => {
-  const [referrerShop, refereeShop] = await Promise.all([getShopState(d1, input.referrerId), getShopState(d1, input.refereeId)])
-
-  const referrerCoins = (referrerShop.coins ?? 0) + input.referrerReward
-  const refereeCoins = (refereeShop.coins ?? 0) + input.refereeReward
+export const registerReferral = async (d1: D1Database, input: { referrerId: string; refereeId: string; code: string }): Promise<void> => {
+  const refereeShop = await getShopState(d1, input.refereeId)
+  const refereeCoins = (refereeShop.coins ?? 0) + REFEREE_REWARD
 
   await d1.batch([
     d1
       .prepare(
-        'INSERT INTO referrals (id, referrer_id, referee_id, code, referrer_reward, referee_reward, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        `INSERT INTO referrals (id, referrer_id, referee_id, code, referrer_reward, referee_reward, reward_type, claimed, created_at)
+         VALUES (?, ?, ?, ?, 0, ?, NULL, 0, ?)`,
       )
-      .bind(
-        crypto.randomUUID(),
-        input.referrerId,
-        input.refereeId,
-        input.code,
-        input.referrerReward,
-        input.refereeReward,
-        new Date().toISOString(),
-      ),
-    d1.prepare(SHOP_UPSERT_COINS_SQL).bind(input.referrerId, referrerCoins),
+      .bind(crypto.randomUUID(), input.referrerId, input.refereeId, input.code, REFEREE_REWARD, new Date().toISOString()),
     d1.prepare(SHOP_UPSERT_COINS_SQL).bind(input.refereeId, refereeCoins),
   ])
 }
+
+export type PendingReferral = { id: string; createdAt: string }
 
 export type ReferralStats = {
   code: string
   invited: number
   earned: number
+  pending: PendingReferral[]
+  premiumUntil: string | null
 }
 
 export const getReferralStats = async (d1: D1Database, userId: string): Promise<ReferralStats> => {
   const db = getDb(d1)
   const code = await getOrCreateReferralCode(d1, userId)
-  const rows = await db.select({ referrerReward: referrals.referrerReward }).from(referrals).where(eq(referrals.referrerId, userId))
+  const rows = await db
+    .select({ id: referrals.id, referrerReward: referrals.referrerReward, claimed: referrals.claimed, createdAt: referrals.createdAt })
+    .from(referrals)
+    .where(eq(referrals.referrerId, userId))
+
+  const user = await db
+    .select({ isPremium: users.isPremium, premiumUntil: users.premiumUntil })
+    .from(users)
+    .where(eq(users.id, userId))
+    .get()
 
   return {
     code,
     invited: rows.length,
-    earned: rows.reduce((sum, row) => sum + (row.referrerReward || 0), 0),
+    earned: rows.reduce((sum, row) => sum + (row.claimed ? row.referrerReward || 0 : 0), 0),
+    pending: rows.filter((row) => !row.claimed).map((row) => ({ id: row.id, createdAt: row.createdAt })),
+    premiumUntil: user?.premiumUntil ?? null,
   }
+}
+
+export type ClaimResult =
+  | { ok: true; type: 'coins'; coins: number; premiumUntil: string | null }
+  | { ok: true; type: 'premium'; premiumUntil: string }
+  | { ok: false; error: 'NOT_FOUND' | 'INVALID_TYPE' | 'ALREADY_CLAIMED' }
+
+export const claimReferralReward = async (d1: D1Database, userId: string, referralId: string, type: string): Promise<ClaimResult> => {
+  if (type !== 'coins' && type !== 'premium') return { ok: false, error: 'INVALID_TYPE' }
+
+  const db = getDb(d1)
+  const referral = await db
+    .select({ id: referrals.id, claimed: referrals.claimed })
+    .from(referrals)
+    .where(and(eq(referrals.id, referralId), eq(referrals.referrerId, userId)))
+    .get()
+
+  if (!referral) return { ok: false, error: 'NOT_FOUND' }
+  if (referral.claimed) return { ok: false, error: 'ALREADY_CLAIMED' }
+
+  const now = new Date().toISOString()
+
+  if (type === 'coins') {
+    const shop = await getShopState(d1, userId)
+    const coins = (shop.coins ?? 0) + REFERRAL_COINS
+    await d1.batch([
+      d1
+        .prepare('UPDATE referrals SET claimed = 1, reward_type = ?, referrer_reward = ? WHERE id = ?')
+        .bind('coins', REFERRAL_COINS, referralId),
+      d1.prepare(SHOP_UPSERT_COINS_SQL).bind(userId, coins),
+    ])
+    return { ok: true, type: 'coins', coins, premiumUntil: null }
+  }
+
+  const user = await db
+    .select({ isPremium: users.isPremium, premiumUntil: users.premiumUntil })
+    .from(users)
+    .where(eq(users.id, userId))
+    .get()
+  const base = isPremiumActive({ isPremium: user?.isPremium, premiumUntil: user?.premiumUntil }, now) ? (user?.premiumUntil ?? now) : now
+  const premiumUntil = addMonths(base > now ? base : now, REFERRAL_PREMIUM_MONTHS)
+
+  await d1.batch([
+    d1.prepare('UPDATE referrals SET claimed = 1, reward_type = ?, referrer_reward = 0 WHERE id = ?').bind('premium', referralId),
+    d1.prepare('UPDATE users SET premium_until = ? WHERE id = ?').bind(premiumUntil, userId),
+  ])
+
+  return { ok: true, type: 'premium', premiumUntil }
 }

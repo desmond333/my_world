@@ -77,7 +77,7 @@ const REAL_MONEY_PACKS: RealMoneyPack[] = [
 ]
 
 export const ShopPage = () => {
-  const { lang } = useTranslation()
+  const { lang, t } = useTranslation()
   const navigate = useNavigate()
 
   const coins = useShopStore((state) => state.coins)
@@ -107,12 +107,8 @@ export const ShopPage = () => {
     if (!result.success) {
       const message =
         result.error === 'insufficient'
-          ? isEn
-            ? 'Not enough coins for this purchase.'
-            : 'Недостаточно монет для покупки.'
-          : isEn
-            ? 'Purchase failed. Check your connection.'
-            : 'Не удалось купить. Проверьте соединение.'
+          ? t('shop.not-enough-coins-for-this-purchase', 'Недостаточно монет для покупки.')
+          : t('shop.purchase-failed-check-your-connection', 'Не удалось купить. Проверьте соединение.')
       setPurchaseSuccessNotice(message)
       setTimeout(() => setPurchaseSuccessNotice(null), 3000)
       return
@@ -121,23 +117,23 @@ export const ShopPage = () => {
     playVictoryFanfare()
     let title = ''
     if (key === 'lottery') {
-      title = isEn ? 'Medieval Battle Lottery unlocked!' : 'Средневековая лотерея разблокирована!'
+      title = t('shop.medieval-battle-lottery-unlocked', 'Средневековая лотерея разблокирована!')
     } else if (key === 'statham') {
-      title = isEn ? 'Jason Statham section unlocked!' : 'Раздел Джейсона Стэтхэма разблокирован!'
+      title = t('shop.jason-statham-section-unlocked', 'Раздел Джейсона Стэтхэма разблокирован!')
     } else if (key === 'cat_wizard') {
-      title = isEn ? 'Wizard Cat costume unlocked!' : 'Костюм Кота-Чародея открыт!'
+      title = t('shop.wizard-cat-costume-unlocked', 'Костюм Кота-Чародея открыт!')
       equipCatSkin('wizard')
     } else if (key === 'cat_cyber') {
-      title = isEn ? 'Cyber Cat costume unlocked!' : 'Костюм Кибер-Кота открыт!'
+      title = t('shop.cyber-cat-costume-unlocked', 'Костюм Кибер-Кота открыт!')
       equipCatSkin('cyber')
     } else if (key === 'theme_cyberpunk') {
-      title = isEn ? 'Cyberpunk VIP theme unlocked!' : 'VIP-тема Киберпанк активирована!'
+      title = t('shop.cyberpunk-vip-theme-unlocked', 'VIP-тема Киберпанк активирована!')
       equipThemeSkin('cyberpunk')
     } else if (key === 'theme_midnight_gold') {
-      title = isEn ? 'Midnight Gold VIP theme unlocked!' : 'VIP-тема Королевское Золото активирована!'
+      title = t('shop.midnight-gold-vip-theme-unlocked', 'VIP-тема Королевское Золото активирована!')
       equipThemeSkin('midnight_gold')
     } else if (key === 'sound_lofi') {
-      title = isEn ? 'Lo-Fi Ambient Sound Box unlocked!' : 'Lo-Fi Шкатулка звуков открыта!'
+      title = t('shop.lo-fi-ambient-sound-box-unlocked', 'Lo-Fi Шкатулка звуков открыта!')
     }
 
     setPurchaseSuccessNotice(title)
@@ -152,9 +148,7 @@ export const ShopPage = () => {
       credit(activePack.id, activePack.coins)
       playBattleHorn()
       setPayModalProcessing(false)
-      const notice = isEn
-        ? `Successfully purchased +${activePack.coins.toLocaleString()} Coins!`
-        : `Казна пополнена на +${activePack.coins.toLocaleString()} 🪙!`
+      const notice = t('shop.purchaseSuccess', undefined, { coins: activePack.coins.toLocaleString() })
       setActivePack(null)
       setPurchaseSuccessNotice(notice)
       setTimeout(() => setPurchaseSuccessNotice(null), 3500)
@@ -199,34 +193,32 @@ export const ShopPage = () => {
                 <span className="shop-pay-icon">{activePack.icon}</span>
                 <h3>{isEn ? activePack.nameEn : activePack.nameRu}</h3>
                 <div className="shop-pay-amount">
-                  +{activePack.coins.toLocaleString()} {isEn ? 'Coins' : 'монет'}
+                  +{activePack.coins.toLocaleString()} {t('shop.coins')}
                 </div>
               </div>
 
               <div className="shop-pay-details">
                 <div className="shop-pay-row">
-                  <span>{isEn ? 'Price:' : 'Стоимость:'}</span>
+                  <span>{t('shop.price')}</span>
                   <strong>{isEn ? `$${activePack.priceUsd}` : `${activePack.priceRub} ₽`}</strong>
                 </div>
                 <div className="shop-pay-row">
-                  <span>{isEn ? 'Delivery:' : 'Доставка:'}</span>
-                  <strong className="text-instant">{isEn ? 'Instant' : 'Мгновенно'}</strong>
+                  <span>{t('shop.delivery')}</span>
+                  <strong className="text-instant">{t('shop.instant')}</strong>
                 </div>
                 <div className="shop-pay-row">
-                  <span>{isEn ? 'Security:' : 'Безопасность:'}</span>
-                  <span>{isEn ? '256-bit encrypted simulation' : 'Защищённый шлюз'}</span>
+                  <span>{t('shop.security')}</span>
+                  <span>{t('shop.256-bit-encrypted-simulation', 'Защищённый шлюз')}</span>
                 </div>
               </div>
 
               <button type="button" className="shop-pay-confirm-btn" onClick={handleSimulatePayment} disabled={payModalProcessing}>
                 {payModalProcessing ? (
-                  <span>{isEn ? 'Processing...' : 'Обработка платежа...'}</span>
+                  <span>{t('shop.processing')}</span>
                 ) : (
                   <>
                     <CreditCard size={15} />
-                    <span>
-                      {isEn ? `Pay $${activePack.priceUsd} & Receive Coins 🪙` : `Оплатить ${activePack.priceRub} ₽ и забрать 🪙`}
-                    </span>
+                    <span>{t('shop.payAndReceive', undefined, { usd: activePack.priceUsd, rub: activePack.priceRub })}</span>
                   </>
                 )}
               </button>
@@ -237,20 +229,21 @@ export const ShopPage = () => {
         <header className="shop-head">
           <div className="shop-head-meta">
             <p className="eyebrow">
-              <Crown size={15} /> {isEn ? 'royal marketplace' : 'королевская ярмарка'}
+              <Crown size={15} /> {t('shop.royal-marketplace', 'королевская ярмарка')}
             </p>
             <div className="shop-balance-pill">
               <Coins size={18} className="shop-balance-coin" />
-              <span>{isEn ? 'Treasury:' : 'В казне:'}</span>
+              <span>{t('shop.treasury')}</span>
               <strong>{coins.toLocaleString()} 🪙</strong>
             </div>
           </div>
 
-          <h1>{isEn ? 'Royal Market & Shop' : 'Королевский Магазин'}</h1>
+          <h1>{t('shop.royal-market-shop', 'Королевский Магазин')}</h1>
           <p className="intro">
-            {isEn
-              ? 'Unlock special sections, unique virtual cat costumes, VIP themes, and ambient audio with your treasury coins.'
-              : 'Разблокируй разделы сайта, уникальные образы кота, VIP-темы оформления и расслабляющий Lo-Fi звук за золотые монеты.'}
+            {t(
+              'shop.unlock-special-sections-unique-virtual-cat-costu',
+              'Разблокируй разделы сайта, уникальные образы кота, VIP-темы оформления и расслабляющий Lo-Fi звук за золотые монеты.',
+            )}
           </p>
         </header>
 
@@ -258,12 +251,13 @@ export const ShopPage = () => {
           <div className="shop-section-head">
             <div className="section-title-wrap">
               <ShoppingBag size={18} className="section-icon" />
-              <h2>{isEn ? 'Unlockable Sections' : 'Разделы сайта'}</h2>
+              <h2>{t('shop.unlockable-sections', 'Разделы сайта')}</h2>
             </div>
             <p className="section-desc">
-              {isEn
-                ? 'Each exclusive realm costs 250 coins. Once unlocked, it remains accessible forever.'
-                : 'Каждый эксклюзивный раздел стоит 250 монет. После покупки он остаётся открыт навсегда.'}
+              {t(
+                'shop.each-exclusive-realm-costs-250-coins-once-unlock',
+                'Каждый эксклюзивный раздел стоит 250 монет. После покупки он остаётся открыт навсегда.',
+              )}
             </p>
           </div>
 
@@ -272,7 +266,7 @@ export const ShopPage = () => {
               <div className="shop-item-badge">
                 {isUnlocked('lottery') ? (
                   <span className="badge-bought">
-                    <Check size={12} /> {isEn ? 'Unlocked' : 'Открыто'}
+                    <Check size={12} /> {t('shop.unlocked')}
                   </span>
                 ) : (
                   <span className="badge-price">{PART_PRICES.lottery} 🪙</span>
@@ -284,21 +278,22 @@ export const ShopPage = () => {
                   <Swords size={28} />
                 </div>
                 <div>
-                  <h3 className="shop-item-title">{isEn ? 'Medieval Battle Lottery' : 'Средневековая лотерея: Битва'}</h3>
-                  <span className="shop-item-tag">{isEn ? 'Emerald Dragon vs Amethyst Raven' : 'Зелёные vs Фиолетовые'}</span>
+                  <h3 className="shop-item-title">{t('shop.medieval-battle-lottery', 'Средневековая лотерея: Битва')}</h3>
+                  <span className="shop-item-tag">{t('shop.emerald-dragon-vs-amethyst-raven', 'Зелёные vs Фиолетовые')}</span>
                 </div>
               </div>
 
               <p className="shop-item-desc">
-                {isEn
-                  ? 'Tactical clash between kingdoms. Recruit swordsmen, archers, knights and siege mages. Hidden odds and golden victory plunder.'
-                  : 'Тактическое сражение королевств. Нанимай мечников, лучников, рыцарей и магов. Скрытые шансы и золотые боевые трофеи.'}
+                {t(
+                  'shop.tactical-clash-between-kingdoms-recruit-swordsme',
+                  'Тактическое сражение королевств. Нанимай мечников, лучников, рыцарей и магов. Скрытые шансы и золотые боевые трофеи.',
+                )}
               </p>
 
               <div className="shop-item-footer">
                 {isUnlocked('lottery') ? (
                   <button type="button" className="shop-open-btn" onClick={() => navigate('/misc/lottery')}>
-                    <span>{isEn ? 'Enter Arena ⚔️' : 'Перейти в битву ⚔️'}</span>
+                    <span>{t('shop.enter-arena', 'Перейти в битву ⚔️')}</span>
                   </button>
                 ) : (
                   <button
@@ -308,7 +303,7 @@ export const ShopPage = () => {
                     disabled={coins < PART_PRICES.lottery}
                   >
                     <Sparkles size={14} />
-                    <span>{isEn ? `Unlock for ${PART_PRICES.lottery} 🪙` : `Купить за ${PART_PRICES.lottery} 🪙`}</span>
+                    <span>{t('shop.unlockFor', undefined, { price: PART_PRICES.lottery })}</span>
                   </button>
                 )}
               </div>
@@ -318,7 +313,7 @@ export const ShopPage = () => {
               <div className="shop-item-badge">
                 {isUnlocked('statham') ? (
                   <span className="badge-bought">
-                    <Check size={12} /> {isEn ? 'Unlocked' : 'Открыто'}
+                    <Check size={12} /> {t('shop.unlocked')}
                   </span>
                 ) : (
                   <span className="badge-price">{PART_PRICES.statham} 🪙</span>
@@ -330,21 +325,22 @@ export const ShopPage = () => {
                   <Flame size={28} />
                 </div>
                 <div>
-                  <h3 className="shop-item-title">{isEn ? 'Jason Statham: Memes & Quotes' : 'Джейсон Стэйтем: Мемы и Цитаты'}</h3>
-                  <span className="shop-item-tag">{isEn ? 'Wisdom, soundboard & costumes' : 'Цитаты, пацанский саундборд и образы'}</span>
+                  <h3 className="shop-item-title">{t('shop.jason-statham-memes-quotes', 'Джейсон Стэйтем: Мемы и Цитаты')}</h3>
+                  <span className="shop-item-tag">{t('shop.wisdom-soundboard-costumes', 'Цитаты, пацанский саундборд и образы')}</span>
                 </div>
               </div>
 
               <p className="shop-item-desc">
-                {isEn
-                  ? 'Legendary street quotes, interactive costumes with wig and red clown nose, clown-meter, soundboard and funny memes.'
-                  : 'Легендарные уличные цитаты, интерактивная примерка парика и носа Стэйтему, клоунометр, звуковые сигналы и коллекция мемов.'}
+                {t(
+                  'shop.legendary-street-quotes-interactive-costumes-wit',
+                  'Легендарные уличные цитаты, интерактивная примерка парика и носа Стэйтему, клоунометр, звуковые сигналы и коллекция мемов.',
+                )}
               </p>
 
               <div className="shop-item-footer">
                 {isUnlocked('statham') ? (
                   <button type="button" className="shop-open-btn" onClick={() => navigate('/misc/fun')}>
-                    <span>{isEn ? 'Open Statham 🐺' : 'Открыть Стэйтема 🐺'}</span>
+                    <span>{t('shop.open-statham', 'Открыть Стэйтема 🐺')}</span>
                   </button>
                 ) : (
                   <button
@@ -354,7 +350,7 @@ export const ShopPage = () => {
                     disabled={coins < PART_PRICES.statham}
                   >
                     <Sparkles size={14} />
-                    <span>{isEn ? `Unlock for ${PART_PRICES.statham} 🪙` : `Купить за ${PART_PRICES.statham} 🪙`}</span>
+                    <span>{t('shop.unlockFor', undefined, { price: PART_PRICES.statham })}</span>
                   </button>
                 )}
               </div>
@@ -366,12 +362,13 @@ export const ShopPage = () => {
           <div className="shop-section-head">
             <div className="section-title-wrap">
               <Wand2 size={18} className="section-icon" />
-              <h2>{isEn ? 'Cat Assistant Wardrobe' : 'Гардероб Кота-Ассистента'}</h2>
+              <h2>{t('shop.cat-assistant-wardrobe', 'Гардероб Кота-Ассистента')}</h2>
             </div>
             <p className="section-desc">
-              {isEn
-                ? 'Equip exclusive animated skins for your virtual cat avatar in normal mode.'
-                : 'Эксклюзивные анимированные скины для премиального аватара кота-помощника.'}
+              {t(
+                'shop.equip-exclusive-animated-skins-for-your-virtual-',
+                'Эксклюзивные анимированные скины для премиального аватара кота-помощника.',
+              )}
             </p>
           </div>
 
@@ -380,7 +377,7 @@ export const ShopPage = () => {
               <div className="shop-item-badge">
                 {isUnlocked('cat_wizard') ? (
                   <span className="badge-bought">
-                    <Check size={12} /> {isEn ? 'Unlocked' : 'Открыто'}
+                    <Check size={12} /> {t('shop.unlocked')}
                   </span>
                 ) : (
                   <span className="badge-price">{PART_PRICES.cat_wizard} 🪙</span>
@@ -392,15 +389,16 @@ export const ShopPage = () => {
                   <CatPremiumAvatar size={50} skin="wizard" />
                 </div>
                 <div>
-                  <h3 className="shop-item-title">{isEn ? 'Wizard Cat' : 'Кот-Чародей 🧙‍♂️'}</h3>
-                  <span className="shop-item-tag">{isEn ? 'Magic star hat & celestial glow' : 'Волшебный колпак и звёздная аура'}</span>
+                  <h3 className="shop-item-title">{t('shop.wizard-cat', 'Кот-Чародей 🧙‍♂️')}</h3>
+                  <span className="shop-item-tag">{t('shop.magic-star-hat-celestial-glow', 'Волшебный колпак и звёздная аура')}</span>
                 </div>
               </div>
 
               <p className="shop-item-desc">
-                {isEn
-                  ? 'Transforms your cat assistant into an ancient sorcerer with a star-crested conical hat and mystical sparkle effects.'
-                  : 'Превращает кота-ассистента в древнего мага в остроконечном колпаке с золотыми звёздами и искрами.'}
+                {t(
+                  'shop.transforms-your-cat-assistant-into-an-ancient-so',
+                  'Превращает кота-ассистента в древнего мага в остроконечном колпаке с золотыми звёздами и искрами.',
+                )}
               </p>
 
               <div className="shop-item-footer">
@@ -413,10 +411,10 @@ export const ShopPage = () => {
                     >
                       {activeCatSkin === 'wizard' ? (
                         <>
-                          <Check size={14} /> <span>{isEn ? 'Equipped' : 'Надето'}</span>
+                          <Check size={14} /> <span>{t('shop.equipped')}</span>
                         </>
                       ) : (
-                        <span>{isEn ? 'Equip Costume' : 'Надеть костюм'}</span>
+                        <span>{t('shop.equip-costume', 'Надеть костюм')}</span>
                       )}
                     </button>
                   </div>
@@ -428,7 +426,7 @@ export const ShopPage = () => {
                     disabled={coins < PART_PRICES.cat_wizard}
                   >
                     <Sparkles size={14} />
-                    <span>{isEn ? `Unlock for ${PART_PRICES.cat_wizard} 🪙` : `Купить за ${PART_PRICES.cat_wizard} 🪙`}</span>
+                    <span>{t('shop.unlockFor', undefined, { price: PART_PRICES.cat_wizard })}</span>
                   </button>
                 )}
               </div>
@@ -438,7 +436,7 @@ export const ShopPage = () => {
               <div className="shop-item-badge">
                 {isUnlocked('cat_cyber') ? (
                   <span className="badge-bought">
-                    <Check size={12} /> {isEn ? 'Unlocked' : 'Открыто'}
+                    <Check size={12} /> {t('shop.unlocked')}
                   </span>
                 ) : (
                   <span className="badge-price">{PART_PRICES.cat_cyber} 🪙</span>
@@ -450,15 +448,16 @@ export const ShopPage = () => {
                   <CatPremiumAvatar size={50} skin="cyber" />
                 </div>
                 <div>
-                  <h3 className="shop-item-title">{isEn ? 'Cyber-Cat 2077' : 'Кибер-Кот 🐱⚡'}</h3>
-                  <span className="shop-item-tag">{isEn ? 'Neon cyan visor & antenna' : 'Неоновый визор и антенна'}</span>
+                  <h3 className="shop-item-title">{t('shop.cyber-cat-2077', 'Кибер-Кот 🐱⚡')}</h3>
+                  <span className="shop-item-tag">{t('shop.neon-cyan-visor-antenna', 'Неоновый визор и антенна')}</span>
                 </div>
               </div>
 
               <p className="shop-item-desc">
-                {isEn
-                  ? 'Futuristic cybernetic enhancements: glowing cyan tactical HUD visor, ear communications antenna, and cyber aura.'
-                  : 'Футуристический визор с неоновым интерфейсом, коммуникационная антенна и кибер-аура.'}
+                {t(
+                  'shop.futuristic-cybernetic-enhancements-glowing-cyan-',
+                  'Футуристический визор с неоновым интерфейсом, коммуникационная антенна и кибер-аура.',
+                )}
               </p>
 
               <div className="shop-item-footer">
@@ -471,10 +470,10 @@ export const ShopPage = () => {
                     >
                       {activeCatSkin === 'cyber' ? (
                         <>
-                          <Check size={14} /> <span>{isEn ? 'Equipped' : 'Надето'}</span>
+                          <Check size={14} /> <span>{t('shop.equipped')}</span>
                         </>
                       ) : (
-                        <span>{isEn ? 'Equip Costume' : 'Надеть костюм'}</span>
+                        <span>{t('shop.equip-costume', 'Надеть костюм')}</span>
                       )}
                     </button>
                   </div>
@@ -486,7 +485,7 @@ export const ShopPage = () => {
                     disabled={coins < PART_PRICES.cat_cyber}
                   >
                     <Sparkles size={14} />
-                    <span>{isEn ? `Unlock for ${PART_PRICES.cat_cyber} 🪙` : `Купить за ${PART_PRICES.cat_cyber} 🪙`}</span>
+                    <span>{t('shop.unlockFor', undefined, { price: PART_PRICES.cat_cyber })}</span>
                   </button>
                 )}
               </div>
@@ -498,12 +497,13 @@ export const ShopPage = () => {
           <div className="shop-section-head">
             <div className="section-title-wrap">
               <Palette size={18} className="section-icon" />
-              <h2>{isEn ? 'VIP Themes & Color Schemes' : 'Премиальные темы оформления'}</h2>
+              <h2>{t('shop.vip-themes-color-schemes', 'Премиальные темы оформления')}</h2>
             </div>
             <p className="section-desc">
-              {isEn
-                ? 'Luxurious palettes for the entire application interface.'
-                : 'Уникальные дизайнерские цветовые гаммы для всего интерфейса приложения.'}
+              {t(
+                'shop.luxurious-palettes-for-the-entire-application-in',
+                'Уникальные дизайнерские цветовые гаммы для всего интерфейса приложения.',
+              )}
             </p>
           </div>
 
@@ -512,7 +512,7 @@ export const ShopPage = () => {
               <div className="shop-item-badge">
                 {isUnlocked('theme_cyberpunk') ? (
                   <span className="badge-bought">
-                    <Check size={12} /> {isEn ? 'Unlocked' : 'Открыто'}
+                    <Check size={12} /> {t('shop.unlocked')}
                   </span>
                 ) : (
                   <span className="badge-price">{PART_PRICES.theme_cyberpunk} 🪙</span>
@@ -524,19 +524,20 @@ export const ShopPage = () => {
                   <Zap size={28} />
                 </div>
                 <div>
-                  <h3 className="shop-item-title">{isEn ? 'Neon Cyberpunk' : 'Неоновый Киберпанк'}</h3>
+                  <h3 className="shop-item-title">{t('shop.neon-cyberpunk', 'Неоновый Киберпанк')}</h3>
                   <div className="theme-palette-dots">
-                    <span style={{ background: isLight ? '#f1f6fc' : '#090a14' }} title={isEn ? 'Canvas' : 'Фон'} />
-                    <span style={{ background: isLight ? '#0077b6' : '#00f2fe' }} title={isEn ? 'Cyan Accent' : 'Циан'} />
-                    <span style={{ background: isLight ? '#d40066' : '#ff007f' }} title={isEn ? 'Magenta Accent' : 'Маджента'} />
+                    <span style={{ background: isLight ? '#f1f6fc' : '#090a14' }} title={t('shop.canvas')} />
+                    <span style={{ background: isLight ? '#0077b6' : '#00f2fe' }} title={t('shop.cyan-accent', 'Циан')} />
+                    <span style={{ background: isLight ? '#d40066' : '#ff007f' }} title={t('shop.magenta-accent', 'Маджента')} />
                   </div>
                 </div>
               </div>
 
               <p className="shop-item-desc">
-                {isEn
-                  ? 'Dual theme (adapts to light & dark modes). Clean ice-cyber canvas with electric cyan in light mode; deep sapphire with glowing neon in dark mode.'
-                  : 'Двойная тема (адаптируется к светлому и тёмному режимам). Ледяной кибер-фон со светящимся цианом в светлом режиме и глубокий сапфир с неоном в тёмном.'}
+                {t(
+                  'shop.dual-theme-adapts-to-light-dark-modes-clean-ice-',
+                  'Двойная тема (адаптируется к светлому и тёмному режимам). Ледяной кибер-фон со светящимся цианом в светлом режиме и глубокий сапфир с неоном в тёмном.',
+                )}
               </p>
 
               <div className="shop-item-footer">
@@ -548,10 +549,10 @@ export const ShopPage = () => {
                   >
                     {activeThemeSkin === 'cyberpunk' ? (
                       <>
-                        <Check size={14} /> <span>{isEn ? 'Theme Active' : 'Тема активна'}</span>
+                        <Check size={14} /> <span>{t('shop.theme-active', 'Тема активна')}</span>
                       </>
                     ) : (
-                      <span>{isEn ? 'Apply Cyberpunk' : 'Применить тему'}</span>
+                      <span>{t('shop.apply-cyberpunk', 'Применить тему')}</span>
                     )}
                   </button>
                 ) : (
@@ -562,7 +563,7 @@ export const ShopPage = () => {
                     disabled={coins < PART_PRICES.theme_cyberpunk}
                   >
                     <Sparkles size={14} />
-                    <span>{isEn ? `Unlock for ${PART_PRICES.theme_cyberpunk} 🪙` : `Купить за ${PART_PRICES.theme_cyberpunk} 🪙`}</span>
+                    <span>{t('shop.unlockFor', undefined, { price: PART_PRICES.theme_cyberpunk })}</span>
                   </button>
                 )}
               </div>
@@ -572,7 +573,7 @@ export const ShopPage = () => {
               <div className="shop-item-badge">
                 {isUnlocked('theme_midnight_gold') ? (
                   <span className="badge-bought">
-                    <Check size={12} /> {isEn ? 'Unlocked' : 'Открыто'}
+                    <Check size={12} /> {t('shop.unlocked')}
                   </span>
                 ) : (
                   <span className="badge-price">{PART_PRICES.theme_midnight_gold} 🪙</span>
@@ -584,19 +585,20 @@ export const ShopPage = () => {
                   <Crown size={28} />
                 </div>
                 <div>
-                  <h3 className="shop-item-title">{isEn ? 'Midnight Gold' : 'Королевское Золото'}</h3>
+                  <h3 className="shop-item-title">{t('shop.midnight-gold', 'Королевское Золото')}</h3>
                   <div className="theme-palette-dots">
-                    <span style={{ background: isLight ? '#faf6ed' : '#0d0c0a' }} title={isEn ? 'Canvas' : 'Фон'} />
-                    <span style={{ background: isLight ? '#b38206' : '#ffd700' }} title={isEn ? 'Gold Accent' : 'Золото'} />
-                    <span style={{ background: isLight ? '#c0631c' : '#e5a93c' }} title={isEn ? 'Amber Accent' : 'Янтарь'} />
+                    <span style={{ background: isLight ? '#faf6ed' : '#0d0c0a' }} title={t('shop.canvas')} />
+                    <span style={{ background: isLight ? '#b38206' : '#ffd700' }} title={t('shop.gold-accent', 'Золото')} />
+                    <span style={{ background: isLight ? '#c0631c' : '#e5a93c' }} title={t('shop.amber-accent', 'Янтарь')} />
                   </div>
                 </div>
               </div>
 
               <p className="shop-item-desc">
-                {isEn
-                  ? 'Dual theme (adapts to light & dark modes). Regal champagne ivory in light mode; obsidian black with imperial gold illumination in dark mode.'
-                  : 'Двойная тема (адаптируется к светлому и тёмному режимам). Благородная слоновая кость в светлом режиме и обсидиановый фон с золотым тиснением в тёмном.'}
+                {t(
+                  'shop.dual-theme-adapts-to-light-dark-modes-regal-cham',
+                  'Двойная тема (адаптируется к светлому и тёмному режимам). Благородная слоновая кость в светлом режиме и обсидиановый фон с золотым тиснением в тёмном.',
+                )}
               </p>
 
               <div className="shop-item-footer">
@@ -608,10 +610,10 @@ export const ShopPage = () => {
                   >
                     {activeThemeSkin === 'midnight_gold' ? (
                       <>
-                        <Check size={14} /> <span>{isEn ? 'Theme Active' : 'Тема активна'}</span>
+                        <Check size={14} /> <span>{t('shop.theme-active', 'Тема активна')}</span>
                       </>
                     ) : (
-                      <span>{isEn ? 'Apply Midnight Gold' : 'Применить тему'}</span>
+                      <span>{t('shop.apply-midnight-gold', 'Применить тему')}</span>
                     )}
                   </button>
                 ) : (
@@ -622,9 +624,7 @@ export const ShopPage = () => {
                     disabled={coins < PART_PRICES.theme_midnight_gold}
                   >
                     <Sparkles size={14} />
-                    <span>
-                      {isEn ? `Unlock for ${PART_PRICES.theme_midnight_gold} 🪙` : `Купить за ${PART_PRICES.theme_midnight_gold} 🪙`}
-                    </span>
+                    <span>{t('shop.unlockFor', undefined, { price: PART_PRICES.theme_midnight_gold })}</span>
                   </button>
                 )}
               </div>
@@ -636,12 +636,13 @@ export const ShopPage = () => {
           <div className="shop-section-head">
             <div className="section-title-wrap">
               <Headphones size={18} className="section-icon" />
-              <h2>{isEn ? 'Lo-Fi Focus Sound Box' : 'Lo-Fi Звуковая шкатулка'}</h2>
+              <h2>{t('shop.lo-fi-focus-sound-box', 'Lo-Fi Звуковая шкатулка')}</h2>
             </div>
             <p className="section-desc">
-              {isEn
-                ? 'Synthesized relaxing ambient sounds for productivity, reading, and deep concentration.'
-                : 'Процедурные расслабляющие звуки для продуктивной работы, чтения и медитации.'}
+              {t(
+                'shop.synthesized-relaxing-ambient-sounds-for-producti',
+                'Процедурные расслабляющие звуки для продуктивной работы, чтения и медитации.',
+              )}
             </p>
           </div>
 
@@ -650,7 +651,7 @@ export const ShopPage = () => {
               <div className="shop-item-badge">
                 {isUnlocked('sound_lofi') ? (
                   <span className="badge-bought">
-                    <Check size={12} /> {isEn ? 'Unlocked' : 'Открыто'}
+                    <Check size={12} /> {t('shop.unlocked')}
                   </span>
                 ) : (
                   <span className="badge-price">{PART_PRICES.sound_lofi} 🪙</span>
@@ -662,17 +663,16 @@ export const ShopPage = () => {
                   <Volume2 size={28} />
                 </div>
                 <div>
-                  <h3 className="shop-item-title">{isEn ? 'Procedural Soundscapes' : 'Процедурный эмбиент-генератор'}</h3>
-                  <span className="shop-item-tag">
-                    {isEn ? 'Cozy Rain, Fireplace & Deep Drone' : 'Уютный дождь, камин и космический гул'}
-                  </span>
+                  <h3 className="shop-item-title">{t('shop.procedural-soundscapes', 'Процедурный эмбиент-генератор')}</h3>
+                  <span className="shop-item-tag">{t('shop.cozy-rain-fireplace-deep-drone', 'Уютный дождь, камин и космический гул')}</span>
                 </div>
               </div>
 
               <p className="shop-item-desc">
-                {isEn
-                  ? 'Real-time generated procedural audio via Web Audio API. Zero internet traffic, pure relaxation, and focus booster.'
-                  : 'Генерация звука в реальном времени прямо в браузере. Без расхода трафика, успокаивает ум и помогает сосредоточиться.'}
+                {t(
+                  'shop.real-time-generated-procedural-audio-via-web-aud',
+                  'Генерация звука в реальном времени прямо в браузере. Без расхода трафика, успокаивает ум и помогает сосредоточиться.',
+                )}
               </p>
 
               <div className="shop-item-footer">
@@ -685,7 +685,7 @@ export const ShopPage = () => {
                         onClick={() => handleAmbientPlay('rain')}
                       >
                         <CloudRain size={14} />
-                        <span>{isEn ? 'Rain' : 'Дождь'}</span>
+                        <span>{t('shop.rain')}</span>
                       </button>
                       <button
                         type="button"
@@ -693,7 +693,7 @@ export const ShopPage = () => {
                         onClick={() => handleAmbientPlay('fire')}
                       >
                         <Flame size={14} />
-                        <span>{isEn ? 'Fireplace' : 'Камин'}</span>
+                        <span>{t('shop.fireplace')}</span>
                       </button>
                       <button
                         type="button"
@@ -701,14 +701,14 @@ export const ShopPage = () => {
                         onClick={() => handleAmbientPlay('drone')}
                       >
                         <Zap size={14} />
-                        <span>{isEn ? 'Drone' : 'Медитация'}</span>
+                        <span>{t('shop.drone')}</span>
                       </button>
                       {currentTrack && (
                         <button
                           type="button"
                           className="ambient-btn ambient-stop-btn"
                           onClick={handleAmbientStop}
-                          title={isEn ? 'Stop audio' : 'Остановить звук'}
+                          title={t('shop.stop-audio', 'Остановить звук')}
                         >
                           <Square size={13} />
                         </button>
@@ -723,7 +723,7 @@ export const ShopPage = () => {
                     disabled={coins < PART_PRICES.sound_lofi}
                   >
                     <Sparkles size={14} />
-                    <span>{isEn ? `Unlock for ${PART_PRICES.sound_lofi} 🪙` : `Купить за ${PART_PRICES.sound_lofi} 🪙`}</span>
+                    <span>{t('shop.unlockFor', undefined, { price: PART_PRICES.sound_lofi })}</span>
                   </button>
                 )}
               </div>
@@ -735,12 +735,13 @@ export const ShopPage = () => {
           <div className="shop-section-head">
             <div className="section-title-wrap">
               <HelpCircle size={18} className="section-icon" />
-              <h2>{isEn ? 'How to Earn Coins' : 'Как зарабатывать коины'}</h2>
+              <h2>{t('shop.how-to-earn-coins', 'Как зарабатывать коины')}</h2>
             </div>
             <p className="section-desc">
-              {isEn
-                ? 'Grow your treasury through daily habits, friendship, and battlefield glory.'
-                : 'Пополняй казну регулярными привычками, дружбой и боевой славой.'}
+              {t(
+                'shop.grow-your-treasury-through-daily-habits-friendsh',
+                'Пополняй казну регулярными привычками, дружбой и боевой славой.',
+              )}
             </p>
           </div>
 
@@ -750,14 +751,15 @@ export const ShopPage = () => {
                 <Zap size={20} />
               </div>
               <div className="earn-way-info">
-                <strong>{isEn ? 'Productivity & Tasks' : 'Продуктивность и дела'}</strong>
+                <strong>{t('shop.productivity-tasks', 'Продуктивность и дела')}</strong>
                 <p>
-                  {isEn
-                    ? 'Check off tasks (+10 🪙), achieve goals (+100 🪙), and realize dreams (+1,000 🪙).'
-                    : 'Отмечай задачи (+10 🪙), достигай целей (+100 🪙) и исполняй мечты (+1000 🪙).'}
+                  {t(
+                    'shop.check-off-tasks-10-achieve-goals-100-and-realize',
+                    'Отмечай задачи (+10 🪙), достигай целей (+100 🪙) и исполняй мечты (+1000 🪙).',
+                  )}
                 </p>
                 <Link to="/extra/productivity/task" className="earn-link">
-                  {isEn ? 'Go to tasks →' : 'В задачи →'}
+                  {t('shop.go-to-tasks', 'В задачи →')}
                 </Link>
               </div>
             </div>
@@ -767,14 +769,15 @@ export const ShopPage = () => {
                 <Mail size={20} />
               </div>
               <div className="earn-way-info">
-                <strong>{isEn ? 'Dream Diary Greetings' : 'Приветствия в снах'}</strong>
+                <strong>{t('shop.dream-diary-greetings', 'Приветствия в снах')}</strong>
                 <p>
-                  {isEn
-                    ? 'Send a greeting to a friend in the Dream Diary. On your next visit, receive their reply and a +100 🪙 gift.'
-                    : 'Отправь приветствие другу в Дневнике снов. При следующем входе получи ответ и подарок +100 🪙.'}
+                  {t(
+                    'shop.send-a-greeting-to-a-friend-in-the-dream-diary-o',
+                    'Отправь приветствие другу в Дневнике снов. При следующем входе получи ответ и подарок +100 🪙.',
+                  )}
                 </p>
                 <Link to="/notes" className="earn-link">
-                  {isEn ? 'Open Dream Diary →' : 'В дневник снов →'}
+                  {t('shop.open-dream-diary', 'В дневник снов →')}
                 </Link>
               </div>
             </div>
@@ -784,14 +787,15 @@ export const ShopPage = () => {
                 <Shield size={20} />
               </div>
               <div className="earn-way-info">
-                <strong>{isEn ? 'Arena Victories' : 'Победы в лотерее'}</strong>
+                <strong>{t('shop.arena-victories', 'Победы в лотерее')}</strong>
                 <p>
-                  {isEn
-                    ? 'Assemble troops in the Medieval Clash. Winning army plunders +35..+65 🪙 into your treasury.'
-                    : 'Собирай армии в Битве Королевств. Армия-победитель приносит трофеи +35..+65 🪙.'}
+                  {t(
+                    'shop.assemble-troops-in-the-medieval-clash-winning-ar',
+                    'Собирай армии в Битве Королевств. Армия-победитель приносит трофеи +35..+65 🪙.',
+                  )}
                 </p>
                 <Link to="/misc/lottery" className="earn-link">
-                  {isEn ? 'To the arena →' : 'На арену →'}
+                  {t('shop.to-the-arena', 'На арену →')}
                 </Link>
               </div>
             </div>
@@ -801,14 +805,15 @@ export const ShopPage = () => {
                 <UserPlus size={20} />
               </div>
               <div className="earn-way-info">
-                <strong>{isEn ? 'Invite a Friend' : 'Пригласи друга'}</strong>
+                <strong>{t('shop.invite-a-friend', 'Пригласи друга')}</strong>
                 <p>
-                  {isEn
-                    ? 'Share your referral code. When a friend signs up, you get +250 🪙 and they get +100 🪙.'
-                    : 'Поделись своим реферальным кодом. Когда друг зарегистрируется, ты получишь +250 🪙, а он +100 🪙.'}
+                  {t(
+                    'shop.share-your-referral-code-when-a-friend-signs-up-',
+                    'Поделись своим реферальным кодом. Когда друг зарегистрируется, ты получишь +250 🪙, а он +100 🪙.',
+                  )}
                 </p>
                 <Link to="/auth" className="earn-link">
-                  {isEn ? 'Get my code →' : 'Мой код →'}
+                  {t('shop.get-my-code', 'Мой код →')}
                 </Link>
               </div>
             </div>
@@ -819,12 +824,13 @@ export const ShopPage = () => {
           <div className="shop-section-head">
             <div className="section-title-wrap">
               <Crown size={18} className="section-icon" />
-              <h2>{isEn ? 'Royal Treasury Vault' : 'Королевская сокровищница'}</h2>
+              <h2>{t('shop.royal-treasury-vault', 'Королевская сокровищница')}</h2>
             </div>
             <p className="section-desc">
-              {isEn
-                ? 'Need instant resources? Support the development and expand your coin reserve with luxury bundles.'
-                : 'Нужно больше золота? Поддержи развитие проекта и пополни запасы монет премиальными наборами.'}
+              {t(
+                'shop.need-instant-resources-support-the-development-a',
+                'Нужно больше золота? Поддержи развитие проекта и пополни запасы монет премиальными наборами.',
+              )}
             </p>
           </div>
 

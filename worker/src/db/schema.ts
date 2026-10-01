@@ -7,6 +7,8 @@ export const users = sqliteTable('users', {
   role: text('role').notNull().default('user'),
   createdAt: text('created_at').notNull(),
   referralCode: text('referral_code').unique(),
+  isPremium: integer('is_premium').notNull().default(0),
+  premiumUntil: text('premium_until'),
 })
 
 export const referrals = sqliteTable('referrals', {
@@ -21,6 +23,8 @@ export const referrals = sqliteTable('referrals', {
   code: text('code').notNull(),
   referrerReward: integer('referrer_reward').notNull().default(0),
   refereeReward: integer('referee_reward').notNull().default(0),
+  rewardType: text('reward_type'),
+  claimed: integer('claimed').notNull().default(0),
   createdAt: text('created_at').notNull(),
 })
 

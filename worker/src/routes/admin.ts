@@ -26,6 +26,7 @@ import {
   viewModes,
 } from '../db/schema'
 import { getSyncSnapshot } from '../db/queries/sync'
+import { isPremiumActive } from '../lib/premium'
 import { adminMiddleware } from '../middleware/admin'
 import { authMiddleware } from '../middleware/auth'
 import type { Env } from '../types'
@@ -42,11 +43,18 @@ adminRouter.get('/users', async (c) => {
       email: users.email,
       role: users.role,
       createdAt: users.createdAt,
+      isPremium: users.isPremium,
+      premiumUntil: users.premiumUntil,
     })
     .from(users)
     .orderBy(desc(users.createdAt))
 
-  return c.json(results)
+  return c.json(
+    results.map((user) => ({
+      ...user,
+      premium: isPremiumActive({ isPremium: user.isPremium, premiumUntil: user.premiumUntil }, new Date().toISOString()),
+    })),
+  )
 })
 
 adminRouter.get('/users/:userId', async (c) => {
@@ -58,6 +66,8 @@ adminRouter.get('/users/:userId', async (c) => {
       email: users.email,
       role: users.role,
       createdAt: users.createdAt,
+      isPremium: users.isPremium,
+      premiumUntil: users.premiumUntil,
     })
     .from(users)
     .where(eq(users.id, targetId))
@@ -67,7 +77,31 @@ adminRouter.get('/users/:userId', async (c) => {
     return c.json({ error: 'User not found', code: 'NOT_FOUND' }, 404)
   }
 
-  return c.json(user)
+  return c.json({
+    ...user,
+    premium: isPremiumActive({ isPremium: user.isPremium, premiumUntil: user.premiumUntil }, new Date().toISOString()),
+  })
+})
+
+adminRouter.post('/users/:userId/premium', async (c) => {
+  const targetId = c.req.param('userId')
+  const body = await c.req.json<{ premium?: boolean }>().catch(() => ({}) as { premium?: boolean })
+  if (typeof body.premium !== 'boolean') {
+    return c.json({ error: 'premium (boolean) is required', code: 'INVALID_INPUT' }, 400)
+  }
+
+  const appDb = getDb(c.env.DB)
+  const existing = await appDb.select({ id: users.id, role: users.role }).from(users).where(eq(users.id, targetId)).get()
+  if (!existing) {
+    return c.json({ error: 'User not found', code: 'NOT_FOUND' }, 404)
+  }
+
+  await appDb
+    .update(users)
+    .set({ isPremium: body.premium ? 1 : 0 })
+    .where(eq(users.id, targetId))
+  const premium = body.premium || existing.role === 'admin'
+  return c.json({ id: targetId, premium })
 })
 
 adminRouter.get('/users/:userId/sync', async (c) => {
