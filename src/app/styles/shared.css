@@ -1,0 +1,32 @@
+.page-shell {
+  max-width: 1240px;
+  min-height: 100vh;
+  margin: auto;
+  padding: 25px 40px 34px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.intro {
+  max-width: 330px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+@media (max-width: 760px) {
+  .page-shell {
+    padding: 16px 16px 24px;
+  }
+}

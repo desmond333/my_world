@@ -7,6 +7,8 @@ export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | '
 export type CatSkinId = 'classic' | 'wizard' | 'cyber'
 export type ThemeSkinId = 'default' | 'cyberpunk' | 'midnight_gold'
 
+export const SHOP_DEV_UNLOCK_ALL = true
+
 export const PART_PRICES: Record<ShopItemKey, number> = {
   lottery: 250,
   statham: 250,
@@ -36,7 +38,7 @@ export type ShopState = {
   claimFriendGreetingReply: () => number
 }
 
-const STORAGE_KEY = 'myworld-shop-economy'
+const STORAGE_KEY = 'tau-shop-economy'
 
 export const useShopStore = create<ShopState>()(
   persist(
@@ -59,10 +61,11 @@ export const useShopStore = create<ShopState>()(
       greetingRewardClaimed: false,
       hasPendingGreetingReply: false,
 
-      isUnlocked: (key) => Boolean(get().unlockedParts?.[key]),
+      isUnlocked: (key) => SHOP_DEV_UNLOCK_ALL || Boolean(get().unlockedParts?.[key]),
 
       buyPart: (key) => {
         const state = get()
+        if (SHOP_DEV_UNLOCK_ALL) return true
         const price = PART_PRICES[key] ?? 250
         if (state.coins < price || state.unlockedParts?.[key]) {
           return false

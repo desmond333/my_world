@@ -69,7 +69,7 @@ export const handleTmdbRequest = async (c: Context<{ Bindings: Env }>) => {
     return c.json({ error: `Запрос должен быть от ${SEARCH_MIN_LENGTH} до ${SEARCH_MAX_LENGTH} символов` }, 400)
   }
 
-  const cache = caches.default
+  const cache = (caches as unknown as { default: Cache }).default
   const cacheKey = new Request(url.toString(), { method: 'GET' })
   const hit = await cache.match(cacheKey)
 

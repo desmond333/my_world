@@ -92,7 +92,7 @@
   min-width: 0;
 }
 
-.languages-tab-btn:hover {
+.languages-tab-btn:not(.active):hover {
   background: rgba(255, 255, 255, 0.04);
   color: var(--fg);
 }
@@ -140,7 +140,7 @@
   padding: 3px 8px;
   border-radius: 10px;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   flex-shrink: 0;
 }
 
@@ -238,13 +238,13 @@
   display: none;
 }
 
-.english-mode-btn:hover {
+.english-mode-btn:not(.active):hover {
   color: var(--fg);
 }
 
 .english-mode-btn.active {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-weight: 700;
 }
 
@@ -700,14 +700,14 @@
   flex-shrink: 0;
 }
 
-.reading-cat-tab:hover {
+.reading-cat-tab:not(.active):hover {
   color: var(--fg);
   border-color: var(--muted);
 }
 
 .reading-cat-tab.active {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   border-color: var(--accent);
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(244, 184, 73, 0.25);
@@ -912,7 +912,7 @@
 
 .reading-size-btn.active {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 
 .reading-toggle-trans-btn {
@@ -1026,7 +1026,7 @@
   border-radius: 16px;
   background: var(--accent);
   border: 1px solid var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;

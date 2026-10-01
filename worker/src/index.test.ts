@@ -48,4 +48,24 @@ describe('Worker App Endpoints', () => {
 
     expect(lastStatus).toBe(429)
   })
+
+  it('validates input schema using valibot on /auth/register', async () => {
+    const res = await app.request(
+      '/auth/register',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'invalid-email', password: '123' }),
+      },
+      testEnv,
+    )
+    expect(res.status).toBe(400)
+    const data = (await res.json()) as { error: string; code: string }
+    expect(data.code).toBe('INVALID_INPUT')
+  })
+
+  it('rejects websocket request without upgrade header', async () => {
+    const res = await app.request('/api/realtime/ws', {}, testEnv)
+    expect(res.status).toBe(426)
+  })
 })

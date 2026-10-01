@@ -1,0 +1,189 @@
+.notes-help-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.notes-help-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  overflow-x: auto;
+}
+
+.notes-help-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.notes-help-tab-btn:not(.is-active):hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.notes-help-tab-btn.is-active {
+  color: var(--accent);
+  background: rgba(244, 184, 73, 0.12);
+  border-color: rgba(244, 184, 73, 0.3);
+  font-weight: 600;
+}
+
+.notes-help-content {
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(80vh - 160px);
+}
+
+.notes-help-lead {
+  font-size: 14px;
+  color: var(--fg);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.notes-help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.notes-help-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.15s ease;
+}
+
+.notes-help-card:hover {
+  border-color: rgba(244, 184, 73, 0.3);
+}
+
+.notes-help-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notes-help-cmd-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(244, 184, 73, 0.14);
+  color: var(--accent);
+  border: 1px solid rgba(244, 184, 73, 0.3);
+}
+
+.notes-help-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.notes-help-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.notes-help-shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.notes-help-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.notes-help-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notes-help-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.notes-help-feature-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(244, 184, 73, 0.12);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.notes-help-feature-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notes-help-feature-body strong {
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.notes-help-feature-body p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.notes-help-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}

@@ -1,3 +1,5 @@
+import { idbClear, idbEntries } from '../storage/hybridStorage'
+
 export type StorageCategoryStat = {
   id: string
   nameRu: string
@@ -38,16 +40,16 @@ const KNOWN_STORAGE_KEYS = [
   'animal-movies',
   'animal-books',
   'animal-games',
-  'myworld-shop-economy',
+  'tau-shop-economy',
   'app-view-modes',
-  'myworld_notes',
-  'myworld_cat_hidden',
+  'animal-notes',
+  'tau_cat_hidden',
   'statham-lottery-trophies',
   'georgian-favorite-phrases',
 ]
 
-export const getStorageStats = (): StorageStats => {
-  if (typeof window === 'undefined' || !window.localStorage) {
+export const getStorageStats = async (): Promise<StorageStats> => {
+  if (typeof window === 'undefined') {
     return {
       totalBytes: 0,
       formattedSize: '0 B',
@@ -64,7 +66,7 @@ export const getStorageStats = (): StorageStats => {
       nameRu: 'Заметки и сны',
       nameEn: 'Notes & Dreams',
       bytes: 0,
-      keys: ['myworld_notes'],
+      keys: ['animal-notes'],
     },
     productivity: {
       nameRu: 'Продуктивность',
@@ -88,7 +90,7 @@ export const getStorageStats = (): StorageStats => {
       nameRu: 'Магазин и казна',
       nameEn: 'Shop & Treasury',
       bytes: 0,
-      keys: ['myworld-shop-economy', 'statham-lottery-trophies'],
+      keys: ['tau-shop-economy', 'statham-lottery-trophies'],
     },
     training: {
       nameRu: 'Тренировки',
@@ -107,16 +109,33 @@ export const getStorageStats = (): StorageStats => {
         'animal-subscriptions',
         'animal-birthdays',
         'animal-lottery',
-        'myworld_cat_hidden',
+        'tau_cat_hidden',
         'georgian-favorite-phrases',
       ],
     },
   }
 
-  for (let i = 0; i < window.localStorage.length; i++) {
-    const key = window.localStorage.key(i)
-    if (!key) continue
-    const val = window.localStorage.getItem(key) ?? ''
+  const entries = new Map<string, string>()
+
+  try {
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i)
+      if (!key) continue
+      entries.set(key, window.localStorage.getItem(key) ?? '')
+    }
+  } catch {
+    void 0
+  }
+
+  try {
+    for (const entry of await idbEntries()) {
+      entries.set(entry.key, entry.value)
+    }
+  } catch {
+    void 0
+  }
+
+  for (const [key, val] of entries) {
     const itemBytes = (key.length + val.length) * 2
     totalBytes += itemBytes
     itemsCount++
@@ -154,7 +173,7 @@ export const createBackupPayload = (): BackupPayload => {
   if (typeof window === 'undefined' || !window.localStorage) {
     return {
       version: 1,
-      appName: 'MyWorld',
+      appName: 'TAU',
       exportedAt: new Date().toISOString(),
       keys: {},
     }
@@ -164,14 +183,14 @@ export const createBackupPayload = (): BackupPayload => {
   for (let i = 0; i < window.localStorage.length; i++) {
     const key = window.localStorage.key(i)
     if (!key) continue
-    if (KNOWN_STORAGE_KEYS.includes(key) || key.startsWith('animal-') || key.startsWith('myworld') || key.startsWith('app-')) {
+    if (KNOWN_STORAGE_KEYS.includes(key) || key.startsWith('animal-') || key.startsWith('tau') || key.startsWith('app-')) {
       data[key] = window.localStorage.getItem(key) ?? ''
     }
   }
 
   return {
     version: 1,
-    appName: 'MyWorld',
+    appName: 'TAU',
     exportedAt: new Date().toISOString(),
     keys: data,
   }
@@ -186,7 +205,7 @@ export const downloadBackupFile = () => {
   const dateStr = new Date().toISOString().slice(0, 10)
   const link = document.createElement('a')
   link.href = url
-  link.download = `myworld-backup-${dateStr}.json`
+  link.download = `tau-backup-${dateStr}.json`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -249,8 +268,16 @@ export const clearTemporaryCache = (): { freedBytes: number; clearedKeys: number
   return { freedBytes, clearedKeys }
 }
 
-export const resetAllData = () => {
-  if (typeof window === 'undefined' || !window.localStorage) return
+export const resetAllData = async () => {
+  if (typeof window === 'undefined') return
+
+  try {
+    await idbClear()
+  } catch {
+    void 0
+  }
+
+  if (!window.localStorage) return
 
   const keysToRemove: string[] = []
   for (let i = 0; i < window.localStorage.length; i++) {

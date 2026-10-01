@@ -2,8 +2,7 @@
   margin-top: 14px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: rgba(18, 19, 23, 0.65);
-  backdrop-filter: blur(12px);
+  background: var(--panel);
   overflow: hidden;
   transition: all 0.2s ease;
 }
@@ -18,7 +17,7 @@
   justify-content: space-between;
   padding: 10px 14px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg);
 }
 
 .notes-accordion-title {
@@ -105,7 +104,7 @@
 
 .snippet-group-content {
   padding: 10px 14px 14px;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--bg);
 }
 
 .snippet-chips {
@@ -274,7 +273,8 @@
   margin: 0;
   padding: 8px 10px;
   border-radius: 4px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--panel);
+  border: 1px solid var(--line);
   color: var(--muted);
   font-family: inherit;
   font-size: 11px;

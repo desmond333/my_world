@@ -1,105 +1,75 @@
-import { parseJson } from '../client'
+import { and, asc, desc, eq } from 'drizzle-orm'
+import { getDb, parseJson } from '../client'
+import { collectionItems } from '../schema'
 import type { CollectionItem, CollectionListKey } from '../../types'
 
-type CollectionItemRow = {
-  id: string
-  user_id: string
-  collection: string
-  list_key: string
-  title: string
-  subtitle: string
-  description: string
-  image_url: string | null
-  year: number | null
-  tags_json: string
-  score: string | null
-  added_at: string
-  finished_at: string | null
-  review: string | null
-  enjoyment: number | null
-  enjoyment_reaction: string | null
-  sort_order: number
-}
-
-const mapRowToItem = (row: CollectionItemRow): CollectionItem => ({
-  id: row.id,
-  title: row.title,
-  subtitle: row.subtitle,
-  description: row.description,
-  imageUrl: row.image_url,
-  year: row.year,
-  tags: parseJson<string[]>(row.tags_json, []),
-  score: row.score,
-  addedAt: row.added_at,
-  finishedAt: row.finished_at || undefined,
-  review: row.review || undefined,
-  enjoyment: row.enjoyment !== null ? row.enjoyment : undefined,
-  enjoymentReaction: (row.enjoyment_reaction as CollectionItem['enjoymentReaction']) || undefined,
-  sortOrder: row.sort_order,
-})
-
 export const getCollectionItems = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   collection: string,
   listKey?: CollectionListKey,
 ): Promise<CollectionItem[]> => {
-  let query = 'SELECT * FROM collection_items WHERE user_id = ? AND collection = ?'
-  const params: unknown[] = [userId, collection]
-
+  const db = getDb(d1)
+  const conditions = [eq(collectionItems.userId, userId), eq(collectionItems.collection, collection)]
   if (listKey) {
-    query += ' AND list_key = ?'
-    params.push(listKey)
+    conditions.push(eq(collectionItems.listKey, listKey))
   }
 
-  query += ' ORDER BY sort_order ASC, added_at DESC'
+  const rows = await db
+    .select()
+    .from(collectionItems)
+    .where(and(...conditions))
+    .orderBy(asc(collectionItems.sortOrder), desc(collectionItems.addedAt))
 
-  const { results } = await db
-    .prepare(query)
-    .bind(...params)
-    .all<CollectionItemRow>()
-  return results.map(mapRowToItem)
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    subtitle: row.subtitle,
+    description: row.description,
+    imageUrl: row.imageUrl,
+    year: row.year,
+    tags: parseJson<string[]>(row.tagsJson, []),
+    score: row.score,
+    addedAt: row.addedAt,
+    finishedAt: row.finishedAt || undefined,
+    review: row.review || undefined,
+    enjoyment: row.enjoyment !== null ? row.enjoyment : undefined,
+    enjoymentReaction: (row.enjoymentReaction as CollectionItem['enjoymentReaction']) || undefined,
+    sortOrder: row.sortOrder,
+  }))
 }
 
 export const createCollectionItem = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   collection: string,
   listKey: CollectionListKey,
   item: CollectionItem,
 ): Promise<CollectionItem> => {
+  const db = getDb(d1)
   const id = item.id || crypto.randomUUID()
   const addedAt = item.addedAt || new Date().toISOString()
   const sortOrder = item.sortOrder ?? 0
 
-  await db
-    .prepare(
-      `INSERT INTO collection_items (
-        id, user_id, collection, list_key, title, subtitle, description,
-        image_url, year, tags_json, score, added_at, finished_at,
-        review, enjoyment, enjoyment_reaction, sort_order
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .bind(
-      id,
-      userId,
-      collection,
-      listKey,
-      item.title,
-      item.subtitle || '',
-      item.description || '',
-      item.imageUrl ?? null,
-      item.year ?? null,
-      JSON.stringify(item.tags || []),
-      item.score ?? null,
-      addedAt,
-      item.finishedAt ?? null,
-      item.review ?? null,
-      item.enjoyment ?? null,
-      item.enjoymentReaction ?? null,
-      sortOrder,
-    )
-    .run()
+  await db.insert(collectionItems).values({
+    id,
+    userId,
+    collection,
+    listKey,
+    title: item.title,
+    subtitle: item.subtitle || '',
+    description: item.description || '',
+    imageUrl: item.imageUrl ?? null,
+    year: item.year ?? null,
+    tagsJson: JSON.stringify(item.tags || []),
+    score: item.score ?? null,
+    addedAt,
+    finishedAt: item.finishedAt ?? null,
+    review: item.review ?? null,
+    enjoyment: item.enjoyment ?? null,
+    enjoymentReaction: item.enjoymentReaction ?? null,
+    sortOrder,
+  })
 
   return {
     ...item,
@@ -110,44 +80,40 @@ export const createCollectionItem = async (
 }
 
 export const updateCollectionItem = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   collection: string,
   id: string,
   listKey?: CollectionListKey,
   patch?: Partial<CollectionItem>,
 ): Promise<boolean> => {
+  const db = getDb(d1)
   const existing = await db
-    .prepare('SELECT * FROM collection_items WHERE id = ? AND user_id = ? AND collection = ?')
-    .bind(id, userId, collection)
-    .first<CollectionItemRow>()
+    .select()
+    .from(collectionItems)
+    .where(and(eq(collectionItems.id, id), eq(collectionItems.userId, userId), eq(collectionItems.collection, collection)))
+    .get()
 
   if (!existing) return false
 
-  const nextListKey = listKey ?? existing.list_key
+  const nextListKey = listKey ?? existing.listKey
   const title = patch?.title ?? existing.title
   const subtitle = patch?.subtitle !== undefined ? patch.subtitle : existing.subtitle
   const description = patch?.description !== undefined ? patch.description : existing.description
-  const imageUrl = patch?.imageUrl !== undefined ? patch.imageUrl : existing.image_url
+  const imageUrl = patch?.imageUrl !== undefined ? patch.imageUrl : existing.imageUrl
   const year = patch?.year !== undefined ? patch.year : existing.year
-  const tagsJson = patch?.tags !== undefined ? JSON.stringify(patch.tags) : existing.tags_json
+  const tagsJson = patch?.tags !== undefined ? JSON.stringify(patch.tags) : existing.tagsJson
   const score = patch?.score !== undefined ? patch.score : existing.score
-  const finishedAt = patch?.finishedAt !== undefined ? patch.finishedAt : existing.finished_at
+  const finishedAt = patch?.finishedAt !== undefined ? patch.finishedAt : existing.finishedAt
   const review = patch?.review !== undefined ? patch.review : existing.review
   const enjoyment = patch?.enjoyment !== undefined ? patch.enjoyment : existing.enjoyment
-  const reaction = patch?.enjoymentReaction !== undefined ? patch.enjoymentReaction : existing.enjoyment_reaction
-  const sortOrder = patch?.sortOrder !== undefined ? patch.sortOrder : existing.sort_order
+  const reaction = patch?.enjoymentReaction !== undefined ? patch.enjoymentReaction : existing.enjoymentReaction
+  const sortOrder = patch?.sortOrder !== undefined ? patch.sortOrder : existing.sortOrder
 
   await db
-    .prepare(
-      `UPDATE collection_items
-       SET list_key = ?, title = ?, subtitle = ?, description = ?, image_url = ?,
-           year = ?, tags_json = ?, score = ?, finished_at = ?, review = ?,
-           enjoyment = ?, enjoyment_reaction = ?, sort_order = ?
-       WHERE id = ? AND user_id = ? AND collection = ?`,
-    )
-    .bind(
-      nextListKey,
+    .update(collectionItems)
+    .set({
+      listKey: nextListKey,
       title,
       subtitle,
       description,
@@ -158,59 +124,49 @@ export const updateCollectionItem = async (
       finishedAt,
       review,
       enjoyment,
-      reaction,
+      enjoymentReaction: reaction,
       sortOrder,
-      id,
-      userId,
-      collection,
-    )
-    .run()
+    })
+    .where(and(eq(collectionItems.id, id), eq(collectionItems.userId, userId), eq(collectionItems.collection, collection)))
 
   return true
 }
 
 export const deleteCollectionItem = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   collection: string,
   id: string,
   listKey?: CollectionListKey,
 ): Promise<boolean> => {
-  let query = 'DELETE FROM collection_items WHERE id = ? AND user_id = ? AND collection = ?'
-  const params: unknown[] = [id, userId, collection]
-
+  const db = getDb(d1)
+  const conditions = [eq(collectionItems.id, id), eq(collectionItems.userId, userId), eq(collectionItems.collection, collection)]
   if (listKey) {
-    query += ' AND list_key = ?'
-    params.push(listKey)
+    conditions.push(eq(collectionItems.listKey, listKey))
   }
-
-  const res = await db
-    .prepare(query)
-    .bind(...params)
-    .run()
+  const res = await db.delete(collectionItems).where(and(...conditions))
   return (res.meta.changes ?? 0) > 0
 }
 
 export const reorderCollectionItems = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   collection: string,
   listKey: CollectionListKey,
   orderedIds: string[],
 ): Promise<void> => {
-  const statements: D1PreparedStatement[] = []
+  const db = getDb(d1)
   for (let i = 0; i < orderedIds.length; i++) {
-    statements.push(
-      db
-        .prepare(
-          `UPDATE collection_items
-           SET sort_order = ?
-           WHERE id = ? AND user_id = ? AND collection = ? AND list_key = ?`,
-        )
-        .bind(i, orderedIds[i], userId, collection, listKey),
-    )
-  }
-  if (statements.length > 0) {
-    await db.batch(statements)
+    await db
+      .update(collectionItems)
+      .set({ sortOrder: i })
+      .where(
+        and(
+          eq(collectionItems.id, orderedIds[i]),
+          eq(collectionItems.userId, userId),
+          eq(collectionItems.collection, collection),
+          eq(collectionItems.listKey, listKey),
+        ),
+      )
   }
 }

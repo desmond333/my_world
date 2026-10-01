@@ -33,6 +33,9 @@ export type Blocks = Record<BlockKey, boolean>
 
 export type AnimalScope = 'all' | 'home'
 export type ThemeMode = 'system' | 'dark' | 'light'
+export type SeasonalThemeId = 'spring' | 'summer' | 'autumn' | 'winter'
+export type NamedThemeId = 'nord' | 'solarized'
+export type ThemePaletteId = 'auto' | SeasonalThemeId | NamedThemeId
 
 export type TrainingSport = {
   id: string
@@ -121,6 +124,38 @@ export type FinanceEntry = {
   createdAt: string
 }
 
+export type Deposit = {
+  id: string
+  title: string
+  bank: string
+  amount: number
+  currency: Currency
+  rate: number
+  startDate: string
+  periodMonths: number
+  isCapitalized: boolean
+  canDeposit?: boolean
+  canWithdraw?: boolean
+  note?: string
+  createdAt: string
+}
+
+export type Loan = {
+  id: string
+  title: string
+  bank: string
+  initialAmount: number
+  remainingAmount: number
+  currency: Currency
+  rate: number
+  monthlyPayment: number
+  paymentDay: number
+  startDate: string
+  endDate: string
+  note?: string
+  createdAt: string
+}
+
 export type SubscriptionPeriod = 'week' | 'month' | 'year'
 
 export type Subscription = {
@@ -166,4 +201,126 @@ export type SentFriendTask = {
   priority?: TaskPriority
   note?: string
   createdAt: string
+}
+
+export type AvailabilityScope = 'weekly' | 'date'
+
+export const MINUTES_IN_DAY = 1440
+
+export type AvailabilityWindow = {
+  id: string
+  userId: string
+  scope: AvailabilityScope
+  dayOfWeek: number | null
+  date: string | null
+  startMin: number
+  endMin: number
+  note: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type FriendAvailability = {
+  friendId: string
+  email: string
+  windows: AvailabilityWindow[]
+}
+
+export type AvailabilityWindowInput = {
+  scope?: AvailabilityScope
+  dayOfWeek?: number | null
+  date?: string | null
+  startMin: number
+  endMin: number
+  note?: string
+}
+
+export type NoteKind = 'note' | 'dream'
+
+export type Note = {
+  id: string
+  kind: NoteKind
+  title: string
+  body: string
+  parentId?: string | null
+  icon?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type MoodEntry = { level: number; note?: string }
+
+export type LotteryStats = Record<string, { spins: number; wins: number; earned: number }>
+
+export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | 'theme_cyberpunk' | 'theme_midnight_gold' | 'sound_lofi'
+
+export type CatSkinId = 'classic' | 'wizard' | 'cyber'
+export type ThemeSkinId = 'default' | 'cyberpunk' | 'midnight_gold'
+
+export type ViewMode = 'simple' | 'normal'
+
+export type ViewPageId =
+  'today' | 'productivity' | 'finance' | 'training' | 'media' | 'mind' | 'languages' | 'favorites' | 'notes' | 'tasks' | 'goals' | 'dreams'
+
+export type SyncSnapshot = {
+  settings: {
+    lang: string
+    themeMode: ThemeMode
+    cityId: string
+    scope: AnimalScope
+    extraTab: boolean
+    startPage: string
+    blocks: Blocks
+    allowFriendTasks: boolean
+    hiddenSections?: string[]
+  }
+  training: {
+    days: Record<string, string[]>
+    sports: TrainingSport[]
+  }
+  finance: {
+    entries: FinanceEntry[]
+    balance: CurrencyRates
+    rates: CurrencyRates
+    ratesSource: string
+  }
+  productivity: {
+    items: ProductivityItem[]
+    months: Record<string, MonthPoints>
+    mood: Record<string, MoodEntry>
+  }
+  subscriptions: {
+    items: Subscription[]
+  }
+  birthdays: {
+    ownBirthday: string
+    birthdays: Birthday[]
+  }
+  collection: {
+    movies: { wishlist: CollectionItem[]; watched: CollectionItem[] }
+    books: { wishlist: CollectionItem[]; watched: CollectionItem[] }
+    games: { wishlist: CollectionItem[]; watched: CollectionItem[] }
+  }
+  favorites: Favorite[]
+  lottery: LotteryStats
+  notes: Note[]
+  shop: {
+    coins: number
+    unlockedParts: Partial<Record<ShopItemKey, boolean>>
+    activeCatSkin: CatSkinId
+    activeThemeSkin: ThemeSkinId
+    greetingSent: boolean
+    greetingFriendName: string
+    greetingTimestamp: number | null
+    greetingRewardClaimed: boolean
+    hasPendingGreetingReply: boolean
+  }
+  viewModes: {
+    globalMode: ViewMode
+    pageModes: Partial<Record<ViewPageId, ViewMode>>
+    avatarMode: ViewMode
+  }
+  availability: {
+    windows: AvailabilityWindow[]
+  }
 }

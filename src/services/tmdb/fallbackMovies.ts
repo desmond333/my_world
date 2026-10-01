@@ -1,5 +1,5 @@
 import type { SearchCandidate } from '../../data'
-import type { MovieDetails } from './tmdb'
+import type { MovieDetails } from './types'
 
 export type FallbackMovie = SearchCandidate & {
   details: MovieDetails

@@ -1,18 +1,15 @@
+import { and, eq } from 'drizzle-orm'
+import { getDb } from '../client'
+import { lotteryStats } from '../schema'
 import type { LotteryStats } from '../../types'
 
-type LotteryRow = {
-  sector_id: string
-  spins: number
-  wins: number
-  earned: number
-}
-
-export const getLotteryStats = async (db: D1Database, userId: string): Promise<LotteryStats> => {
-  const { results } = await db.prepare('SELECT * FROM lottery_stats WHERE user_id = ?').bind(userId).all<LotteryRow>()
+export const getLotteryStats = async (d1: D1Database, userId: string): Promise<LotteryStats> => {
+  const db = getDb(d1)
+  const rows = await db.select().from(lotteryStats).where(eq(lotteryStats.userId, userId))
 
   const stats: LotteryStats = {}
-  for (const row of results) {
-    stats[row.sector_id] = {
+  for (const row of rows) {
+    stats[row.sectorId] = {
       spins: row.spins,
       wins: row.wins,
       earned: row.earned,
@@ -21,50 +18,49 @@ export const getLotteryStats = async (db: D1Database, userId: string): Promise<L
   return stats
 }
 
-export const setLotteryStats = async (db: D1Database, userId: string, stats: LotteryStats): Promise<void> => {
-  const statements: D1PreparedStatement[] = [db.prepare('DELETE FROM lottery_stats WHERE user_id = ?').bind(userId)]
+export const setLotteryStats = async (d1: D1Database, userId: string, stats: LotteryStats): Promise<void> => {
+  const db = getDb(d1)
+  await db.delete(lotteryStats).where(eq(lotteryStats.userId, userId))
 
-  for (const [sectorId, entry] of Object.entries(stats)) {
-    statements.push(
-      db
-        .prepare(
-          `INSERT INTO lottery_stats (user_id, sector_id, spins, wins, earned)
-           VALUES (?, ?, ?, ?, ?)`,
-        )
-        .bind(userId, sectorId, entry.spins || 0, entry.wins || 0, entry.earned || 0),
+  const entries = Object.entries(stats)
+  if (entries.length > 0) {
+    await db.insert(lotteryStats).values(
+      entries.map(([sectorId, entry]) => ({
+        userId,
+        sectorId,
+        spins: entry.spins || 0,
+        wins: entry.wins || 0,
+        earned: entry.earned || 0,
+      })),
     )
   }
-
-  await db.batch(statements)
 }
 
 export const recordLotterySpin = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   sectorId: string,
   won: boolean,
   prize: number,
 ): Promise<{ spins: number; wins: number; earned: number }> => {
+  const db = getDb(d1)
   const existing = await db
-    .prepare('SELECT * FROM lottery_stats WHERE user_id = ? AND sector_id = ?')
-    .bind(userId, sectorId)
-    .first<LotteryRow>()
+    .select()
+    .from(lotteryStats)
+    .where(and(eq(lotteryStats.userId, userId), eq(lotteryStats.sectorId, sectorId)))
+    .get()
 
   const spins = (existing?.spins || 0) + 1
   const wins = (existing?.wins || 0) + (won ? 1 : 0)
   const earned = (existing?.earned || 0) + (won ? prize : 0)
 
   await db
-    .prepare(
-      `INSERT INTO lottery_stats (user_id, sector_id, spins, wins, earned)
-       VALUES (?, ?, ?, ?, ?)
-       ON CONFLICT(user_id, sector_id) DO UPDATE SET
-         spins = excluded.spins,
-         wins = excluded.wins,
-         earned = excluded.earned`,
-    )
-    .bind(userId, sectorId, spins, wins, earned)
-    .run()
+    .insert(lotteryStats)
+    .values({ userId, sectorId, spins, wins, earned })
+    .onConflictDoUpdate({
+      target: [lotteryStats.userId, lotteryStats.sectorId],
+      set: { spins, wins, earned },
+    })
 
   return { spins, wins, earned }
 }

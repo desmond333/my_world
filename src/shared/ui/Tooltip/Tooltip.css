@@ -1,0 +1,77 @@
+.ui-tooltip-content {
+  border-radius: calc(var(--radius, 10px) - 4px);
+  padding: 5px 9px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--ink, #fff);
+  background: var(--fg, #222);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  user-select: none;
+  z-index: 2000;
+  max-width: 260px;
+  word-wrap: break-word;
+  animation-duration: 0.15s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.ui-tooltip-content[data-state='delayed-open'][data-side='top'] {
+  animation-name: ui-tooltip-slide-down-and-fade;
+}
+.ui-tooltip-content[data-state='delayed-open'][data-side='right'] {
+  animation-name: ui-tooltip-slide-left-and-fade;
+}
+.ui-tooltip-content[data-state='delayed-open'][data-side='bottom'] {
+  animation-name: ui-tooltip-slide-up-and-fade;
+}
+.ui-tooltip-content[data-state='delayed-open'][data-side='left'] {
+  animation-name: ui-tooltip-slide-right-and-fade;
+}
+
+.ui-tooltip-arrow {
+  fill: var(--fg, #222);
+}
+
+@keyframes ui-tooltip-slide-up-and-fade {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ui-tooltip-slide-right-and-fade {
+  from {
+    opacity: 0;
+    transform: translateX(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ui-tooltip-slide-down-and-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ui-tooltip-slide-left-and-fade {
+  from {
+    opacity: 0;
+    transform: translateX(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

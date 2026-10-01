@@ -1,0 +1,25 @@
+.ui-popover-content {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius, 10px);
+  padding: 12px;
+  box-shadow:
+    0 16px 36px -4px rgba(0, 0, 0, 0.4),
+    0 6px 14px -2px rgba(0, 0, 0, 0.25);
+  z-index: 1500;
+  max-width: 90vw;
+  max-height: 85vh;
+  outline: none;
+  animation: ui-popover-scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ui-popover-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

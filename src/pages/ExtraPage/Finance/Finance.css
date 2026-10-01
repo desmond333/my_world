@@ -477,6 +477,68 @@
   .entry-actions button {
     flex: 1 1 40%;
   }
+  .finance-year-name,
+  .finance-month-split dt,
+  .finance-month-head dt,
+  .finance-month-head h3 em,
+  .finance-entry-kind,
+  .finance-entry-note,
+  .finance-rate-unit,
+  .finance-balance-total {
+    font-size: 11px;
+  }
+}
+
+.mini-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.mini-button:hover:not(:disabled) {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+
+.mini-button:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+
+.mini-button.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.mini-button--ghost {
+  color: var(--muted);
+}
+
+.mini-button--ghost:hover:not(:disabled) {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.mini-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .finance-chart-wrapper {

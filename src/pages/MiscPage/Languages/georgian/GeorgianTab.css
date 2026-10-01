@@ -85,12 +85,12 @@
   min-width: 0;
   white-space: nowrap;
 }
-.georgian-mode-btn:hover {
+.georgian-mode-btn:not(.is-active):hover {
   color: var(--fg);
 }
 .georgian-mode-btn.is-active {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(244, 184, 73, 0.3);
 }
@@ -110,7 +110,7 @@
   cursor: pointer;
   transition: all 0.15s ease;
 }
-.georgian-fav-filter-btn:hover {
+.georgian-fav-filter-btn:not(.is-active):hover {
   border-color: var(--accent);
   color: var(--fg);
 }
@@ -503,7 +503,7 @@
 .georgian-btn-sound.is-playing {
   border-color: var(--accent);
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-weight: 700;
 }
 .georgian-btn-copy:hover {

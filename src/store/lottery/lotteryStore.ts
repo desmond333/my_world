@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { hybridPersistStorage } from '../../lib/storage'
-import { scheduleDebouncedSync } from '../../services/api/syncService'
+import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 
 const STORAGE_KEY = 'animal-lottery'
 

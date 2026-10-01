@@ -1,4 +1,8 @@
 import { Hono } from 'hono'
+import { vValidator } from '@hono/valibot-validator'
+import { eq } from 'drizzle-orm'
+import { getDb } from '../db/client'
+import { users } from '../db/schema'
 import {
   acceptFriendRequest,
   assignTaskToFriend,
@@ -9,6 +13,7 @@ import {
   searchUsers,
   sendFriendRequest,
 } from '../db/queries/friends'
+import { assignFriendTaskSchema, friendRequestSchema } from '../lib/validation'
 import { authMiddleware } from '../middleware/auth'
 import type { Env, TaskPriority } from '../types'
 
@@ -29,23 +34,31 @@ friendsRouter.get('/search', async (c) => {
   return c.json({ results })
 })
 
-friendsRouter.post('/request', async (c) => {
-  const userId = c.get('user').userId
-  const body = (await c.req.json().catch(() => ({}))) as { email?: string; friendId?: string }
-  const target = (body.email || body.friendId || '').trim()
+friendsRouter.post(
+  '/request',
+  vValidator('json', friendRequestSchema, (result, c) => {
+    if (!result.success) {
+      return c.json({ error: 'Email or user ID is required', issues: result.issues }, 400)
+    }
+  }),
+  async (c) => {
+    const userId = c.get('user').userId
+    const body = c.req.valid('json')
+    const target = (body.email || body.friendId || '').trim()
 
-  if (!target) {
-    return c.json({ error: 'Email or user ID is required', code: 'INVALID_DATA' }, 400)
-  }
+    if (!target) {
+      return c.json({ error: 'Email or user ID is required', code: 'INVALID_DATA' }, 400)
+    }
 
-  const res = await sendFriendRequest(c.env.DB, userId, target)
-  if (!res.success) {
-    const status = res.error === 'USER_NOT_FOUND' ? 404 : res.error === 'ALREADY_FRIENDS' ? 409 : 400
-    return c.json({ error: res.error, code: res.error }, status)
-  }
+    const res = await sendFriendRequest(c.env.DB, userId, target)
+    if (!res.success) {
+      const status = res.error === 'USER_NOT_FOUND' ? 404 : res.error === 'ALREADY_FRIENDS' ? 409 : 400
+      return c.json({ error: res.error, code: res.error }, status)
+    }
 
-  return c.json(res, 201)
-})
+    return c.json(res, 201)
+  },
+)
 
 friendsRouter.post('/accept/:id', async (c) => {
   const userId = c.get('user').userId
@@ -83,37 +96,36 @@ friendsRouter.delete('/:friendId', async (c) => {
   return c.json({ success: true })
 })
 
-friendsRouter.post('/tasks', async (c) => {
-  const userId = c.get('user').userId
-  const body = (await c.req.json().catch(() => ({}))) as {
-    friendId?: string
-    title?: string
-    date?: string
-    priority?: TaskPriority
-    note?: string
-  }
+friendsRouter.post(
+  '/tasks',
+  vValidator('json', assignFriendTaskSchema, (result, c) => {
+    if (!result.success) {
+      return c.json({ error: 'Friend ID and title are required', issues: result.issues }, 400)
+    }
+  }),
+  async (c) => {
+    const userId = c.get('user').userId
+    const body = c.req.valid('json')
 
-  if (!body.friendId || !body.title) {
-    return c.json({ error: 'Friend ID and title are required', code: 'INVALID_DATA' }, 400)
-  }
+    const appDb = getDb(c.env.DB)
+    const currentUser = await appDb.select({ email: users.email }).from(users).where(eq(users.id, userId)).get()
+    const currentUserEmail = currentUser?.email || 'Unknown'
 
-  const currentUser = await c.env.DB.prepare('SELECT email FROM users WHERE id = ?').bind(userId).first<{ email: string }>()
-  const currentUserEmail = currentUser?.email || 'Unknown'
+    const res = await assignTaskToFriend(c.env.DB, userId, currentUserEmail, body.friendId, {
+      title: body.title,
+      date: body.date,
+      priority: body.priority as TaskPriority,
+      note: body.note,
+    })
 
-  const res = await assignTaskToFriend(c.env.DB, userId, currentUserEmail, body.friendId, {
-    title: body.title,
-    date: body.date,
-    priority: body.priority,
-    note: body.note,
-  })
+    if (!res.success) {
+      const status = res.error === 'FRIEND_TASKS_DISABLED' ? 403 : res.error === 'NOT_FRIENDS' ? 403 : 400
+      return c.json({ error: res.error, code: res.error }, status)
+    }
 
-  if (!res.success) {
-    const status = res.error === 'FRIEND_TASKS_DISABLED' ? 403 : res.error === 'NOT_FRIENDS' ? 403 : 400
-    return c.json({ error: res.error, code: res.error }, status)
-  }
-
-  return c.json(res, 201)
-})
+    return c.json(res, 201)
+  },
+)
 
 friendsRouter.get('/tasks/sent', async (c) => {
   const userId = c.get('user').userId

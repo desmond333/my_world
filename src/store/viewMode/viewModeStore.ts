@@ -1,22 +1,20 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { hybridPersistStorage } from '../../lib/storage'
-import { scheduleDebouncedSync } from '../../services/api/syncService'
+import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 
 export type ViewMode = 'simple' | 'normal'
 
 export const VIEW_PAGES = [
   { id: 'today', titleKey: 'settings.page.today', defaultMode: 'simple' },
-  { id: 'tasks', titleKey: 'settings.page.tasks', defaultMode: 'simple' },
-  { id: 'goals', titleKey: 'settings.page.goals', defaultMode: 'simple' },
-  { id: 'dreams', titleKey: 'settings.page.dreams', defaultMode: 'simple' },
-  { id: 'training', titleKey: 'settings.page.training', defaultMode: 'simple' },
+  { id: 'productivity', titleKey: 'settings.page.productivity', defaultMode: 'simple' },
   { id: 'finance', titleKey: 'settings.page.finance', defaultMode: 'simple' },
+  { id: 'training', titleKey: 'settings.page.training', defaultMode: 'simple' },
   { id: 'media', titleKey: 'settings.page.media', defaultMode: 'simple' },
-  { id: 'subscriptions', titleKey: 'settings.page.subscriptions', defaultMode: 'simple' },
+  { id: 'mind', titleKey: 'settings.page.mind', defaultMode: 'simple' },
+  { id: 'notes', titleKey: 'settings.page.notes', defaultMode: 'simple' },
   { id: 'languages', titleKey: 'settings.page.languages', defaultMode: 'simple' },
   { id: 'favorites', titleKey: 'settings.page.favorites', defaultMode: 'simple' },
-  { id: 'notes', titleKey: 'settings.page.notes', defaultMode: 'simple' },
 ] as const
 
 export type ViewPageId = (typeof VIEW_PAGES)[number]['id']
@@ -90,7 +88,9 @@ export const useViewModeStore = create<ViewModeState>()(
 )
 
 export const usePageViewMode = (pageId: ViewPageId | string) => {
-  const mode = useViewModeStore((state) => (state.pageModes as Record<string, ViewMode>)[pageId] ?? state.globalMode ?? 'simple')
+  const normalizedId =
+    pageId === 'tasks' || pageId === 'goals' || pageId === 'dreams' ? 'productivity' : pageId === 'birthdays' ? 'remind' : pageId
+  const mode = useViewModeStore((state) => (state.pageModes as Record<string, ViewMode>)[normalizedId] ?? state.globalMode ?? 'simple')
   const setPageMode = useViewModeStore((state) => state.setPageMode)
   const togglePageMode = useViewModeStore((state) => state.togglePageMode)
 
@@ -98,8 +98,8 @@ export const usePageViewMode = (pageId: ViewPageId | string) => {
     mode,
     isSimple: mode === 'simple',
     isNormal: mode === 'normal',
-    setMode: (next: ViewMode) => setPageMode(pageId, next),
-    toggleMode: () => togglePageMode(pageId),
+    setMode: (next: ViewMode) => setPageMode(normalizedId, next),
+    toggleMode: () => togglePageMode(normalizedId),
   }
 }
 

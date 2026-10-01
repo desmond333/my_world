@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Bike, ChevronLeft, ChevronRight, ClipboardCopy, Dumbbell, Flame, PieChart, Plus, Settings2, Trash2, Check } from 'lucide-react'
 import { findCity } from '../../data'
 import { useCopyFeedback } from '../../hooks'
-import { DonutChart, ViewModeToggle } from '../../shared/ui'
+import { DonutChart, Switch, ViewModeToggle } from '../../shared/ui'
 import {
   activeSports,
   daySports,
@@ -156,17 +156,17 @@ export const TrainingPage = () => {
             <div className="sport-settings">
               {sports.map((sport) => (
                 <div className="sport-setting" key={sport.id}>
-                  <label className="switch-row">
-                    <span className="switch-text">
+                  <Switch
+                    checked={sport.enabled}
+                    onCheckedChange={() => setSportEnabled(sport.id, !sport.enabled)}
+                    label={
                       <span className="sport-name">
                         <i style={{ background: sport.color }} />
                         {sportLabel(sport, lang)}
                       </span>
-                      {sport.custom && <small>{t('training.settings.custom')}</small>}
-                    </span>
-                    <input type="checkbox" checked={sport.enabled} onChange={() => setSportEnabled(sport.id, !sport.enabled)} />
-                    <i className="switch" aria-hidden="true" />
-                  </label>
+                    }
+                    hint={sport.custom ? t('training.settings.custom') : undefined}
+                  />
                   {sport.custom && (
                     <button
                       className="sport-remove"

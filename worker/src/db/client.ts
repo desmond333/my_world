@@ -1,4 +1,11 @@
+import { drizzle } from 'drizzle-orm/d1'
+import * as schema from './schema'
+
 export const getD1 = (db: D1Database): D1Database => db
+
+export const getDb = (d1: D1Database) => drizzle(d1, { schema })
+export type AppDb = ReturnType<typeof getDb>
+export { schema }
 
 export const parseJson = <T>(value: string | null | undefined, fallback: T): T => {
   if (!value) return fallback

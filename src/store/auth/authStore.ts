@@ -25,7 +25,7 @@ export type AuthState = {
   clearError: () => void
 }
 
-const STORAGE_KEY = 'myworld-auth-state'
+const STORAGE_KEY = 'tau-auth-state'
 
 export const useAuthStore = create<AuthState>()(
   persist(

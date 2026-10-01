@@ -9,6 +9,10 @@ export const languages: Dictionary = {
     'langPage.georgianDesc': 'Базовые фразы с русской транскрипцией, ситуациями и озвучкой',
     'langPage.search': 'Поиск слов и выражений...',
     'langPage.tabsAria': 'Языки обучения',
+    'langPage.basicEnglishName': 'Базовый английский',
+    'langPage.basicEnglishHint': 'С нуля и для начинающих',
+    'langPage.basicEnglishDesc':
+      'Самый нужный словарь и готовые фразы для первого общения: приветствия, числа, глаголы, простые истории и диалоги',
     'langPage.englishName': 'Английский',
     'langPage.englishHint': 'YouTube & Пресса',
     'langPage.georgianName': 'Грузинский',
@@ -43,6 +47,10 @@ export const languages: Dictionary = {
     'lang.en.heroTitle': 'Английский для YouTube и американской прессы',
     'lang.en.heroDesc':
       'Слова и обороты, которые американские авторы используют в видео-эссе, подкастах и статьях The Wall Street Journal, а также аутентичные тексты для практики чтения.',
+
+    'lang.basic.heroTitle': 'Английский с нуля',
+    'lang.basic.heroDesc':
+      'Самые нужные слова и фразы, чтобы сделать первые шаги в языке: знакомство, числа, повседневные действия и короткие простые тексты с переводом.',
 
     'lang.trainer.aria': 'Режимы тренировки',
     'lang.trainer.flashcards': '🗂️ Карточки',
@@ -263,6 +271,10 @@ export const languages: Dictionary = {
     'langPage.georgianDesc': 'Essential phrases with Russian & English pronunciation notes, situations & audio',
     'langPage.search': 'Search words and expressions...',
     'langPage.tabsAria': 'Learning languages',
+    'langPage.basicEnglishName': 'Basic English',
+    'langPage.basicEnglishHint': 'From scratch & beginners',
+    'langPage.basicEnglishDesc':
+      'The most useful vocabulary and ready phrases for your first conversations: greetings, numbers, verbs, simple stories and dialogues',
     'langPage.englishName': 'English',
     'langPage.englishHint': 'YouTube & Press',
     'langPage.georgianName': 'Georgian',
@@ -297,6 +309,10 @@ export const languages: Dictionary = {
     'lang.en.heroTitle': 'English for YouTube & US Press',
     'lang.en.heroDesc':
       'Phrases and vocabulary used in American video essays, top podcasts, Wall Street Journal articles, and authentic reading texts.',
+
+    'lang.basic.heroTitle': 'English from scratch',
+    'lang.basic.heroDesc':
+      'The most useful words and phrases for your first steps in the language: introductions, numbers, everyday actions and short simple texts with translation.',
 
     'lang.trainer.aria': 'Training modes',
     'lang.trainer.flashcards': '🗂️ Cards',

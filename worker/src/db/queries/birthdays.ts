@@ -1,54 +1,38 @@
+import { and, asc, eq } from 'drizzle-orm'
+import { getDb } from '../client'
+import { birthdays, ownBirthday } from '../schema'
 import type { Birthday } from '../../types'
 
-type BirthdayRow = {
-  id: string
-  name: string
-  date: string
-}
-
-type OwnBirthdayRow = {
-  date: string
-}
-
-export const getBirthdays = async (db: D1Database, userId: string): Promise<{ ownBirthday: string; birthdays: Birthday[] }> => {
-  const ownRow = await db.prepare('SELECT date FROM own_birthday WHERE user_id = ?').bind(userId).first<OwnBirthdayRow>()
-
-  const { results } = await db
-    .prepare('SELECT id, name, date FROM birthdays WHERE user_id = ? ORDER BY date ASC')
-    .bind(userId)
-    .all<BirthdayRow>()
+export const getBirthdays = async (d1: D1Database, userId: string): Promise<{ ownBirthday: string; birthdays: Birthday[] }> => {
+  const db = getDb(d1)
+  const ownRow = await db.select({ date: ownBirthday.date }).from(ownBirthday).where(eq(ownBirthday.userId, userId)).get()
+  const rows = await db
+    .select({ id: birthdays.id, name: birthdays.name, date: birthdays.date })
+    .from(birthdays)
+    .where(eq(birthdays.userId, userId))
+    .orderBy(asc(birthdays.date))
 
   return {
     ownBirthday: ownRow?.date || '',
-    birthdays: results.map((row) => ({
-      id: row.id,
-      name: row.name,
-      date: row.date,
-    })),
+    birthdays: rows,
   }
 }
 
-export const createBirthday = async (db: D1Database, userId: string, name: string, date: string): Promise<Birthday> => {
+export const createBirthday = async (d1: D1Database, userId: string, name: string, date: string): Promise<Birthday> => {
+  const db = getDb(d1)
   const id = crypto.randomUUID()
-  await db.prepare('INSERT INTO birthdays (id, user_id, name, date) VALUES (?, ?, ?, ?)').bind(id, userId, name, date).run()
-
+  await db.insert(birthdays).values({ id, userId, name, date })
   return { id, name, date }
 }
 
-export const deleteBirthday = async (db: D1Database, userId: string, id: string): Promise<boolean> => {
-  const res = await db.prepare('DELETE FROM birthdays WHERE id = ? AND user_id = ?').bind(id, userId).run()
+export const deleteBirthday = async (d1: D1Database, userId: string, id: string): Promise<boolean> => {
+  const db = getDb(d1)
+  const res = await db.delete(birthdays).where(and(eq(birthdays.id, id), eq(birthdays.userId, userId)))
   return (res.meta.changes ?? 0) > 0
 }
 
-export const setOwnBirthday = async (db: D1Database, userId: string, date: string): Promise<string> => {
-  await db
-    .prepare(
-      `INSERT INTO own_birthday (user_id, date)
-       VALUES (?, ?)
-       ON CONFLICT(user_id) DO UPDATE SET date = excluded.date`,
-    )
-    .bind(userId, date)
-    .run()
-
+export const setOwnBirthday = async (d1: D1Database, userId: string, date: string): Promise<string> => {
+  const db = getDb(d1)
+  await db.insert(ownBirthday).values({ userId, date }).onConflictDoUpdate({ target: ownBirthday.userId, set: { date } })
   return date
 }

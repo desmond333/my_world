@@ -1,6 +1,6 @@
 import { createJSONStorage, type StateStorage } from 'zustand/middleware'
 
-const DB_NAME = 'my-world-db'
+const DB_NAME = 'tau-db'
 const STORE_NAME = 'keyval'
 const DB_VERSION = 1
 
@@ -82,6 +82,50 @@ export const idbDel = async (key: string): Promise<void> => {
       const tx = db.transaction(STORE_NAME, 'readwrite')
       const store = tx.objectStore(STORE_NAME)
       store.delete(key)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => resolve()
+      tx.onabort = () => resolve()
+    } catch {
+      resolve()
+    }
+  })
+}
+
+export const idbEntries = async (): Promise<{ key: string; value: string }[]> => {
+  const db = await getIDB()
+  if (!db) return []
+
+  return new Promise((resolve) => {
+    const out: { key: string; value: string }[] = []
+    try {
+      const tx = db.transaction(STORE_NAME, 'readonly')
+      const store = tx.objectStore(STORE_NAME)
+      const req = store.openCursor()
+      req.onsuccess = () => {
+        const cursor = req.result
+        if (cursor) {
+          const value = cursor.value
+          out.push({ key: String(cursor.key), value: typeof value === 'string' ? value : JSON.stringify(value) })
+          cursor.continue()
+          return
+        }
+        resolve(out)
+      }
+      req.onerror = () => resolve(out)
+    } catch {
+      resolve(out)
+    }
+  })
+}
+
+export const idbClear = async (): Promise<void> => {
+  const db = await getIDB()
+  if (!db) return
+
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE_NAME, 'readwrite')
+      tx.objectStore(STORE_NAME).clear()
       tx.oncomplete = () => resolve()
       tx.onerror = () => resolve()
       tx.onabort = () => resolve()

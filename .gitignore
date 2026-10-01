@@ -34,9 +34,15 @@ worker/.dev.vars
 worker/.dev.vars.*
 worker/.wrangler/
 
-# Агентские правила
+# Агентские правила и временные дорожные карты
 AGENTS.md
-PROJECT_MAP.md
+ROADMAP.md
+RADIX_ROADMAP.md
+FSD_ROADMAP.md
+*ROADMAP*.md
+*MIGRATION*.md
+*TASKS*.md
+*BACKLOG*.md
 
 # Покрытие тестами
 coverage/
@@ -46,6 +52,8 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+.order
+*.order
 .idea/
 *.swp
 *.swo

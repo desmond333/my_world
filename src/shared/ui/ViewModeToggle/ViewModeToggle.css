@@ -39,13 +39,13 @@
   gap: 4px;
 }
 
-.view-mode-btn:hover {
+.view-mode-btn:not(.is-active):hover {
   color: var(--fg);
 }
 
 .view-mode-btn.is-active {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-weight: 700;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }

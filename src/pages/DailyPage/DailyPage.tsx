@@ -5,10 +5,11 @@ import { getSeason, getThemedOccasion, getWish, hasTraining, seasonName, STRENGT
 import { useTranslation } from '../../lib/i18n'
 import { fetchHoliday } from '../../services/holidays'
 import { fetchWeather } from '../../services/weather'
+import { Thermometer } from 'lucide-react'
+import { AppFooter } from '../../widgets'
 import { getDateForTimezone, useAnimalsStore, useDailyStore, useFavoritesStore, usePageViewMode, useTrainingStore } from '../../store'
 import {
   BreedCard,
-  DailyFooter,
   DesktopHint,
   ForecastStrip,
   HeroSection,
@@ -141,7 +142,14 @@ export const DailyPage = () => {
       )}
 
       <DesktopHint />
-      <DailyFooter />
+      <AppFooter
+        leftText={t('daily.footer.new')}
+        note={
+          <>
+            <Thermometer size={14} /> {t('daily.footer.auto')}
+          </>
+        }
+      />
     </main>
   )
 }

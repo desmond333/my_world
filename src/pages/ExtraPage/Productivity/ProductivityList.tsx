@@ -42,7 +42,7 @@ import {
 } from '../../../lib'
 import type { Lang } from '../../../lib/i18n'
 import { useTranslation } from '../../../lib/i18n'
-import { ProgressRing, ViewModeToggle } from '../../../shared/ui'
+import { Popover, PopoverContent, PopoverTrigger, ProgressRing, Tooltip } from '../../../shared/ui'
 import { getDateForTimezone, useDailyStore, useFriendsStore, usePageViewMode, useProductivityStore } from '../../../store'
 import type { ProductivitySnapshot } from '../../../store'
 
@@ -95,45 +95,32 @@ type DateCellProps = {
 const DateCell = ({ item, today, lang, onChange }: DateCellProps) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const root = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!open) return
-    const onPointerDown = (event: MouseEvent) => {
-      if (root.current && !root.current.contains(event.target as Node)) setOpen(false)
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', onPointerDown)
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', onPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open])
-
+  const isUndated = !item.date
   const label = item.date ? dayLabel(item.date, today, lang) : undatedLabel(lang)
   const tag = dayTagKind(item.date, today)
 
   return (
-    <div className="point-date-cell" ref={root}>
-      <button
-        type="button"
-        className={`point-date-chip tag-${tag}${open ? ' is-open' : ''}`}
-        onClick={() => setOpen((value) => !value)}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        title={t('productivity.date.move')}
-        aria-label={item.date ? t('productivity.date.openAria', undefined, { label }) : t('productivity.date.undatedAria')}
-      >
-        <CalendarDays size={12} />
-        <span>{label}</span>
-        <ChevronRight size={12} className="point-date-chip-arrow" />
-      </button>
+    <div className="point-date-cell">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={`point-date-chip tag-${tag}${isUndated ? ' is-undated' : ''}${open ? ' is-open' : ''}`}
+            aria-label={item.date ? t('productivity.date.openAria', undefined, { label }) : t('productivity.date.undatedAria')}
+          >
+            <CalendarDays size={12} />
+            <span>{label}</span>
+            <ChevronRight size={12} className="point-date-chip-arrow" />
+          </button>
+        </PopoverTrigger>
 
-      {open && (
-        <div className="point-date-pop" role="dialog" aria-label={t('productivity.date.pickAria', undefined, { title: item.title })}>
+        <PopoverContent
+          className="point-date-pop"
+          align="start"
+          sideOffset={4}
+          aria-label={t('productivity.date.pickAria', undefined, { title: item.title })}
+        >
           <input
             type="date"
             className="point-date-input"
@@ -144,18 +131,42 @@ const DateCell = ({ item, today, lang, onChange }: DateCellProps) => {
             }}
           />
           <div className="point-date-pop-row">
-            <button type="button" onClick={() => onChange(today)} className="mini-button">
+            <button
+              type="button"
+              onClick={() => {
+                onChange(today)
+                setOpen(false)
+              }}
+              className="mini-button"
+            >
               {t('common.today')}
             </button>
-            <button type="button" onClick={() => onChange(shiftDate(today, 1))} className="mini-button">
+            <button
+              type="button"
+              onClick={() => {
+                onChange(shiftDate(today, 1))
+                setOpen(false)
+              }}
+              className="mini-button"
+            >
               {t('common.tomorrow')}
             </button>
-            <button type="button" onClick={() => onChange(shiftDate(item.date || today, 7))} className="mini-button">
+            <button
+              type="button"
+              onClick={() => {
+                onChange(shiftDate(item.date || today, 7))
+                setOpen(false)
+              }}
+              className="mini-button"
+            >
               {t('productivity.date.plusWeek')}
             </button>
             <button
               type="button"
-              onClick={() => onChange('')}
+              onClick={() => {
+                onChange('')
+                setOpen(false)
+              }}
               className="mini-button"
               title={t('productivity.date.clear')}
               aria-label={t('productivity.date.clear')}
@@ -163,8 +174,8 @@ const DateCell = ({ item, today, lang, onChange }: DateCellProps) => {
               <Eraser size={12} />
             </button>
           </div>
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
   )
 }
@@ -187,8 +198,7 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
   const cityId = useDailyStore((state) => state.cityId)
   const today = useMemo(() => getDateForTimezone(findCity(cityId).timezone), [cityId])
 
-  const pageId = kind === 'task' ? 'tasks' : kind === 'goal' ? 'goals' : 'dreams'
-  const { isNormal, mode, setMode } = usePageViewMode(pageId)
+  const { isNormal, mode } = usePageViewMode('productivity')
 
   const friends = useFriendsStore((state) => state.friends)
   const assignTaskToFriend = useFriendsStore((state) => state.assignTask)
@@ -563,15 +573,16 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
 
         <DateCell item={item} today={today} lang={lang} onChange={(date) => move(item.id, date)} />
 
-        <button
-          type="button"
-          className="icon-button point-remove-btn"
-          onClick={() => handleRemove(item)}
-          title={t('productivity.item.remove')}
-        >
-          <Trash2 size={15} />
-          <span className="visually-hidden">{t('productivity.item.removeAria', undefined, { title: item.title })}</span>
-        </button>
+        <Tooltip content={t('productivity.item.remove')}>
+          <button
+            type="button"
+            className="icon-button point-remove-btn"
+            onClick={() => handleRemove(item)}
+            aria-label={t('productivity.item.removeAria', undefined, { title: item.title })}
+          >
+            <Trash2 size={15} />
+          </button>
+        </Tooltip>
 
         {overdue && <span className="point-overdue-badge">{t('productivity.filter.overdue')}</span>}
       </div>
@@ -886,8 +897,6 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
         </div>
 
         <div className="point-toolbar-right">
-          <ViewModeToggle mode={mode} onChange={setMode} size="sm" />
-
           {isNormal && (
             <label className="point-search">
               <Search size={13} aria-hidden="true" />

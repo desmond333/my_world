@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Cake, Cloud, Crown, Lock, LogIn, LogOut, Mail, RefreshCw, ShieldCheck, User, UserPlus } from 'lucide-react'
-import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
+import { AppTopbar } from '../../widgets'
 import { displayBirthday } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
 import { useAuthStore, useBirthdayStore } from '../../store'

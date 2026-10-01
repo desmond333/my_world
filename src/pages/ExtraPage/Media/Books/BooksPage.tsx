@@ -1,5 +1,5 @@
 import { BookOpen } from 'lucide-react'
-import { CollectionView } from '../../../../components/Collection/CollectionView'
+import { CollectionView } from '../../../../widgets/Collection'
 import { useTranslation } from '../../../../lib/i18n'
 import { useBooksStore } from '../../../../store'
 import { booksCollection } from './books'

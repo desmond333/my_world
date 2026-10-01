@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import { secureHeaders } from 'hono/secure-headers'
 import { adminRouter } from './routes/admin'
 import { authRouter } from './routes/auth'
+import { availabilityRouter } from './routes/availability'
 import { birthdaysRouter } from './routes/birthdays'
 import { collectionRouter } from './routes/collection'
 import { favoritesRouter } from './routes/favorites'
@@ -11,6 +12,7 @@ import { friendsRouter } from './routes/friends'
 import { lotteryRouter } from './routes/lottery'
 import { notesRouter } from './routes/notes'
 import { productivityRouter } from './routes/productivity'
+import { realtimeRouter } from './routes/realtime'
 import { settingsRouter } from './routes/settings'
 import { shopRouter } from './routes/shop'
 import { subscriptionsRouter } from './routes/subscriptions'
@@ -72,33 +74,36 @@ app.use(
   }),
 )
 
-app.route('/auth', authRouter)
-app.route('/api/settings', settingsRouter)
-app.route('/api/training', trainingRouter)
-app.route('/api/finance', financeRouter)
-app.route('/api/productivity', productivityRouter)
-app.route('/api/subscriptions', subscriptionsRouter)
-app.route('/api/birthdays', birthdaysRouter)
-app.route('/api/collection', collectionRouter)
-app.route('/api/favorites', favoritesRouter)
-app.route('/api/friends', friendsRouter)
-app.route('/api/lottery', lotteryRouter)
-app.route('/api/notes', notesRouter)
-app.route('/api/shop', shopRouter)
-app.route('/api/view-modes', viewModesRouter)
-app.route('/api/sync', syncRouter)
-app.route('/admin', adminRouter)
-app.route('/tmdb', tmdbRouter)
+const routes = app
+  .route('/auth', authRouter)
+  .route('/api/settings', settingsRouter)
+  .route('/api/training', trainingRouter)
+  .route('/api/finance', financeRouter)
+  .route('/api/productivity', productivityRouter)
+  .route('/api/subscriptions', subscriptionsRouter)
+  .route('/api/birthdays', birthdaysRouter)
+  .route('/api/collection', collectionRouter)
+  .route('/api/favorites', favoritesRouter)
+  .route('/api/friends', friendsRouter)
+  .route('/api/availability', availabilityRouter)
+  .route('/api/lottery', lotteryRouter)
+  .route('/api/notes', notesRouter)
+  .route('/api/shop', shopRouter)
+  .route('/api/view-modes', viewModesRouter)
+  .route('/api/sync', syncRouter)
+  .route('/api/realtime', realtimeRouter)
+  .route('/admin', adminRouter)
+  .route('/tmdb', tmdbRouter)
 
-app.get('/search/movie', async (c) => handleTmdbRequest(c))
-app.get('/genre/movie/list', async (c) => handleTmdbRequest(c))
-app.get('/movie/:id', async (c) => handleTmdbRequest(c))
+routes.get('/search/movie', async (c) => handleTmdbRequest(c))
+routes.get('/genre/movie/list', async (c) => handleTmdbRequest(c))
+routes.get('/movie/:id', async (c) => handleTmdbRequest(c))
 
-app.notFound((c) => {
+routes.notFound((c) => {
   return c.json({ error: 'Endpoint not found', code: 'NOT_FOUND' }, 404)
 })
 
-app.onError((err, c) => {
+routes.onError((err, c) => {
   const errorLog = {
     timestamp: new Date().toISOString(),
     level: 'error',
@@ -113,7 +118,8 @@ app.onError((err, c) => {
     },
   }
   console.error(JSON.stringify(errorLog))
-  return c.json({ error: err.message || 'Internal Server Error', code: 'SERVER_ERROR' }, 500)
+  return c.json({ error: 'Internal Server Error', code: 'SERVER_ERROR' }, 500)
 })
 
-export default app
+export type AppType = typeof routes
+export default routes

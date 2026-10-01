@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { idbPersistStorage } from '../../lib/storage'
-import { scheduleDebouncedSync } from '../../services/api/syncService'
+import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 
 const STORAGE_KEY = 'animal-notes'
 
@@ -14,6 +14,8 @@ export type Note = {
   kind: NoteKind
   title: string
   body: string
+  parentId?: string | null
+  icon?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -25,6 +27,7 @@ export type NotesStore = {
   add: (kind?: NoteKind, patch?: NotePatch) => string
   update: (id: string, patch: NotePatch) => void
   remove: (id: string) => void
+  move: (id: string, newParentId: string | null) => void
 }
 
 export const useNotesStore = create<NotesStore>()(
@@ -38,6 +41,8 @@ export const useNotesStore = create<NotesStore>()(
           kind,
           title: patch?.title ?? '',
           body: patch?.body ?? '',
+          parentId: patch?.parentId ?? null,
+          icon: patch?.icon ?? null,
           createdAt: now,
           updatedAt: now,
         }
@@ -52,14 +57,45 @@ export const useNotesStore = create<NotesStore>()(
         scheduleDebouncedSync()
       },
       remove: (id) => {
-        set((state) => ({ notes: state.notes.filter((note) => note.id !== id) }))
+        set((state) => {
+          const toDelete = new Set<string>([id])
+          let changed = true
+          while (changed) {
+            changed = false
+            for (const n of state.notes) {
+              if (n.parentId && toDelete.has(n.parentId) && !toDelete.has(n.id)) {
+                toDelete.add(n.id)
+                changed = true
+              }
+            }
+          }
+          return { notes: state.notes.filter((note) => !toDelete.has(note.id)) }
+        })
+        scheduleDebouncedSync()
+      },
+      move: (id, newParentId) => {
+        set((state) => {
+          if (newParentId === id) return state
+          if (newParentId) {
+            let curr = state.notes.find((n) => n.id === newParentId)
+            while (curr && curr.parentId) {
+              if (curr.parentId === id) return state
+              curr = state.notes.find((n) => n.id === curr?.parentId)
+            }
+          }
+          return {
+            notes: state.notes.map((note) =>
+              note.id === id ? { ...note, parentId: newParentId, updatedAt: new Date().toISOString() } : note,
+            ),
+          }
+        })
         scheduleDebouncedSync()
       },
     }),
     {
       name: STORAGE_KEY,
       storage: idbPersistStorage,
-      version: 2,
+      version: 3,
       migrate: (persistedState) => {
         const state = persistedState as { notes?: Partial<Note>[] }
         return {
@@ -68,6 +104,8 @@ export const useNotesStore = create<NotesStore>()(
             kind: item.kind ?? 'note',
             title: item.title ?? '',
             body: item.body ?? '',
+            parentId: item.parentId ?? null,
+            icon: item.icon ?? null,
             createdAt: item.createdAt ?? new Date().toISOString(),
             updatedAt: item.updatedAt ?? new Date().toISOString(),
           })) as Note[],

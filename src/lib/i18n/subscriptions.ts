@@ -50,7 +50,7 @@ export const subscriptions: Dictionary = {
     'subscription.status.over': 'просрочена',
     'subscription.status.stopped': 'отменена',
 
-    'subs.kicker': 'разное · подписки',
+    'subs.kicker': 'финансы · подписки',
     'subs.title': 'Подписки',
     'subs.intro': 'Удобный контроль регулярных списаний. Видно, когда и сколько снимут, а при отмене сервис помнит оплаченный период.',
     'subs.stat.monthly': 'Расходы в месяц',
@@ -148,7 +148,7 @@ export const subscriptions: Dictionary = {
     'subscription.status.over': 'overdue',
     'subscription.status.stopped': 'canceled',
 
-    'subs.kicker': 'misc · subscriptions',
+    'subs.kicker': 'finance · subscriptions',
     'subs.title': 'Subscriptions',
     'subs.intro': 'Convenient tracking of recurring charges. See upcoming dates and amounts with automatic billing cycle rollforward.',
     'subs.stat.monthly': 'Monthly expenses',

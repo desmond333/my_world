@@ -100,8 +100,8 @@ export const dayLabel = (key: string, today: string, lang: 'ru' | 'en' = 'ru') =
   return formatShortDate(key, locale)
 }
 
-export const UNTITLED_DAY = 'без даты'
-export const UNTITLED_DAY_EN = 'no date'
+export const UNTITLED_DAY = 'Без даты'
+export const UNTITLED_DAY_EN = 'No date'
 
 export const undatedLabel = (lang: 'ru' | 'en' = 'ru') => (lang === 'en' ? UNTITLED_DAY_EN : UNTITLED_DAY)
 

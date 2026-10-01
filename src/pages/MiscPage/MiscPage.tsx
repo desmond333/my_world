@@ -1,8 +1,7 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Laugh } from 'lucide-react'
-import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
-import { CreatorNote } from '../../components/CreatorNote/CreatorNote'
-import { ExtraNav } from '../../components/ExtraNav/ExtraNav'
+import { AppFooter, AppTopbar, ExtraNav } from '../../widgets'
 import { useTranslation } from '../../lib/i18n'
 import { useDailyStore } from '../../store'
 import { miscSections } from './sections'
@@ -12,9 +11,15 @@ export const MiscPage = () => {
   const { t } = useTranslation()
   const extraTab = useDailyStore((state) => state.extraTab)
   const toggleExtraTab = useDailyStore((state) => state.toggleExtraTab)
+  const hiddenSections = useDailyStore((state) => state.hiddenSections ?? [])
+  const hideSection = useDailyStore((state) => state.hideSection)
   const { pathname } = useLocation()
+  const navigate = useNavigate()
 
-  const navItems = miscSections.map((section) => ({
+  const visibleSections = miscSections.filter((section) => !hiddenSections.includes(section.key))
+
+  const navItems = visibleSections.map((section) => ({
+    key: section.key,
     to: `/misc/${section.key}`,
     label: t(`section.${section.key}`, section.label),
     hint: t(`section.${section.key}.hint`, section.hint),
@@ -24,6 +29,22 @@ export const MiscPage = () => {
 
   const active = navItems.find((item) => pathname === item.to || pathname.startsWith(`${item.to}/`))?.to ?? ''
 
+  useEffect(() => {
+    if (visibleSections.length === 0) return
+    const currentSectionKey = miscSections.find((s) => pathname.startsWith(`/misc/${s.key}`))?.key
+    if (currentSectionKey && hiddenSections.includes(currentSectionKey)) {
+      navigate(`/misc/${visibleSections[0].key}`, { replace: true })
+    }
+  }, [pathname, hiddenSections, visibleSections, navigate])
+
+  const handleHide = (key: string) => {
+    hideSection(key)
+    const remaining = visibleSections.filter((s) => s.key !== key)
+    if (pathname.startsWith(`/misc/${key}`) && remaining.length > 0) {
+      navigate(`/misc/${remaining[0].key}`, { replace: true })
+    }
+  }
+
   return (
     <main className="page-shell">
       <AppTopbar />
@@ -32,15 +53,16 @@ export const MiscPage = () => {
         <div className="extra-layout">
           <div className="extra-content">
             <Outlet />
-            <footer>
-              <span>{t('footer.device')}</span>
-              <span className="footer-note">
-                <Laugh size={14} /> {t('footer.mood')}
-              </span>
-              <CreatorNote />
-            </footer>
+            <AppFooter
+              leftText={t('footer.device')}
+              note={
+                <>
+                  <Laugh size={14} /> {t('footer.mood')}
+                </>
+              }
+            />
           </div>
-          <ExtraNav items={navItems} active={active} />
+          <ExtraNav items={navItems} active={active} onHideSection={handleHide} />
         </div>
       ) : (
         <section className="favorites-empty extra-off">

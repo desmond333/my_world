@@ -1,5 +1,5 @@
 {
-  "name": "today-animal-tmdb-worker",
+  "name": "tau-worker",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,14 +8,15 @@
     "deploy": "wrangler deploy",
     "secret": "wrangler secret put TMDB_TOKEN",
     "secret:list": "wrangler secret list",
-    "migrate:local": "wrangler d1 migrations apply my-world-db --local",
-    "migrate:remote": "wrangler d1 migrations apply my-world-db --remote",
+    "migrate:local": "wrangler d1 migrations apply tau-db --local",
+    "migrate:remote": "wrangler d1 migrations apply tau-db --remote",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@cloudflare/workers-types": "^5.20260926.1",
+    "drizzle-kit": "^0.31.11",
     "typescript": "^5.9.2",
     "vitest": "^4.1.11",
     "wrangler": "^4.42.0"
@@ -25,6 +26,9 @@
     "workerd@1.20260926.1": true
   },
   "dependencies": {
-    "hono": "^4.13.11"
+    "@hono/valibot-validator": "^0.6.1",
+    "drizzle-orm": "^0.45.3",
+    "hono": "^4.13.12",
+    "valibot": "^1.5.0"
   }
 }

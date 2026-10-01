@@ -30,7 +30,7 @@
   transition: all 0.2s ease;
 }
 
-.fun-tab-btn:hover {
+.fun-tab-btn:not(.is-active):hover {
   color: var(--fg);
   border-color: var(--accent);
 }
@@ -38,7 +38,7 @@
 .fun-tab-btn.is-active {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--ink, #000);
+  color: var(--on-accent, #000);
   box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
 }
 
@@ -307,7 +307,7 @@
 .costume-btn.is-active {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--ink, #000);
+  color: var(--on-accent, #000);
 }
 
 .statham-action-row {
@@ -660,7 +660,7 @@
 .meme-cat-btn.is-active {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--ink, #000);
+  color: var(--on-accent, #000);
 }
 
 .meme-stage {
@@ -735,7 +735,7 @@
   padding: 12px 24px;
   background: var(--accent);
   border: none;
-  color: var(--ink, #000);
+  color: var(--on-accent, #000);
   font:
     800 14px 'Manrope',
     sans-serif;

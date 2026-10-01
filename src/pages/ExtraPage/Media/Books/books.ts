@@ -1,4 +1,4 @@
-import type { CollectionDescriptor } from '../../../../components/Collection/types'
+import type { CollectionDescriptor } from '../../../../widgets/Collection'
 import type { CollectionListOption } from '../../../../data'
 import { onlineSearchUrl } from '../../../../lib'
 import { MIN_BOOKS_QUERY_LENGTH, fetchBookDetails, searchBooks } from '../../../../services'

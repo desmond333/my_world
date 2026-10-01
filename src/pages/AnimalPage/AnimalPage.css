@@ -105,7 +105,7 @@
   margin-top: 12px;
   padding: 30px 29px 34px;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .animal-story h2 {
   margin: 26px 0 12px;
@@ -121,6 +121,41 @@
   line-height: 1.65;
 }
 
+.favorites-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  text-align: center;
+  padding: 76px 24px 88px;
+  background: var(--panel);
+  color: var(--fg);
+}
+
+.favorites-empty h2 {
+  margin: 0;
+  font:
+    500 30px 'Fraunces',
+    serif;
+  letter-spacing: -0.04em;
+}
+
+.favorites-empty p {
+  margin: 0;
+  max-width: 380px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.favorites-empty .add-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin-top: 7px;
+  text-decoration: none;
+}
+
 @media (max-width: 760px) {
   .animal-hero {
     grid-template-columns: 1fr;
@@ -129,6 +164,9 @@
   }
   .animal-specs {
     grid-template-columns: 1fr;
+  }
+  .animal-specs .spec span {
+    font-size: 11px;
   }
   .animal-story {
     padding: 24px 20px 26px;

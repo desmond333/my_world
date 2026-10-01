@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Coins, Heart, Mail, Send, Sparkles, X } from 'lucide-react'
 import { useTranslation } from '../../../lib/i18n'
 import { useShopStore } from '../../../store'
-import { playCatMeow, playCatPurr } from '../../../components/CatAssistant/catAudio'
+import { playCatMeow, playCatPurr } from '../../../widgets/CatAssistant'
 import './DreamFriendGreeting.css'
 
 type DreamFriendGreetingProps = {

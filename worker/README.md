@@ -47,14 +47,14 @@ npx wrangler secret put TMDB_TOKEN
 npm run deploy
 ```
 
-Команда напечатает адрес вида `https://today-animal-tmdb.<твой-поддомен>.workers.dev`.
+Команда напечатает адрес вида `https://tau-api.<твой-поддомен>.workers.dev`.
 
 ## Подключение к приложению
 
 В `.env` фронтенда:
 
 ```
-VITE_TMDB_PROXY_URL=https://today-animal-tmdb.<твой-поддомен>.workers.dev
+VITE_TMDB_PROXY_URL=https://tau-api.<твой-поддомен>.workers.dev
 VITE_TMDB_TOKEN=
 ```
 

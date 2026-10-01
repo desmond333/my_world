@@ -1,7 +1,9 @@
 import { apiFetch, getAuthToken } from './apiClient'
+import { registerSyncTrigger, scheduleDebouncedSync } from './syncDebounce'
 import { offlineStorage } from '../../lib/storage'
 import { validateSyncSnapshot } from '../../lib/validation'
 import { useBirthdayStore } from '../../store/birthday/birthdayStore'
+import { useAvailabilityStore } from '../../store/availability/availabilityStore'
 import { useBooksStore, useGamesStore, useMoviesStore } from '../../store/collection'
 import { useDailyStore } from '../../store/daily/dailyStore'
 import { useFavoritesStore } from '../../store/favorites/favoritesStore'
@@ -30,6 +32,7 @@ export const collectLocalSnapshot = (): SyncSnapshot => {
   const notes = useNotesStore.getState()
   const shop = useShopStore.getState()
   const viewMode = useViewModeStore.getState()
+  const availability = useAvailabilityStore.getState()
 
   return {
     settings: {
@@ -41,6 +44,7 @@ export const collectLocalSnapshot = (): SyncSnapshot => {
       startPage: daily.startPage ?? '/today',
       blocks: daily.blocks,
       allowFriendTasks: daily.allowFriendTasks ?? true,
+      hiddenSections: daily.hiddenSections ?? [],
     },
     training: {
       days: training.days,
@@ -88,6 +92,9 @@ export const collectLocalSnapshot = (): SyncSnapshot => {
       pageModes: viewMode.pageModes,
       avatarMode: viewMode.avatarMode,
     },
+    availability: {
+      windows: availability.windows,
+    },
   }
 }
 
@@ -102,6 +109,7 @@ export const applyRemoteSnapshot = (snapshot: SyncSnapshot): void => {
       startPage: snapshot.settings.startPage ?? state.startPage,
       blocks: snapshot.settings.blocks ? { ...state.blocks, ...snapshot.settings.blocks } : state.blocks,
       allowFriendTasks: snapshot.settings.allowFriendTasks !== undefined ? snapshot.settings.allowFriendTasks : state.allowFriendTasks,
+      hiddenSections: Array.isArray(snapshot.settings.hiddenSections) ? snapshot.settings.hiddenSections : state.hiddenSections,
     }))
   }
 
@@ -202,6 +210,24 @@ export const applyRemoteSnapshot = (snapshot: SyncSnapshot): void => {
       avatarMode: snapshot.viewModes.avatarMode || 'simple',
     })
   }
+
+  if (snapshot.availability) {
+    const now = new Date().toISOString()
+    useAvailabilityStore.setState({
+      windows: (snapshot.availability.windows ?? []).map((window) => ({
+        id: window.id,
+        userId: window.userId ?? '',
+        scope: window.scope === 'date' ? 'date' : 'weekly',
+        dayOfWeek: window.dayOfWeek ?? null,
+        date: window.date ?? null,
+        startMin: window.startMin,
+        endMin: window.endMin,
+        note: window.note ?? '',
+        createdAt: window.createdAt ?? now,
+        updatedAt: window.updatedAt ?? now,
+      })),
+    })
+  }
 }
 
 export const pushSync = async (): Promise<void> => {
@@ -219,6 +245,10 @@ export const pushSync = async (): Promise<void> => {
     throw err
   }
 }
+
+registerSyncTrigger(pushSync)
+
+export { scheduleDebouncedSync }
 
 export const pullSync = async (): Promise<SyncSnapshot> => {
   const raw = await apiFetch<unknown>('/api/sync')
@@ -252,19 +282,4 @@ export const initOfflineSync = (): void => {
       }
     }
   })
-}
-
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
-
-export const scheduleDebouncedSync = (delayMs = 2000): void => {
-  if (typeof window === 'undefined' || !getAuthToken()) return
-
-  if (debounceTimer) {
-    clearTimeout(debounceTimer)
-  }
-
-  debounceTimer = setTimeout(() => {
-    debounceTimer = null
-    void pushSync().catch(() => {})
-  }, delayMs)
 }

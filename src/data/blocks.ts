@@ -19,7 +19,7 @@ export const startPageOptions: { path: string; key: string; fallback: string }[]
   { path: '/extra/training', key: 'settings.start.training', fallback: 'Тренировки' },
   { path: '/extra/finance', key: 'settings.start.finance', fallback: 'Финансы' },
   { path: '/extra/media/movies', key: 'settings.start.media', fallback: 'Медиа' },
-  { path: '/misc/subscriptions', key: 'settings.start.subscriptions', fallback: 'Подписки' },
+  { path: '/extra/finance/subscriptions', key: 'settings.start.subscriptions', fallback: 'Подписки' },
   { path: '/misc/languages', key: 'settings.start.languages', fallback: 'Языки' },
   { path: '/misc/fun', key: 'settings.start.fun', fallback: 'Веселье' },
   { path: '/favorites', key: 'settings.start.favorites', fallback: 'Избранное' },

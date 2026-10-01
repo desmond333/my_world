@@ -6,6 +6,9 @@ export const fun: Dictionary = {
     'lottery.title': 'Лотерея',
     'lottery.intro':
       'Три варианта с разными шансами. Крути колесо столько, сколько хочешь: оно честно, поэтому настоящую лотерею прочувствуешь быстро.',
+    'lottery.tabsAria': 'Режимы лотереи',
+    'lottery.tab.draw': 'Колесо и монетка',
+    'lottery.tab.battle': 'Битва королевств',
     'lottery.variant.one-of-hundred': 'Лотерея 1 из 100',
     'lottery.variant.one-of-hundred.comment':
       'Приз заоблачный, а шанс такой, что его почти не обойти. Хорошее начало, чтобы понять остальные.',
@@ -83,6 +86,9 @@ export const fun: Dictionary = {
     'lottery.title': 'Lottery',
     'lottery.intro':
       'Three variants with different odds. Spin the wheel as much as you like: it is fair, so you will feel a real lottery in no time.',
+    'lottery.tabsAria': 'Lottery modes',
+    'lottery.tab.draw': 'Wheel & coin',
+    'lottery.tab.battle': 'Kingdom clash',
     'lottery.variant.one-of-hundred': '1 out of 100',
     'lottery.variant.one-of-hundred.comment':
       'The prize is out of this world, and the odds are so slim you will barely get past them. A good starting point.',

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Heart, Send } from 'lucide-react'
 import { creator } from '../../data'
 import { useTranslation } from '../../lib/i18n'
-import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
+import { AppTopbar } from '../../widgets'
 import './CreatorPage.css'
 
 export const CreatorPage = () => {

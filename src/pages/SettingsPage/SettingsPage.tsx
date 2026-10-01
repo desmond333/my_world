@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlertTriangle,
@@ -7,10 +7,13 @@ import {
   Crown,
   Database,
   Download,
+  Eye,
   Feather,
   HardDrive,
+  Lock,
   Monitor,
   Moon,
+  Palette,
   RefreshCw,
   Settings as SettingsIcon,
   Sliders,
@@ -20,11 +23,21 @@ import {
   Upload,
   Users,
 } from 'lucide-react'
-import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
-import { cities, defaultBlocks } from '../../data'
-import { clearTemporaryCache, downloadBackupFile, getStorageStats, resetAllData, restoreBackupFromJSON, type StorageStats } from '../../lib'
+import { AppTopbar } from '../../widgets'
+import { cities, defaultBlocks, type ThemePaletteId } from '../../data'
+import { extraSections } from '../ExtraPage/sections'
+import {
+  clearTemporaryCache,
+  downloadBackupFile,
+  getStorageStats,
+  resetAllData,
+  restoreBackupFromJSON,
+  THEME_PALETTES,
+  VIP_THEMES,
+  type StorageStats,
+} from '../../lib'
 import { useTranslation } from '../../lib/i18n'
-import { Card, ViewModeToggle } from '../../shared/ui'
+import { Card, Switch, ViewModeToggle } from '../../shared/ui'
 import {
   VIEW_PAGES,
   type ViewMode,
@@ -33,6 +46,7 @@ import {
   useDailyStore,
   useFriendsStore,
   usePageViewMode,
+  useShopStore,
   useViewModeStore,
 } from '../../store'
 import './SettingsPage.css'
@@ -49,22 +63,44 @@ export const SettingsPage = () => {
 
   const themeMode = useDailyStore((state) => state.themeMode ?? 'system')
   const setThemeMode = useDailyStore((state) => state.setThemeMode)
+  const themePalette = useDailyStore((state) => state.themePalette ?? 'auto')
+  const setThemePalette = useDailyStore((state) => state.setThemePalette)
+  const activeThemeSkin = useShopStore((state) => state.activeThemeSkin)
+  const equipThemeSkin = useShopStore((state) => state.equipThemeSkin)
+  const isShopUnlocked = useShopStore((state) => state.isUnlocked)
   const cityId = useDailyStore((state) => state.cityId)
   const setCity = useDailyStore((state) => state.setCity)
   const blocks = useDailyStore((state) => state.blocks ?? defaultBlocks)
   const toggleBlock = useDailyStore((state) => state.toggleBlock)
   const allowFriendTasks = useDailyStore((state) => state.allowFriendTasks ?? true)
   const setAllowFriendTasks = useDailyStore((state) => state.setAllowFriendTasks)
+  const hiddenSections = useDailyStore((state) => state.hiddenSections ?? [])
+  const toggleSection = useDailyStore((state) => state.toggleSection)
+  const resetHiddenSections = useDailyStore((state) => state.resetHiddenSections)
   const user = useAuthStore((state) => state.user)
   const openFriendsModal = useFriendsStore((state) => state.openModal)
   const friendsCount = useFriendsStore((state) => state.friends.length)
 
-  const [stats, setStats] = useState<StorageStats>(() => getStorageStats())
+  const [stats, setStats] = useState<StorageStats | null>(null)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isEn = lang === 'en'
+
+  const refreshStats = () => {
+    void getStorageStats().then(setStats)
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    void getStorageStats().then((next) => {
+      if (!cancelled) setStats(next)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const allAreSimple = useMemo(() => VIEW_PAGES.every((p) => (pageModes[p.id] ?? globalMode) === 'simple'), [pageModes, globalMode])
   const allAreNormal = useMemo(() => VIEW_PAGES.every((p) => (pageModes[p.id] ?? globalMode) === 'normal'), [pageModes, globalMode])
@@ -87,7 +123,7 @@ export const SettingsPage = () => {
       if (!content) return
       const res = restoreBackupFromJSON(content)
       if (res.success) {
-        setStats(getStorageStats())
+        refreshStats()
         setFeedback({
           type: 'success',
           message: t('settings.data.importSuccess', undefined, { count: res.count }),
@@ -110,7 +146,7 @@ export const SettingsPage = () => {
 
   const handleClearCache = () => {
     const res = clearTemporaryCache()
-    setStats(getStorageStats())
+    refreshStats()
     setFeedback({
       type: 'success',
       message: `${t('settings.data.cacheCleared')} (${res.clearedKeys} ${isEn ? 'items' : 'записей'})`,
@@ -118,10 +154,32 @@ export const SettingsPage = () => {
     setTimeout(() => setFeedback(null), 3500)
   }
 
-  const handleFullReset = () => {
-    resetAllData()
+  const handleFullReset = async () => {
+    await resetAllData()
     setShowResetConfirm(false)
     window.location.reload()
+  }
+
+  const selectThemePalette = (palette: ThemePaletteId) => {
+    setThemePalette(palette)
+    if (activeThemeSkin && activeThemeSkin !== 'default') equipThemeSkin('default')
+  }
+
+  const selectThemeVariant = (palette: ThemePaletteId, mode: 'light' | 'dark') => {
+    setThemePalette(palette)
+    setThemeMode(mode)
+    if (activeThemeSkin && activeThemeSkin !== 'default') equipThemeSkin('default')
+  }
+
+  const isLightVariant = (palette: ThemePaletteId) => themePalette === palette && themeMode === 'light'
+  const isDarkVariant = (palette: ThemePaletteId) => themePalette === palette && themeMode === 'dark'
+
+  const isVipUnlocked = (shopKey: string) => isShopUnlocked(shopKey as Parameters<typeof isShopUnlocked>[0])
+
+  const selectVipTheme = (skin: string, mode?: 'light' | 'dark') => {
+    if (!isVipUnlocked(`theme_${skin}`)) return
+    equipThemeSkin(skin as Parameters<typeof equipThemeSkin>[0])
+    if (mode) setThemeMode(mode)
   }
 
   return (
@@ -249,6 +307,44 @@ export const SettingsPage = () => {
         <section className="settings-section">
           <div className="settings-section-head">
             <div className="settings-section-title">
+              <Eye size={18} className="settings-section-icon" />
+              <h2>{t('settings.sectionsVisibility.title')}</h2>
+            </div>
+            <p className="settings-section-desc">{t('settings.sectionsVisibility.desc')}</p>
+          </div>
+
+          <div className="page-modes-list">
+            {extraSections.map((section) => {
+              const isVisible = !hiddenSections.includes(section.key)
+
+              return (
+                <div key={section.key} className="page-mode-row">
+                  <div className="page-mode-info">
+                    <span className="page-mode-name">{t(`section.${section.key}`, section.label)}</span>
+                    <span className="page-mode-hint">{t(`section.${section.key}.hint`, section.hint)}</span>
+                  </div>
+
+                  <div className="page-mode-control">
+                    <Switch checked={isVisible} onCheckedChange={() => toggleSection(section.key)} standalone />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {hiddenSections.length > 0 && (
+            <div style={{ marginTop: '14px' }}>
+              <button type="button" className="add-button" onClick={resetHiddenSections}>
+                <Sparkles size={14} />
+                <span>{t('settings.sectionsVisibility.showAll')}</span>
+              </button>
+            </div>
+          )}
+        </section>
+
+        <section className="settings-section">
+          <div className="settings-section-head">
+            <div className="settings-section-title">
               <Users size={18} className="settings-section-icon" />
               <h2>{t('friends.settings.title')}</h2>
             </div>
@@ -262,12 +358,7 @@ export const SettingsPage = () => {
                 <span className="page-mode-hint">{t('friends.settings.allowTasksDesc')}</span>
               </div>
               <div className="page-mode-control">
-                <input
-                  type="checkbox"
-                  className="switch-checkbox"
-                  checked={allowFriendTasks}
-                  onChange={(e) => setAllowFriendTasks(e.target.checked)}
-                />
+                <Switch checked={allowFriendTasks} onCheckedChange={setAllowFriendTasks} standalone />
               </div>
             </div>
 
@@ -314,16 +405,14 @@ export const SettingsPage = () => {
                 <span className="storage-metric-label">{t('settings.data.storageUsed')}</span>
               </div>
               <div className="storage-metric-val">
-                <strong>{stats.formattedSize}</strong>
-                <span className="storage-metric-count">
-                  ({stats.itemsCount} {isEn ? 'entries' : 'записей'})
-                </span>
+                <strong>{stats?.formattedSize ?? '—'}</strong>
+                <span className="storage-metric-count">{stats ? `(${stats.itemsCount} ${isEn ? 'entries' : 'записей'})` : ''}</span>
               </div>
             </div>
 
-            {!isSimple && stats.categories.length > 0 && (
+            {!isSimple && (stats?.categories.length ?? 0) > 0 && (
               <div className="storage-categories-breakdown">
-                {stats.categories
+                {(stats?.categories ?? [])
                   .filter((c) => c.bytes > 0)
                   .map((c) => (
                     <div key={c.id} className="storage-category-pill">
@@ -435,33 +524,6 @@ export const SettingsPage = () => {
 
           <div className="settings-grid">
             <Card className="settings-pref-card">
-              <span className="settings-pref-label">{t('settings.general.theme')}</span>
-              <div className="settings-pill-group">
-                <button
-                  type="button"
-                  className={`settings-pill-btn ${themeMode === 'light' ? 'is-active' : ''}`}
-                  onClick={() => setThemeMode('light')}
-                >
-                  <Sun size={14} /> {t('theme.light')}
-                </button>
-                <button
-                  type="button"
-                  className={`settings-pill-btn ${themeMode === 'dark' ? 'is-active' : ''}`}
-                  onClick={() => setThemeMode('dark')}
-                >
-                  <Moon size={14} /> {t('theme.dark')}
-                </button>
-                <button
-                  type="button"
-                  className={`settings-pill-btn ${themeMode === 'system' ? 'is-active' : ''}`}
-                  onClick={() => setThemeMode('system')}
-                >
-                  <Monitor size={14} /> {t('theme.system')}
-                </button>
-              </div>
-            </Card>
-
-            <Card className="settings-pref-card">
               <span className="settings-pref-label">{t('settings.general.lang')}</span>
               <div className="settings-pill-group">
                 <button type="button" className={`settings-pill-btn ${lang === 'ru' ? 'is-active' : ''}`} onClick={() => setLang('ru')}>
@@ -490,6 +552,159 @@ export const SettingsPage = () => {
                 ))}
               </select>
             </Card>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div className="settings-section-head">
+            <div className="settings-section-title">
+              <Palette size={18} className="settings-section-icon" />
+              <h2>{t('settings.theme.title')}</h2>
+            </div>
+            <p className="settings-section-desc">{t('settings.theme.desc')}</p>
+          </div>
+
+          <div className="theme-mode-row">
+            <span className="settings-pref-label">{t('settings.theme.mode')}</span>
+            <div className="settings-pill-group">
+              <button
+                type="button"
+                className={`settings-pill-btn ${themeMode === 'system' ? 'is-active' : ''}`}
+                onClick={() => setThemeMode('system')}
+              >
+                <Monitor size={14} /> {t('theme.system')}
+              </button>
+              <button
+                type="button"
+                className={`settings-pill-btn ${themeMode === 'light' ? 'is-active' : ''}`}
+                onClick={() => selectThemeVariant(themePalette, 'light')}
+              >
+                <Sun size={14} /> {t('theme.light')}
+              </button>
+              <button
+                type="button"
+                className={`settings-pill-btn ${themeMode === 'dark' ? 'is-active' : ''}`}
+                onClick={() => selectThemeVariant(themePalette, 'dark')}
+              >
+                <Moon size={14} /> {t('theme.dark')}
+              </button>
+            </div>
+          </div>
+
+          <div className="theme-cards-grid">
+            {THEME_PALETTES.map((palette) => {
+              const isActive = themePalette === palette.id
+
+              return (
+                <div key={palette.id} className={`theme-card ${isActive ? 'is-active' : ''}`}>
+                  <button type="button" className="theme-card-main" onClick={() => selectThemePalette(palette.id)} aria-pressed={isActive}>
+                    <span className="theme-card-preview" aria-hidden="true">
+                      <span className="theme-card-preview-half" style={{ background: palette.preview.light.bg }}>
+                        <span className="theme-card-preview-dot" style={{ background: palette.preview.light.accent }} />
+                      </span>
+                      <span className="theme-card-preview-half" style={{ background: palette.preview.dark.bg }}>
+                        <span className="theme-card-preview-dot" style={{ background: palette.preview.dark.accent }} />
+                      </span>
+                    </span>
+
+                    <span className="theme-card-info">
+                      <strong>{t(palette.nameKey, palette.fallback)}</strong>
+                      {palette.hintKey && <small>{t(palette.hintKey, palette.hintFallback)}</small>}
+                    </span>
+
+                    {isActive && <Check size={16} className="theme-card-check" />}
+                  </button>
+
+                  <div className="theme-card-variants">
+                    <button
+                      type="button"
+                      className={`theme-variant-btn ${isLightVariant(palette.id) ? 'is-on' : ''}`}
+                      onClick={() => selectThemeVariant(palette.id, 'light')}
+                    >
+                      <Sun size={14} /> {t('theme.light')}
+                    </button>
+                    <button
+                      type="button"
+                      className={`theme-variant-btn ${isDarkVariant(palette.id) ? 'is-on' : ''}`}
+                      onClick={() => selectThemeVariant(palette.id, 'dark')}
+                    >
+                      <Moon size={14} /> {t('theme.dark')}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {activeThemeSkin && activeThemeSkin !== 'default' && (
+            <p className="settings-section-desc theme-vip-note">{t('settings.theme.vipNote')}</p>
+          )}
+
+          <div className="theme-vip-head">
+            <Crown size={15} />
+            <span>{t('settings.theme.vip')}</span>
+          </div>
+
+          <div className="theme-cards-grid">
+            {VIP_THEMES.map((vip) => {
+              const unlocked = isVipUnlocked(vip.shopKey)
+              const isActive = activeThemeSkin === vip.skin
+
+              return (
+                <div key={vip.skin} className={`theme-card theme-card--vip ${isActive ? 'is-active' : ''} ${unlocked ? '' : 'is-locked'}`}>
+                  <button
+                    type="button"
+                    className="theme-card-main"
+                    onClick={() => selectVipTheme(vip.skin)}
+                    aria-pressed={isActive}
+                    disabled={!unlocked}
+                  >
+                    <span className="theme-card-preview" aria-hidden="true">
+                      <span className="theme-card-preview-half" style={{ background: vip.preview.light.bg }}>
+                        <span className="theme-card-preview-dot" style={{ background: vip.preview.light.accent }} />
+                      </span>
+                      <span className="theme-card-preview-half" style={{ background: vip.preview.dark.bg }}>
+                        <span className="theme-card-preview-dot" style={{ background: vip.preview.dark.accent }} />
+                      </span>
+                    </span>
+
+                    <span className="theme-card-info">
+                      <strong>{t(vip.nameKey, vip.fallback)}</strong>
+                      {!unlocked && <small>{t('settings.theme.price', undefined, { price: vip.price })}</small>}
+                    </span>
+
+                    {isActive ? (
+                      <Check size={16} className="theme-card-check" />
+                    ) : !unlocked ? (
+                      <Lock size={15} className="theme-card-lock" />
+                    ) : null}
+                  </button>
+
+                  {unlocked ? (
+                    <div className="theme-card-variants">
+                      <button
+                        type="button"
+                        className={`theme-variant-btn ${isActive && themeMode === 'light' ? 'is-on' : ''}`}
+                        onClick={() => selectVipTheme(vip.skin, 'light')}
+                      >
+                        <Sun size={14} /> {t('theme.light')}
+                      </button>
+                      <button
+                        type="button"
+                        className={`theme-variant-btn ${isActive && themeMode === 'dark' ? 'is-on' : ''}`}
+                        onClick={() => selectVipTheme(vip.skin, 'dark')}
+                      >
+                        <Moon size={14} /> {t('theme.dark')}
+                      </button>
+                    </div>
+                  ) : (
+                    <Link to="/shop" className="theme-vip-unlock">
+                      <Lock size={13} /> {t('settings.theme.locked')}
+                    </Link>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </section>
 

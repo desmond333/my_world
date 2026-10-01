@@ -1,0 +1,373 @@
+.notes-sidebar-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.notes-tree-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notes-tree-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notes-tree-add-btn {
+  flex: 1;
+}
+
+.notes-tree-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.notes-tree-icon-btn:hover:not(:disabled) {
+  color: var(--fg);
+  border-color: var(--accent);
+  background: rgba(244, 184, 73, 0.08);
+}
+
+.notes-tree-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.notes-tree-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.notes-tree-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.notes-tree-search-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 28px 0 30px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--fg);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.notes-tree-search-input:focus {
+  border-color: var(--accent);
+}
+
+.notes-tree-search-clear {
+  position: absolute;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 4px;
+}
+
+.notes-tree-search-clear:hover {
+  color: var(--fg);
+}
+
+.notes-tree-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notes-tree-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tree-node-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.tree-node-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+  position: relative;
+}
+
+.tree-node-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tree-node-row.is-active {
+  background: rgba(244, 184, 73, 0.12);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.tree-node-expand-zone {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.tree-chevron-btn {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 3px;
+  transition:
+    transform 0.12s ease,
+    color 0.12s ease;
+}
+
+.tree-chevron-btn:hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tree-leaf-spacer {
+  width: 16px;
+  height: 16px;
+}
+
+.tree-node-icon {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.tree-node-row.is-active .tree-node-icon {
+  color: var(--accent);
+}
+
+.tree-node-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.tree-node-badge {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 5px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.tree-node-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.tree-node-row:hover .tree-node-actions,
+.tree-node-row:focus-within .tree-node-actions {
+  opacity: 1;
+}
+
+.tree-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.12s ease;
+}
+
+.tree-action-btn:hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tree-action-btn.is-delete:hover {
+  color: var(--coral);
+  background: rgba(229, 116, 80, 0.14);
+}
+
+.tree-node-children {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 1px;
+  margin-bottom: 2px;
+}
+
+.notes-tree-no-match {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.move-note-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 60vh;
+}
+
+.move-note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.move-note-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.move-note-node {
+  display: flex;
+  flex-direction: column;
+}
+
+.move-note-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+  width: 100%;
+}
+
+.move-note-item-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.move-note-item-btn.is-selected {
+  background: rgba(244, 184, 73, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.move-note-item-btn.is-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.move-note-root-btn {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.move-note-item-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.move-note-current-badge {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 1px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+.move-note-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.notes-dream-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tree-node-row.is-dream-item {
+  padding: 8px 10px;
+  gap: 10px;
+}
+
+.tree-dream-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-dream-date {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}

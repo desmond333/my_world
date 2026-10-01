@@ -1,4 +1,4 @@
-import type { CollectionDescriptor } from '../../../../components/Collection/types'
+import type { CollectionDescriptor } from '../../../../widgets/Collection'
 import type { CollectionListOption } from '../../../../data'
 import { MIN_GAMES_QUERY_LENGTH, fetchGameDetails, isRawgConfigured, searchGames } from '../../../../services'
 

@@ -4,19 +4,35 @@ import { useSpeechSynthesis } from '../../../../hooks'
 import { useTranslation } from '../../../../lib/i18n'
 import { READING_ARTICLES, type ReadingArticle, type ReadingParagraph, type ReadingVocabularyItem } from './readingData'
 
-export const EnglishReadingView = () => {
+export type ReadingCategoryOption = {
+  id: string
+  label: string
+}
+
+type EnglishReadingViewProps = {
+  articles?: ReadingArticle[]
+  categories?: ReadingCategoryOption[]
+}
+
+export const EnglishReadingView = ({ articles = READING_ARTICLES, categories }: EnglishReadingViewProps = {}) => {
   const { lang, t } = useTranslation()
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null)
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'youtube' | 'press' | 'tech'>('all')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showAllTranslations, setShowAllTranslations] = useState(false)
   const [revealedParagraphs, setRevealedParagraphs] = useState<Record<string, boolean>>({})
   const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>('md')
 
   const { speak, cancel, pause, resume, playingId, isSpeaking, isPaused } = useSpeechSynthesis()
 
-  const selectedArticle = READING_ARTICLES.find((a) => a.id === selectedArticleId) ?? null
+  const selectedArticle = articles.find((a) => a.id === selectedArticleId) ?? null
 
-  const filteredArticles = READING_ARTICLES.filter((article) => {
+  const categoryOptions: ReadingCategoryOption[] = categories ?? [
+    { id: 'youtube', label: `🎬 ${t('lang.reading.catYoutube')}` },
+    { id: 'press', label: `📰 ${t('lang.reading.catPress')}` },
+    { id: 'tech', label: `🚀 ${t('lang.reading.catTech')}` },
+  ]
+
+  const filteredArticles = articles.filter((article) => {
     if (selectedCategory === 'all') return true
     return article.category === selectedCategory
   })
@@ -272,29 +288,18 @@ export const EnglishReadingView = () => {
           className={`reading-cat-tab ${selectedCategory === 'all' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('all')}
         >
-          {t('lang.reading.allTopics')} ({READING_ARTICLES.length})
+          {t('lang.reading.allTopics')} ({articles.length})
         </button>
-        <button
-          type="button"
-          className={`reading-cat-tab ${selectedCategory === 'youtube' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('youtube')}
-        >
-          🎬 {t('lang.reading.catYoutube')}
-        </button>
-        <button
-          type="button"
-          className={`reading-cat-tab ${selectedCategory === 'press' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('press')}
-        >
-          📰 {t('lang.reading.catPress')}
-        </button>
-        <button
-          type="button"
-          className={`reading-cat-tab ${selectedCategory === 'tech' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('tech')}
-        >
-          🚀 {t('lang.reading.catTech')}
-        </button>
+        {categoryOptions.map((cat) => (
+          <button
+            key={cat.id}
+            type="button"
+            className={`reading-cat-tab ${selectedCategory === cat.id ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(cat.id)}
+          >
+            {cat.label}
+          </button>
+        ))}
       </div>
 
       <div className="reading-articles-grid">

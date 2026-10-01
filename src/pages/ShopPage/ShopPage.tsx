@@ -22,10 +22,9 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
-import { CatPremiumAvatar } from '../../components/CatAssistant/CatPremiumAvatar'
+import { AppTopbar, CatPremiumAvatar } from '../../widgets'
 import { useTranslation } from '../../lib/i18n'
-import { PART_PRICES, type ShopItemKey, useShopStore } from '../../store'
+import { PART_PRICES, type ShopItemKey, useDailyStore, useShopStore } from '../../store'
 import { playAmbientSound, stopAmbientSound, getCurrentAmbientTrack } from '../../services'
 import { playBattleHorn, playVictoryFanfare } from '../MiscPage/Lottery/battleSounds'
 import './ShopPage.css'
@@ -88,6 +87,12 @@ export const ShopPage = () => {
   const activeThemeSkin = useShopStore((state) => state.activeThemeSkin)
   const equipCatSkin = useShopStore((state) => state.equipCatSkin)
   const equipThemeSkin = useShopStore((state) => state.equipThemeSkin)
+  const themeMode = useDailyStore((state) => state.themeMode)
+
+  const isLight =
+    (themeMode ?? 'system') === 'system'
+      ? typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+      : themeMode === 'light'
 
   const [activePack, setActivePack] = useState<RealMoneyPack | null>(null)
   const [purchaseSuccessNotice, setPurchaseSuccessNotice] = useState<string | null>(null)
@@ -508,17 +513,17 @@ export const ShopPage = () => {
                 <div>
                   <h3 className="shop-item-title">{isEn ? 'Neon Cyberpunk' : 'Неоновый Киберпанк'}</h3>
                   <div className="theme-palette-dots">
-                    <span style={{ background: '#090a14' }} />
-                    <span style={{ background: '#00f2fe' }} />
-                    <span style={{ background: '#ff007f' }} />
+                    <span style={{ background: isLight ? '#f1f6fc' : '#090a14' }} title={isEn ? 'Canvas' : 'Фон'} />
+                    <span style={{ background: isLight ? '#0077b6' : '#00f2fe' }} title={isEn ? 'Cyan Accent' : 'Циан'} />
+                    <span style={{ background: isLight ? '#d40066' : '#ff007f' }} title={isEn ? 'Magenta Accent' : 'Маджента'} />
                   </div>
                 </div>
               </div>
 
               <p className="shop-item-desc">
                 {isEn
-                  ? 'Dark deep sapphire canvas with vibrant electric cyan accents, neon magenta highlights, and cybernetic cards.'
-                  : 'Глубокий сапфировый фон с яркими акцентами неонового циана, мадженты и кибернетических карточек.'}
+                  ? 'Dual theme (adapts to light & dark modes). Clean ice-cyber canvas with electric cyan in light mode; deep sapphire with glowing neon in dark mode.'
+                  : 'Двойная тема (адаптируется к светлому и тёмному режимам). Ледяной кибер-фон со светящимся цианом в светлом режиме и глубокий сапфир с неоном в тёмном.'}
               </p>
 
               <div className="shop-item-footer">
@@ -568,17 +573,17 @@ export const ShopPage = () => {
                 <div>
                   <h3 className="shop-item-title">{isEn ? 'Midnight Gold' : 'Королевское Золото'}</h3>
                   <div className="theme-palette-dots">
-                    <span style={{ background: '#0d0c0a' }} />
-                    <span style={{ background: '#ffd700' }} />
-                    <span style={{ background: '#e5a93c' }} />
+                    <span style={{ background: isLight ? '#faf6ed' : '#0d0c0a' }} title={isEn ? 'Canvas' : 'Фон'} />
+                    <span style={{ background: isLight ? '#b38206' : '#ffd700' }} title={isEn ? 'Gold Accent' : 'Золото'} />
+                    <span style={{ background: isLight ? '#c0631c' : '#e5a93c' }} title={isEn ? 'Amber Accent' : 'Янтарь'} />
                   </div>
                 </div>
               </div>
 
               <p className="shop-item-desc">
                 {isEn
-                  ? 'Regal obsidian black backdrop with warm imperial gold borders, subtle amber illumination, and refined typography.'
-                  : 'Благородный обсидиановый фон с тёплым золотым тиснением императорской казны и янтарной подсветкой.'}
+                  ? 'Dual theme (adapts to light & dark modes). Regal champagne ivory in light mode; obsidian black with imperial gold illumination in dark mode.'
+                  : 'Двойная тема (адаптируется к светлому и тёмному режимам). Благородная слоновая кость в светлом режиме и обсидиановый фон с золотым тиснением в тёмном.'}
               </p>
 
               <div className="shop-item-footer">

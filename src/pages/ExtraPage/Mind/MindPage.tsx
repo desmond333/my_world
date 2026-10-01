@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { Heart, Moon } from 'lucide-react'
-import { SectionTabs, type SectionTab } from '../../../components/SectionTabs/SectionTabs'
+import { SectionTabs, type SectionTab } from '../../../widgets'
 import { useTranslation } from '../../../lib/i18n'
 import '../Productivity/Productivity.css'
 

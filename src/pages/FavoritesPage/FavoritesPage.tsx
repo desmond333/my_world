@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, ClipboardCopy, Star, Trash2 } from 'lucide-react'
-import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
+import { AppFooter, AppTopbar } from '../../widgets'
 import { useCopyFeedback } from '../../hooks'
 import { favoritesReport, formatAddedAt } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
 import { useAnimalsStore, useFavoritesStore } from '../../store'
 import './FavoritesPage.css'
-import { CreatorNote } from '../../components/CreatorNote/CreatorNote'
 
 export const FavoritesPage = () => {
   const { lang, t, locale } = useTranslation()
@@ -78,13 +77,14 @@ export const FavoritesPage = () => {
         </section>
       )}
 
-      <footer>
-        <span>{t('favorites.footerNote')}</span>
-        <span className="footer-note">
-          <Star size={14} /> {t('favorites.footerHint')}
-        </span>
-        <CreatorNote />
-      </footer>
+      <AppFooter
+        leftText={t('favorites.footerNote')}
+        note={
+          <>
+            <Star size={14} /> {t('favorites.footerHint')}
+          </>
+        }
+      />
     </main>
   )
 }

@@ -56,9 +56,9 @@
   padding: 8px 18px;
   border-radius: 20px;
   border: 1px solid rgba(244, 184, 73, 0.4);
-  background: radial-gradient(circle at 50% 50%, rgba(244, 184, 73, 0.15) 0%, rgba(26, 22, 16, 0.9) 100%);
+  background: var(--panel);
   font-size: 13px;
-  box-shadow: 0 4px 18px rgba(244, 184, 73, 0.15);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
 }
 
 .shop-balance-coin {
@@ -139,15 +139,14 @@
   padding: 22px;
   border-radius: 8px;
   border: 1px solid var(--line);
-  background: rgba(18, 19, 24, 0.65);
-  backdrop-filter: blur(12px);
+  background: var(--panel);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .shop-item-card:hover {
   border-color: rgba(244, 184, 73, 0.45);
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .shop-item-card.is-unlocked {
@@ -277,7 +276,7 @@
   padding: 10px 18px;
   border-radius: 6px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg);
   color: var(--fg);
   font:
     600 12px 'DM Mono',
@@ -303,7 +302,7 @@
   padding: 16px;
   border-radius: 8px;
   border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--panel);
 }
 
 .earn-way-icon {
@@ -359,7 +358,7 @@
   padding: 24px 18px 20px;
   border-radius: 8px;
   border: 1px solid var(--line);
-  background: rgba(18, 19, 24, 0.6);
+  background: var(--panel);
   transition: all 0.2s ease;
 }
 
@@ -458,9 +457,10 @@
   width: min(400px, calc(100vw - 32px));
   padding: 28px 24px;
   border-radius: 10px;
-  background: rgba(22, 23, 28, 0.98);
-  border: 1px solid rgba(244, 184, 73, 0.4);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
 }
@@ -513,7 +513,8 @@
   gap: 8px;
   padding: 12px 14px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg);
+  border: 1px solid var(--line);
   margin-bottom: 22px;
 }
 
@@ -593,7 +594,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--line);
 }
 
 .shop-actions-split {
@@ -611,7 +612,7 @@
   padding: 10px 18px;
   border-radius: 6px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg);
   color: var(--fg);
   font:
     700 12px 'DM Mono',
@@ -621,7 +622,7 @@
 }
 
 .shop-equip-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--panel);
   border-color: var(--accent);
   color: var(--accent);
 }

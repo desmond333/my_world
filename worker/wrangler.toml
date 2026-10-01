@@ -1,4 +1,4 @@
-name = "today-animal-tmdb"
+name = "tau-api"
 main = "src/index.ts"
 compatibility_date = "2026-08-22"
 workers_dev = true
@@ -13,5 +13,5 @@ ADMIN_EMAIL = "your@email.com"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "my-world-db"
+database_name = "tau-db"
 database_id = "REPLACE_WITH_YOUR_D1_ID"

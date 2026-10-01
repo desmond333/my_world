@@ -1,0 +1,221 @@
+.modal-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #101313b8;
+}
+.birthday-modal {
+  width: min(650px, 100%);
+  max-height: min(760px, 92vh);
+  overflow-y: auto;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 28px 30px 30px;
+  box-shadow: 0 22px 80px #0008;
+  animation: panel-in 0.2s ease both;
+}
+.birthday-modal .settings-heading h2 {
+  margin-bottom: 22px;
+}
+.close-button {
+  border: 1px solid var(--line);
+  border-color: #15171755;
+  background: transparent;
+  color: var(--on-accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0;
+  width: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+.close-button:focus-visible {
+  outline: 2px solid #e57450;
+  outline-offset: 3px;
+}
+.close-button:hover {
+  background: var(--ink);
+  color: var(--accent);
+}
+.own-birthday {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 17px 0;
+  border-top: 1px solid #15171755;
+  border-bottom: 1px solid #15171755;
+}
+.birthday-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font:
+    10px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+.own-birthday strong {
+  display: block;
+  margin-top: 7px;
+  font:
+    20px 'Fraunces',
+    serif;
+}
+.birthday-date-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid #15171766;
+  padding: 9px 11px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.birthday-date-input input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.birthday-add {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr auto;
+  align-items: end;
+  gap: 9px;
+  padding: 22px 0;
+}
+.birthday-add label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font:
+    10px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+}
+.birthday-add input {
+  width: 100%;
+  border: 1px solid #15171755;
+  border-radius: 0;
+  background: #fff8e6;
+  color: #151717;
+  padding: 11px;
+  font:
+    12px 'Manrope',
+    sans-serif;
+}
+.form-error {
+  margin: -10px 0 17px;
+  color: #8f2f22;
+  font-size: 11px;
+}
+.list-heading {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font:
+    10px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+.birthday-row {
+  display: grid;
+  grid-template-columns: 1fr auto 27px;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid #15171733;
+}
+.birthday-row strong {
+  display: block;
+  font:
+    18px 'Fraunces',
+    serif;
+}
+.birthday-row span {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  opacity: 0.62;
+}
+.birthday-row time {
+  font:
+    11px 'DM Mono',
+    monospace;
+  text-transform: lowercase;
+}
+.delete-button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #15171799;
+  cursor: pointer;
+  padding: 5px;
+}
+.delete-button:hover {
+  color: #8f2f22;
+}
+.empty-birthdays {
+  border-top: 1px solid #15171733;
+  padding-top: 15px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.65;
+}
+
+@media (max-width: 760px) {
+  .birthday-modal {
+    padding: 20px 16px;
+    width: 100%;
+    max-width: 100%;
+  }
+  .own-birthday {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 13px;
+  }
+  .birthday-add {
+    grid-template-columns: 1fr;
+  }
+  .birthday-row {
+    grid-template-columns: 1fr auto 25px;
+    gap: 8px;
+  }
+  .birthday-row strong {
+    font-size: 15px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 760px) {
+  .birthday-modal {
+    max-height: 94vh;
+    -webkit-overflow-scrolling: touch;
+  }
+  .birthday-row button,
+  .birthday-add button,
+  .birthday-menu-button {
+    min-height: 44px;
+  }
+  .birthday-add input {
+    min-height: 46px;
+  }
+}

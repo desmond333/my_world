@@ -1,99 +1,88 @@
-import { parseJson } from '../client'
+import { and, asc, eq, gte, lte } from 'drizzle-orm'
+import { getDb, parseJson } from '../client'
+import { trainingDays, trainingSports } from '../schema'
 import type { TrainingSport } from '../../types'
 
-type TrainingDayRow = {
-  date: string
-  sports_json: string
-}
+export const getTrainingDays = async (d1: D1Database, userId: string, from?: string, to?: string): Promise<Record<string, string[]>> => {
+  const db = getDb(d1)
+  const conditions = [eq(trainingDays.userId, userId)]
+  if (from) conditions.push(gte(trainingDays.date, from))
+  if (to) conditions.push(lte(trainingDays.date, to))
 
-type TrainingSportRow = {
-  id: string
-  label: string
-  color: string
-  enabled: number
-  custom: number
-  sort_order: number
-}
-
-export const getTrainingDays = async (db: D1Database, userId: string, from?: string, to?: string): Promise<Record<string, string[]>> => {
-  let query = 'SELECT date, sports_json FROM training_days WHERE user_id = ?'
-  const params: unknown[] = [userId]
-
-  if (from && to) {
-    query += ' AND date >= ? AND date <= ?'
-    params.push(from, to)
-  } else if (from) {
-    query += ' AND date >= ?'
-    params.push(from)
-  } else if (to) {
-    query += ' AND date <= ?'
-    params.push(to)
-  }
-
-  query += ' ORDER BY date ASC'
-
-  const { results } = await db
-    .prepare(query)
-    .bind(...params)
-    .all<TrainingDayRow>()
+  const rows = await db
+    .select({ date: trainingDays.date, sportsJson: trainingDays.sportsJson })
+    .from(trainingDays)
+    .where(and(...conditions))
+    .orderBy(asc(trainingDays.date))
 
   const map: Record<string, string[]> = {}
-  for (const row of results) {
-    map[row.date] = parseJson<string[]>(row.sports_json, [])
+  for (const row of rows) {
+    map[row.date] = parseJson<string[]>(row.sportsJson, [])
   }
   return map
 }
 
-export const setTrainingDay = async (db: D1Database, userId: string, date: string, sports: string[]): Promise<void> => {
+export const setTrainingDay = async (d1: D1Database, userId: string, date: string, sports: string[]): Promise<void> => {
+  const db = getDb(d1)
   const id = `${userId}_${date}`
   await db
-    .prepare(
-      `INSERT INTO training_days (id, user_id, date, sports_json)
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(user_id, date) DO UPDATE SET sports_json = excluded.sports_json`,
-    )
-    .bind(id, userId, date, JSON.stringify(sports))
-    .run()
+    .insert(trainingDays)
+    .values({ id, userId, date, sportsJson: JSON.stringify(sports) })
+    .onConflictDoUpdate({
+      target: [trainingDays.userId, trainingDays.date],
+      set: { sportsJson: JSON.stringify(sports) },
+    })
 }
 
-export const deleteTrainingDay = async (db: D1Database, userId: string, date: string): Promise<boolean> => {
-  const res = await db.prepare('DELETE FROM training_days WHERE user_id = ? AND date = ?').bind(userId, date).run()
+export const deleteTrainingDay = async (d1: D1Database, userId: string, date: string): Promise<boolean> => {
+  const db = getDb(d1)
+  const res = await db.delete(trainingDays).where(and(eq(trainingDays.userId, userId), eq(trainingDays.date, date)))
   return (res.meta.changes ?? 0) > 0
 }
 
-export const getTrainingSports = async (db: D1Database, userId: string): Promise<TrainingSport[]> => {
-  const { results } = await db
-    .prepare('SELECT * FROM training_sports WHERE user_id = ? ORDER BY sort_order ASC, label ASC')
-    .bind(userId)
-    .all<TrainingSportRow>()
+export const getTrainingSports = async (d1: D1Database, userId: string): Promise<TrainingSport[]> => {
+  const db = getDb(d1)
+  const rows = await db
+    .select()
+    .from(trainingSports)
+    .where(eq(trainingSports.userId, userId))
+    .orderBy(asc(trainingSports.sortOrder), asc(trainingSports.label))
 
-  return results.map((row) => ({
+  return rows.map((row) => ({
     id: row.id,
     label: row.label,
     color: row.color,
     enabled: Boolean(row.enabled),
     custom: Boolean(row.custom),
-    sortOrder: row.sort_order,
+    sortOrder: row.sortOrder,
   }))
 }
 
-export const createTrainingSport = async (db: D1Database, userId: string, sport: TrainingSport): Promise<TrainingSport> => {
+export const createTrainingSport = async (d1: D1Database, userId: string, sport: TrainingSport): Promise<TrainingSport> => {
+  const db = getDb(d1)
   const id = sport.id || crypto.randomUUID()
   const sortOrder = sport.sortOrder ?? 0
 
-  await db
-    .prepare(
-      `INSERT INTO training_sports (id, user_id, label, color, enabled, custom, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .bind(id, userId, sport.label, sport.color, sport.enabled ? 1 : 0, sport.custom ? 1 : 0, sortOrder)
-    .run()
+  await db.insert(trainingSports).values({
+    id,
+    userId,
+    label: sport.label,
+    color: sport.color,
+    enabled: sport.enabled ? 1 : 0,
+    custom: sport.custom ? 1 : 0,
+    sortOrder,
+  })
 
   return { ...sport, id, sortOrder }
 }
 
-export const updateTrainingSport = async (db: D1Database, userId: string, id: string, patch: Partial<TrainingSport>): Promise<boolean> => {
-  const existing = await db.prepare('SELECT * FROM training_sports WHERE id = ? AND user_id = ?').bind(id, userId).first<TrainingSportRow>()
+export const updateTrainingSport = async (d1: D1Database, userId: string, id: string, patch: Partial<TrainingSport>): Promise<boolean> => {
+  const db = getDb(d1)
+  const existing = await db
+    .select()
+    .from(trainingSports)
+    .where(and(eq(trainingSports.id, id), eq(trainingSports.userId, userId)))
+    .get()
 
   if (!existing) return false
 
@@ -101,21 +90,18 @@ export const updateTrainingSport = async (db: D1Database, userId: string, id: st
   const color = patch.color ?? existing.color
   const enabled = patch.enabled !== undefined ? (patch.enabled ? 1 : 0) : existing.enabled
   const custom = patch.custom !== undefined ? (patch.custom ? 1 : 0) : existing.custom
-  const sortOrder = patch.sortOrder !== undefined ? patch.sortOrder : existing.sort_order
+  const sortOrder = patch.sortOrder !== undefined ? patch.sortOrder : existing.sortOrder
 
   await db
-    .prepare(
-      `UPDATE training_sports
-       SET label = ?, color = ?, enabled = ?, custom = ?, sort_order = ?
-       WHERE id = ? AND user_id = ?`,
-    )
-    .bind(label, color, enabled, custom, sortOrder, id, userId)
-    .run()
+    .update(trainingSports)
+    .set({ label, color, enabled, custom, sortOrder })
+    .where(and(eq(trainingSports.id, id), eq(trainingSports.userId, userId)))
 
   return true
 }
 
-export const deleteTrainingSport = async (db: D1Database, userId: string, id: string): Promise<boolean> => {
-  const res = await db.prepare('DELETE FROM training_sports WHERE id = ? AND user_id = ?').bind(id, userId).run()
+export const deleteTrainingSport = async (d1: D1Database, userId: string, id: string): Promise<boolean> => {
+  const db = getDb(d1)
+  const res = await db.delete(trainingSports).where(and(eq(trainingSports.id, id), eq(trainingSports.userId, userId)))
   return (res.meta.changes ?? 0) > 0
 }

@@ -1,5 +1,5 @@
 import { Clapperboard } from 'lucide-react'
-import { CollectionView } from '../../../../components/Collection/CollectionView'
+import { CollectionView } from '../../../../widgets/Collection'
 import { useTranslation } from '../../../../lib/i18n'
 import { useMoviesStore } from '../../../../store'
 import { moviesCollection } from './movies'

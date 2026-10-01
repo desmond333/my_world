@@ -1,79 +1,59 @@
+import { and, desc, eq } from 'drizzle-orm'
+import { getDb } from '../client'
+import { financeBalance, financeEntries, financeRates } from '../schema'
 import type { Currency, FinanceEntry, FinanceKind } from '../../types'
 
-type FinanceEntryRow = {
-  id: string
-  user_id: string
-  month: string
-  kind: string
-  amount: number
-  currency: string
-  note: string
-  created_at: string
-}
-
-type BalanceRow = {
-  rub: number
-  usd: number
-  gel: number
-}
-
-type RatesRow = {
-  rub: number
-  usd: number
-  gel: number
-  source: string
-  updated_at: string | null
-}
-
 export const getFinanceEntries = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   month?: string,
   limit = 100,
   offset = 0,
 ): Promise<FinanceEntry[]> => {
-  let query = 'SELECT * FROM finance_entries WHERE user_id = ?'
-  const params: unknown[] = [userId]
-
+  const db = getDb(d1)
+  const conditions = [eq(financeEntries.userId, userId)]
   if (month) {
-    query += ' AND month = ?'
-    params.push(month)
+    conditions.push(eq(financeEntries.month, month))
   }
 
-  query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?'
-  params.push(limit, offset)
+  const rows = await db
+    .select()
+    .from(financeEntries)
+    .where(and(...conditions))
+    .orderBy(desc(financeEntries.createdAt))
+    .limit(limit)
+    .offset(offset)
 
-  const { results } = await db
-    .prepare(query)
-    .bind(...params)
-    .all<FinanceEntryRow>()
-
-  return results.map((row) => ({
+  return rows.map((row) => ({
     id: row.id,
     month: row.month,
     kind: row.kind as FinanceKind,
     amount: row.amount,
     currency: row.currency as Currency,
     note: row.note,
-    createdAt: row.created_at,
+    createdAt: row.createdAt,
   }))
 }
 
 export const createFinanceEntry = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   entry: Omit<FinanceEntry, 'id' | 'createdAt'>,
 ): Promise<FinanceEntry> => {
+  const db = getDb(d1)
   const id = crypto.randomUUID()
   const createdAt = new Date().toISOString()
 
-  await db
-    .prepare(
-      `INSERT INTO finance_entries (id, user_id, month, kind, amount, currency, note, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .bind(id, userId, entry.month, entry.kind, entry.amount, entry.currency, entry.note || '', createdAt)
-    .run()
+  await db.insert(financeEntries).values({
+    id,
+    userId,
+    month: entry.month,
+    kind: entry.kind,
+    amount: entry.amount,
+    currency: entry.currency,
+    note: entry.note || '',
+    createdAt,
+  })
 
   return {
     id,
@@ -86,36 +66,39 @@ export const createFinanceEntry = async (
   }
 }
 
-export const updateFinanceEntry = async (db: D1Database, userId: string, id: string, patch: Partial<FinanceEntry>): Promise<boolean> => {
-  const existing = await db.prepare('SELECT * FROM finance_entries WHERE id = ? AND user_id = ?').bind(id, userId).first<FinanceEntryRow>()
+export const updateFinanceEntry = async (d1: D1Database, userId: string, id: string, patch: Partial<FinanceEntry>): Promise<boolean> => {
+  const db = getDb(d1)
+  const existing = await db
+    .select()
+    .from(financeEntries)
+    .where(and(eq(financeEntries.id, id), eq(financeEntries.userId, userId)))
+    .get()
 
   if (!existing) return false
 
-  const month = patch.month ?? existing.month
-  const kind = patch.kind ?? existing.kind
-  const amount = patch.amount !== undefined ? patch.amount : existing.amount
-  const currency = patch.currency ?? existing.currency
-  const note = patch.note !== undefined ? patch.note : existing.note
-
   await db
-    .prepare(
-      `UPDATE finance_entries
-       SET month = ?, kind = ?, amount = ?, currency = ?, note = ?
-       WHERE id = ? AND user_id = ?`,
-    )
-    .bind(month, kind, amount, currency, note, id, userId)
-    .run()
+    .update(financeEntries)
+    .set({
+      month: patch.month ?? existing.month,
+      kind: patch.kind ?? existing.kind,
+      amount: patch.amount !== undefined ? patch.amount : existing.amount,
+      currency: patch.currency ?? existing.currency,
+      note: patch.note !== undefined ? patch.note : existing.note,
+    })
+    .where(and(eq(financeEntries.id, id), eq(financeEntries.userId, userId)))
 
   return true
 }
 
-export const deleteFinanceEntry = async (db: D1Database, userId: string, id: string): Promise<boolean> => {
-  const res = await db.prepare('DELETE FROM finance_entries WHERE id = ? AND user_id = ?').bind(id, userId).run()
+export const deleteFinanceEntry = async (d1: D1Database, userId: string, id: string): Promise<boolean> => {
+  const db = getDb(d1)
+  const res = await db.delete(financeEntries).where(and(eq(financeEntries.id, id), eq(financeEntries.userId, userId)))
   return (res.meta.changes ?? 0) > 0
 }
 
-export const getFinanceBalance = async (db: D1Database, userId: string): Promise<Record<Currency, number>> => {
-  const row = await db.prepare('SELECT * FROM finance_balance WHERE user_id = ?').bind(userId).first<BalanceRow>()
+export const getFinanceBalance = async (d1: D1Database, userId: string): Promise<Record<Currency, number>> => {
+  const db = getDb(d1)
+  const row = await db.select().from(financeBalance).where(eq(financeBalance.userId, userId)).get()
 
   if (!row) {
     return { RUB: 0, USD: 0, GEL: 0 }
@@ -129,37 +112,44 @@ export const getFinanceBalance = async (db: D1Database, userId: string): Promise
 }
 
 export const updateFinanceBalance = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   balance: Partial<Record<Currency, number>>,
 ): Promise<Record<Currency, number>> => {
-  const current = await getFinanceBalance(db, userId)
+  const current = await getFinanceBalance(d1, userId)
   const merged: Record<Currency, number> = {
     RUB: balance.RUB !== undefined ? balance.RUB : current.RUB,
     USD: balance.USD !== undefined ? balance.USD : current.USD,
     GEL: balance.GEL !== undefined ? balance.GEL : current.GEL,
   }
 
+  const db = getDb(d1)
   await db
-    .prepare(
-      `INSERT INTO finance_balance (user_id, rub, usd, gel)
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(user_id) DO UPDATE SET
-         rub = excluded.rub,
-         usd = excluded.usd,
-         gel = excluded.gel`,
-    )
-    .bind(userId, merged.RUB, merged.USD, merged.GEL)
-    .run()
+    .insert(financeBalance)
+    .values({
+      userId,
+      rub: merged.RUB,
+      usd: merged.USD,
+      gel: merged.GEL,
+    })
+    .onConflictDoUpdate({
+      target: financeBalance.userId,
+      set: {
+        rub: merged.RUB,
+        usd: merged.USD,
+        gel: merged.GEL,
+      },
+    })
 
   return merged
 }
 
 export const getFinanceRates = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
 ): Promise<{ rates: Record<Currency, number>; source: string; updatedAt: string | null }> => {
-  const row = await db.prepare('SELECT * FROM finance_rates WHERE user_id = ?').bind(userId).first<RatesRow>()
+  const db = getDb(d1)
+  const row = await db.select().from(financeRates).where(eq(financeRates.userId, userId)).get()
 
   if (!row) {
     return {
@@ -176,17 +166,17 @@ export const getFinanceRates = async (
       GEL: row.gel,
     },
     source: row.source,
-    updatedAt: row.updated_at,
+    updatedAt: row.updatedAt,
   }
 }
 
 export const updateFinanceRates = async (
-  db: D1Database,
+  d1: D1Database,
   userId: string,
   rates: Partial<Record<Currency, number>>,
   source = 'manual',
 ): Promise<{ rates: Record<Currency, number>; source: string; updatedAt: string }> => {
-  const current = await getFinanceRates(db, userId)
+  const current = await getFinanceRates(d1, userId)
   const mergedRates: Record<Currency, number> = {
     RUB: rates.RUB !== undefined ? rates.RUB : current.rates.RUB,
     USD: rates.USD !== undefined ? rates.USD : current.rates.USD,
@@ -194,19 +184,27 @@ export const updateFinanceRates = async (
   }
   const updatedAt = new Date().toISOString()
 
+  const db = getDb(d1)
   await db
-    .prepare(
-      `INSERT INTO finance_rates (user_id, rub, usd, gel, source, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT(user_id) DO UPDATE SET
-         rub = excluded.rub,
-         usd = excluded.usd,
-         gel = excluded.gel,
-         source = excluded.source,
-         updated_at = excluded.updated_at`,
-    )
-    .bind(userId, mergedRates.RUB, mergedRates.USD, mergedRates.GEL, source, updatedAt)
-    .run()
+    .insert(financeRates)
+    .values({
+      userId,
+      rub: mergedRates.RUB,
+      usd: mergedRates.USD,
+      gel: mergedRates.GEL,
+      source,
+      updatedAt,
+    })
+    .onConflictDoUpdate({
+      target: financeRates.userId,
+      set: {
+        rub: mergedRates.RUB,
+        usd: mergedRates.USD,
+        gel: mergedRates.GEL,
+        source,
+        updatedAt,
+      },
+    })
 
   return {
     rates: mergedRates,

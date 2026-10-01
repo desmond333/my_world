@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, Crown, Database, Eye, Lock, RefreshCw, Search, Shield, Trash2, User, Users, X } from 'lucide-react'
-import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
+import { AppTopbar } from '../../widgets'
 import { useTranslation } from '../../lib/i18n'
 import { apiFetch } from '../../services/api/apiClient'
 import { ViewModeToggle } from '../../shared/ui/ViewModeToggle/ViewModeToggle'

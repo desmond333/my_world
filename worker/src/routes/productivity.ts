@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { vValidator } from '@hono/valibot-validator'
 import { safeLimit, safeOffset } from '../db/client'
 import {
   createProductivityItem,
@@ -11,8 +12,9 @@ import {
   setProductivityMood,
   updateProductivityItem,
 } from '../db/queries/productivity'
+import { createProductivityItemSchema, updateProductivityItemSchema } from '../lib/validation'
 import { authMiddleware } from '../middleware/auth'
-import type { Env, ProductivityItem, ProductivityMonthRecord } from '../types'
+import type { Env, ProductivityItem, ProductivityKind, ProductivityMonthRecord } from '../types'
 
 export const productivityRouter = new Hono<{ Bindings: Env }>()
 
@@ -30,26 +32,53 @@ productivityRouter.get('/', async (c) => {
   return c.json(items)
 })
 
-productivityRouter.post('/', async (c) => {
-  const userId = c.get('user').userId
-  const body = await c.req.json<Omit<ProductivityItem, 'id' | 'createdAt'>>().catch(() => ({}) as never)
-  if (!body.kind || !body.title) {
-    return c.json({ error: 'Kind and title are required', code: 'INVALID_DATA' }, 400)
-  }
-  const created = await createProductivityItem(c.env.DB, userId, body)
-  return c.json(created, 201)
-})
+productivityRouter.post(
+  '/',
+  vValidator('json', createProductivityItemSchema, (result, c) => {
+    if (!result.success) {
+      return c.json({ error: 'Kind and title are required', issues: result.issues }, 400)
+    }
+  }),
+  async (c) => {
+    const userId = c.get('user').userId
+    const body = c.req.valid('json')
+    const itemData: Omit<ProductivityItem, 'id' | 'createdAt'> = {
+      kind: (body.kind as ProductivityKind) || 'task',
+      title: body.title,
+      date: body.date ?? '',
+      repeat: (body.repeat as ProductivityItem['repeat']) || 'none',
+      done: body.done ?? false,
+      doneAt: null,
+      priority: (body.priority as ProductivityItem['priority']) || undefined,
+      note: body.note ?? '',
+    }
+    const created = await createProductivityItem(c.env.DB, userId, itemData)
+    return c.json(created, 201)
+  },
+)
 
-productivityRouter.put('/:id', async (c) => {
-  const userId = c.get('user').userId
-  const id = c.req.param('id')
-  const body = await c.req.json<Partial<ProductivityItem>>().catch(() => ({}))
-  const updated = await updateProductivityItem(c.env.DB, userId, id, body)
-  if (!updated) {
-    return c.json({ error: 'Item not found', code: 'NOT_FOUND' }, 404)
-  }
-  return c.json({ success: true })
-})
+productivityRouter.put(
+  '/:id',
+  vValidator('json', updateProductivityItemSchema, (result, c) => {
+    if (!result.success) {
+      return c.json({ error: 'Invalid productivity data', issues: result.issues }, 400)
+    }
+  }),
+  async (c) => {
+    const userId = c.get('user').userId
+    const id = c.req.param('id')
+    const body = c.req.valid('json')
+    const updated = await updateProductivityItem(c.env.DB, userId, id, {
+      ...body,
+      repeat: body.repeat as ProductivityItem['repeat'],
+      priority: (body.priority as ProductivityItem['priority']) || undefined,
+    })
+    if (!updated) {
+      return c.json({ error: 'Item not found', code: 'NOT_FOUND' }, 404)
+    }
+    return c.json({ success: true })
+  },
+)
 
 productivityRouter.delete('/:id', async (c) => {
   const userId = c.get('user').userId

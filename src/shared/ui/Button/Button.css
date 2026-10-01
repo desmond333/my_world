@@ -55,7 +55,7 @@
 /* Variants */
 .ui-button--primary {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 

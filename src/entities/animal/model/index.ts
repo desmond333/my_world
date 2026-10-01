@@ -1,0 +1,6 @@
+export { useAnimalsStore } from '../../../store/animals/animalsStore'
+export { useFavoritesStore } from '../../../store/favorites/favoritesStore'
+export type { AnimalsSource, AnimalsState } from '../../../store/animals/animalsStore'
+export type { FavoritesState } from '../../../store/types'
+export * from '../../../lib/animal'
+export * from '../../../lib/favorites'

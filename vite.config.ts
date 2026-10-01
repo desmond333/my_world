@@ -15,8 +15,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Животное дня',
-        short_name: 'MyWorld',
+        name: 'TAU',
+        short_name: 'TAU',
         description: 'Твой личный мир: продуктивность, финансы, животные дня',
         theme_color: '#151717',
         background_color: '#151717',
@@ -51,6 +51,9 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    sourcemap: false,
+  },
   server: {
     host: true,
   },

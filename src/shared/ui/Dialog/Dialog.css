@@ -40,7 +40,7 @@
 
 .ui-dialog-content--accent {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   border: none;
 }
 
@@ -122,7 +122,7 @@
 
 .ui-dialog-content--accent .ui-dialog-close {
   border-color: rgba(21, 23, 23, 0.25);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 
 .ui-dialog-close:hover {

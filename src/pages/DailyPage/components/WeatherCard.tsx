@@ -1,5 +1,5 @@
 import { ChevronDown, MapPin, RefreshCw, Wind } from 'lucide-react'
-import { WeatherIcon } from '../../../components/WeatherIcon/WeatherIcon'
+import { WeatherIcon } from '../../../shared/ui'
 import { dayName, getDaySpecialEvent, getTemperatureColor, isRainyDay, weatherLabel } from '../../../lib'
 import { useTranslation } from '../../../lib/i18n'
 import { useBirthdayStore } from '../../../store'

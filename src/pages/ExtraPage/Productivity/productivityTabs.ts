@@ -1,7 +1,7 @@
 import { ChartNoAxesColumn, CheckSquare, Moon, NotebookPen, Target } from 'lucide-react'
 import type { ProductivityKind } from '../../../data'
-import type { SectionTab } from '../../../components/SectionTabs/SectionTabs'
-import { getTranslation, type Lang } from '../../../lib/i18n'
+import { toSectionTab, type SectionTab } from '../../../widgets'
+import type { Lang } from '../../../lib/i18n'
 
 export type ProductivityTabKey = ProductivityKind | 'notes' | 'status'
 
@@ -20,12 +20,7 @@ export const productivityTabs: ProductivityTab[] = [
   { key: 'status', label: 'Статус', hint: 'баллы и месяцы', icon: ChartNoAxesColumn },
 ]
 
-export const toProductivityTab = (tab: ProductivityTab, lang: Lang): SectionTab => ({
-  to: `/extra/productivity/${tab.key}`,
-  label: getTranslation(`productivity.tab.${tab.key}`, lang, tab.label),
-  hint: getTranslation(`productivity.tab.${tab.key}Hint`, lang, tab.hint),
-  icon: tab.icon,
-  end: true,
-})
+export const toProductivityTab = (tab: ProductivityTab, lang: Lang): SectionTab =>
+  toSectionTab('/extra/productivity', 'productivity', lang, tab, true)
 
 export const DEFAULT_PRODUCTIVITY_TAB: ProductivityTabKey = 'task'

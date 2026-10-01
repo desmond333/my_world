@@ -1,5 +1,5 @@
 import * as v from 'valibot'
-import type { SyncSnapshot } from '../../store/types'
+import type { SyncSnapshot } from '../../data'
 
 export const SettingSchema = v.looseObject({
   lang: v.optional(v.string()),
@@ -10,6 +10,7 @@ export const SettingSchema = v.looseObject({
   startPage: v.optional(v.string()),
   blocks: v.optional(v.record(v.string(), v.boolean())),
   allowFriendTasks: v.optional(v.boolean()),
+  hiddenSections: v.optional(v.array(v.string())),
 })
 
 export const TrainingSportSchema = v.looseObject({
@@ -36,8 +37,42 @@ export const FinanceEntrySchema = v.looseObject({
   createdAt: v.string(),
 })
 
+export const DepositSchema = v.looseObject({
+  id: v.string(),
+  title: v.string(),
+  bank: v.string(),
+  amount: v.number(),
+  currency: v.string(),
+  rate: v.number(),
+  startDate: v.string(),
+  periodMonths: v.number(),
+  isCapitalized: v.boolean(),
+  canDeposit: v.optional(v.boolean()),
+  canWithdraw: v.optional(v.boolean()),
+  note: v.optional(v.string()),
+  createdAt: v.string(),
+})
+
+export const LoanSchema = v.looseObject({
+  id: v.string(),
+  title: v.string(),
+  bank: v.string(),
+  initialAmount: v.number(),
+  remainingAmount: v.number(),
+  currency: v.string(),
+  rate: v.number(),
+  monthlyPayment: v.number(),
+  paymentDay: v.number(),
+  startDate: v.string(),
+  endDate: v.string(),
+  note: v.optional(v.string()),
+  createdAt: v.string(),
+})
+
 export const FinanceSchema = v.looseObject({
   entries: v.optional(v.array(FinanceEntrySchema)),
+  deposits: v.optional(v.array(DepositSchema)),
+  loans: v.optional(v.array(LoanSchema)),
   balance: v.optional(v.record(v.string(), v.number())),
   rates: v.optional(v.record(v.string(), v.number())),
   ratesSource: v.optional(v.string()),
@@ -108,8 +143,27 @@ export const NoteItemSchema = v.looseObject({
   kind: v.string(),
   title: v.string(),
   body: v.string(),
+  parentId: v.optional(v.nullable(v.string())),
+  icon: v.optional(v.nullable(v.string())),
   createdAt: v.string(),
   updatedAt: v.string(),
+})
+
+export const AvailabilityWindowSchema = v.looseObject({
+  id: v.string(),
+  userId: v.optional(v.string()),
+  scope: v.optional(v.string()),
+  dayOfWeek: v.optional(v.nullable(v.number())),
+  date: v.optional(v.nullable(v.string())),
+  startMin: v.number(),
+  endMin: v.number(),
+  note: v.optional(v.string()),
+  createdAt: v.optional(v.string()),
+  updatedAt: v.optional(v.string()),
+})
+
+export const AvailabilitySchema = v.looseObject({
+  windows: v.optional(v.array(AvailabilityWindowSchema)),
 })
 
 export const SyncSnapshotSchema = v.looseObject({
@@ -125,6 +179,7 @@ export const SyncSnapshotSchema = v.looseObject({
   notes: v.optional(v.array(NoteItemSchema)),
   shop: v.optional(v.any()),
   viewModes: v.optional(v.any()),
+  availability: v.optional(AvailabilitySchema),
 })
 
 export const validateSyncSnapshot = (data: unknown): SyncSnapshot | null => {

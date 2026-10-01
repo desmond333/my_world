@@ -1,6 +1,8 @@
 import { Feather, Sparkles } from 'lucide-react'
 import { useTranslation } from '../../../lib/i18n'
-import type { ViewMode } from '../../../store'
+import type { ViewMode } from '../../../data'
+import { ToggleGroup, ToggleGroupItem } from '../ToggleGroup/ToggleGroup'
+import { Tooltip } from '../Tooltip/Tooltip'
 import './ViewModeToggle.css'
 
 export type ViewModeToggleProps = {
@@ -38,33 +40,35 @@ export const ViewModeToggle = ({ mode, onChange, size = 'md', variant = 'segment
   }
 
   return (
-    <div
-      role="radiogroup"
+    <ToggleGroup
+      type="single"
+      value={mode}
+      onValueChange={(val) => {
+        if (val) onChange(val as ViewMode)
+      }}
       aria-label={ariaLabel ?? t('settings.viewMode.title')}
       className={`view-mode-toggle size-${size} ${className}`.trim()}
     >
-      <button
-        type="button"
-        role="radio"
-        aria-checked={mode === 'simple'}
-        className={`view-mode-btn ${mode === 'simple' ? 'is-active' : ''}`}
-        onClick={() => onChange('simple')}
-        title={t('settings.viewMode.simpleDesc')}
-      >
-        <Feather size={size === 'sm' ? 12 : 13} />
-        <span>{t('settings.viewMode.simpleShort')}</span>
-      </button>
-      <button
-        type="button"
-        role="radio"
-        aria-checked={mode === 'normal'}
-        className={`view-mode-btn ${mode === 'normal' ? 'is-active' : ''}`}
-        onClick={() => onChange('normal')}
-        title={t('settings.viewMode.normalDesc')}
-      >
-        <Sparkles size={size === 'sm' ? 12 : 13} />
-        <span>{t('settings.viewMode.normalShort')}</span>
-      </button>
-    </div>
+      <Tooltip content={t('settings.viewMode.simpleDesc')}>
+        <ToggleGroupItem
+          value="simple"
+          className={`view-mode-btn ${mode === 'simple' ? 'is-active' : ''}`}
+          aria-label={t('settings.viewMode.simpleShort')}
+        >
+          <Feather size={size === 'sm' ? 12 : 13} />
+          <span>{t('settings.viewMode.simpleShort')}</span>
+        </ToggleGroupItem>
+      </Tooltip>
+      <Tooltip content={t('settings.viewMode.normalDesc')}>
+        <ToggleGroupItem
+          value="normal"
+          className={`view-mode-btn ${mode === 'normal' ? 'is-active' : ''}`}
+          aria-label={t('settings.viewMode.normalShort')}
+        >
+          <Sparkles size={size === 'sm' ? 12 : 13} />
+          <span>{t('settings.viewMode.normalShort')}</span>
+        </ToggleGroupItem>
+      </Tooltip>
+    </ToggleGroup>
   )
 }

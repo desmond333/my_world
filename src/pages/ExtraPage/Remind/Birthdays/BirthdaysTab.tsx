@@ -5,7 +5,7 @@ import { findCity } from '../../../../data'
 import { birthdayInfo, birthdayStatusLabel, displayBirthday } from '../../../../lib'
 import { countText, useTranslation } from '../../../../lib/i18n'
 import { useBirthdayStore, useDailyStore, usePageViewMode } from '../../../../store'
-import type { SortedBirthday } from '../../../../components/BirthdayModal/types'
+import type { SortedBirthday } from '../../../../features/birthdays'
 import './BirthdaysTab.css'
 
 export const BirthdaysTab = () => {

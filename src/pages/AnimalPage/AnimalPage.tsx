@@ -1,11 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ExternalLink, MapPin, Scale, Sparkles, Star, Timer } from 'lucide-react'
-import { AppTopbar } from '../../components/AppTopbar/AppTopbar'
+import { AppFooter, AppTopbar } from '../../widgets'
 import { findAnimal, formatAddedAt } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
 import { useAnimalsStore, useFavoritesStore } from '../../store'
 import './AnimalPage.css'
-import { CreatorNote } from '../../components/CreatorNote/CreatorNote'
 
 export const AnimalPage = () => {
   const { t, locale } = useTranslation()
@@ -100,13 +99,14 @@ export const AnimalPage = () => {
         <p>{animal.description}</p>
       </section>
 
-      <footer>
-        <span>{t('animalPage.footerNote')}</span>
-        <span className="footer-note">
-          <ExternalLink size={14} /> {t('animalPage.sourceWiki')}
-        </span>
-        <CreatorNote />
-      </footer>
+      <AppFooter
+        leftText={t('animalPage.footerNote')}
+        note={
+          <>
+            <ExternalLink size={14} /> {t('animalPage.sourceWiki')}
+          </>
+        }
+      />
     </main>
   )
 }

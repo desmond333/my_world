@@ -1,3 +1,94 @@
+.card-kicker {
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  color: inherit;
+  opacity: 0.65;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.photo-tag {
+  position: absolute;
+  z-index: 1;
+  top: 17px;
+  left: 18px;
+  padding: 7px 10px;
+  color: var(--on-accent);
+  background: var(--accent);
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--coral);
+  margin-right: 7px;
+  box-shadow: 0 0 0 4px #e5745030;
+}
+
+.favorite-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  padding: 0 13px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.favorite-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.favorite-button.is-active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.training-toggle {
+  min-height: 38px;
+  padding: 0 15px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.training-toggle:hover {
+  background: transparent;
+  color: var(--accent);
+}
+
+.training-toggle.is-done {
+  background: transparent;
+  color: var(--accent);
+}
+
+.training-toggle.is-done:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
 .daily-toolbar {
   display: flex;
   align-items: center;
@@ -60,14 +151,16 @@
 }
 
 .settings-panel {
-  background: var(--accent);
-  color: var(--ink);
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
   padding: 27px 30px 24px;
   margin: 16px 0 16px;
   animation: panel-in 0.25s ease both;
 }
 .settings-panel .card-kicker {
-  color: #151717;
+  color: var(--accent);
 }
 .settings-heading {
   display: flex;
@@ -80,13 +173,31 @@
     serif;
   letter-spacing: -0.04em;
   margin: 13px 0 25px;
+  color: var(--fg);
+}
+.close-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+.close-button:hover {
+  color: var(--fg);
+  border-color: var(--accent);
 }
 .settings-fields {
   display: grid;
   grid-template-columns: minmax(200px, 1fr) 1.25fr;
   gap: 24px 48px;
   padding-bottom: 26px;
-  border-bottom: 1px solid #15171755;
+  border-bottom: 1px solid var(--line);
 }
 .setting-field {
   display: flex;
@@ -106,47 +217,27 @@
   text-transform: uppercase;
   opacity: 0.65;
 }
-select {
-  appearance: none;
-  background: var(--ink)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%23f5efe4' stroke-width='1.5'%3E%3Cpath d='m3 5 4 4 4-4'/%3E%3C/svg%3E")
-    no-repeat right 13px center;
-  border: 1px solid #15171755;
-  border-radius: 0;
-  color: var(--accent);
-  padding: 13px 40px 13px 15px;
-  font-family: 'Manrope', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  transition: border-color 0.2s ease;
-}
-select:hover {
-  border-color: #151717;
-}
-select option {
-  background: var(--ink);
-  color: var(--accent);
-  font-weight: 500;
-}
 .scope-options {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 .scope-options label {
-  border: 1px solid #15171755;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
   cursor: pointer;
   padding: 11px 14px;
   font-size: 13px;
   font-weight: 500;
-  transition: background 0.2s ease;
+  border-radius: 4px;
+  transition: all 0.15s ease;
 }
 .scope-options label:hover,
 .scope-options label.selected {
-  background: var(--ink);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
 }
 .scope-options input {
   position: absolute;
@@ -175,7 +266,7 @@ select option {
 .blocks-field {
   margin-top: 26px;
   padding-bottom: 26px;
-  border-bottom: 1px solid #15171755;
+  border-bottom: 1px solid var(--line);
 }
 .blocks-field .block-toggles {
   display: grid;
@@ -184,9 +275,9 @@ select option {
 }
 .birthday-menu-button {
   margin-top: 26px;
-  border: 1px solid #15171766;
-  background: var(--ink);
-  color: var(--accent);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
   padding: 12px 15px;
   cursor: pointer;
   display: inline-flex;
@@ -195,10 +286,13 @@ select option {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.01em;
+  border-radius: 4px;
+  transition: all 0.18s ease;
 }
 .birthday-menu-button:hover {
-  background: transparent;
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
 }
 
 .hero {
@@ -294,7 +388,7 @@ select option {
   right: -20px;
   bottom: -32px;
   background: var(--coral);
-  color: var(--ink);
+  color: var(--on-accent);
   padding: 16px 23px 18px;
   min-width: 145px;
 }
@@ -339,7 +433,7 @@ select option {
 }
 .breed-card {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   display: flex;
   flex-direction: column;
 }
@@ -812,7 +906,7 @@ details[open] .plus {
   height: 48px;
   flex: 0 0 48px;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .training-card h2 {
   margin: 9px 0 6px;
@@ -849,7 +943,7 @@ details[open] .plus {
   height: 48px;
   flex: 0 0 48px;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .wish-card h2 {
   margin: 9px 0 6px;
@@ -873,7 +967,7 @@ details[open] .plus {
   margin-top: 12px;
   padding: 24px 29px;
   background: var(--coral);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .holiday-icon {
   display: grid;
@@ -1050,6 +1144,23 @@ details[open] .plus {
   .forecast-event-badge {
     width: 15px;
     height: 15px;
+  }
+  .training-toggle {
+    flex: 1;
+    min-width: 0;
+  }
+  .card-kicker,
+  .photo-tag,
+  .weather-now,
+  .two-day-name,
+  .two-day-note,
+  .weather-meta span,
+  .holiday-card > span,
+  .setting-field legend,
+  .setting-field span,
+  .theme-season-note,
+  .desktop-hint {
+    font-size: 11px;
   }
 }
 

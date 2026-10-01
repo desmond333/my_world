@@ -1,5 +1,5 @@
 import { MonitorSmartphone, Thermometer } from 'lucide-react'
-import { CreatorNote } from '../../../components/CreatorNote/CreatorNote'
+import { AppFooter } from '../../../widgets'
 import { useTranslation } from '../../../lib/i18n'
 
 export const DesktopHint = () => {
@@ -17,12 +17,13 @@ export const DailyFooter = () => {
   const { t } = useTranslation()
 
   return (
-    <footer>
-      <span>{t('daily.footer.new')}</span>
-      <span className="footer-note">
-        <Thermometer size={14} /> {t('daily.footer.auto')}
-      </span>
-      <CreatorNote />
-    </footer>
+    <AppFooter
+      leftText={t('daily.footer.new')}
+      note={
+        <>
+          <Thermometer size={14} /> {t('daily.footer.auto')}
+        </>
+      }
+    />
   )
 }

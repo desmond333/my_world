@@ -1,12 +1,7 @@
-import { parseJson } from '../client'
+import { eq } from 'drizzle-orm'
+import { getDb, parseJson } from '../client'
+import { viewModes } from '../schema'
 import type { ViewMode, ViewModesData } from '../../types'
-
-type ViewModesRow = {
-  user_id: string
-  global_mode: string
-  page_modes_json: string
-  avatar_mode: string
-}
 
 const DEFAULT_VIEW_MODES: ViewModesData = {
   globalMode: 'simple',
@@ -14,37 +9,44 @@ const DEFAULT_VIEW_MODES: ViewModesData = {
   avatarMode: 'simple',
 }
 
-export const getViewModes = async (db: D1Database, userId: string): Promise<ViewModesData> => {
-  const row = await db.prepare('SELECT * FROM view_modes WHERE user_id = ?').bind(userId).first<ViewModesRow>()
+export const getViewModes = async (d1: D1Database, userId: string): Promise<ViewModesData> => {
+  const db = getDb(d1)
+  const row = await db.select().from(viewModes).where(eq(viewModes.userId, userId)).get()
 
   if (!row) return DEFAULT_VIEW_MODES
 
   return {
-    globalMode: (row.global_mode as ViewMode) || 'simple',
-    pageModes: parseJson<Record<string, ViewMode>>(row.page_modes_json, {}),
-    avatarMode: (row.avatar_mode as ViewMode) || 'simple',
+    globalMode: (row.globalMode as ViewMode) || 'simple',
+    pageModes: parseJson<Record<string, ViewMode>>(row.pageModesJson, {}),
+    avatarMode: (row.avatarMode as ViewMode) || 'simple',
   }
 }
 
-export const updateViewModes = async (db: D1Database, userId: string, patch: Partial<ViewModesData>): Promise<ViewModesData> => {
-  const current = await getViewModes(db, userId)
+export const updateViewModes = async (d1: D1Database, userId: string, patch: Partial<ViewModesData>): Promise<ViewModesData> => {
+  const current = await getViewModes(d1, userId)
   const merged: ViewModesData = {
     globalMode: patch.globalMode ?? current.globalMode,
     pageModes: patch.pageModes ? { ...current.pageModes, ...patch.pageModes } : current.pageModes,
     avatarMode: patch.avatarMode ?? current.avatarMode,
   }
 
+  const db = getDb(d1)
   await db
-    .prepare(
-      `INSERT INTO view_modes (user_id, global_mode, page_modes_json, avatar_mode)
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(user_id) DO UPDATE SET
-         global_mode = excluded.global_mode,
-         page_modes_json = excluded.page_modes_json,
-         avatar_mode = excluded.avatar_mode`,
-    )
-    .bind(userId, merged.globalMode, JSON.stringify(merged.pageModes), merged.avatarMode)
-    .run()
+    .insert(viewModes)
+    .values({
+      userId,
+      globalMode: merged.globalMode,
+      pageModesJson: JSON.stringify(merged.pageModes),
+      avatarMode: merged.avatarMode,
+    })
+    .onConflictDoUpdate({
+      target: viewModes.userId,
+      set: {
+        globalMode: merged.globalMode,
+        pageModesJson: JSON.stringify(merged.pageModes),
+        avatarMode: merged.avatarMode,
+      },
+    })
 
   return merged
 }

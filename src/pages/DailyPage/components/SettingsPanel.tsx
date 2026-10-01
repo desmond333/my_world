@@ -1,6 +1,9 @@
 import { X } from 'lucide-react'
 import { blockOptions, cities, findCity, startPageOptions } from '../../../data'
 import { useTranslation } from '../../../lib/i18n'
+import { extraSections } from '../../ExtraPage/sections'
+import { RadioGroup, RadioGroupItem, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch } from '../../../shared/ui'
+import { useDailyStore } from '../../../store'
 import type { SettingsPanelProps } from '../types'
 
 export const SettingsPanel = ({
@@ -18,6 +21,8 @@ export const SettingsPanel = ({
   onStartPage,
 }: SettingsPanelProps) => {
   const { t } = useTranslation()
+  const hiddenSections = useDailyStore((state) => state.hiddenSections ?? [])
+  const toggleSection = useDailyStore((state) => state.toggleSection)
 
   return (
     <section className="settings-panel" id="settings-panel" aria-label={t('settings.title')}>
@@ -31,69 +36,84 @@ export const SettingsPanel = ({
         </button>
       </div>
       <div className="settings-fields">
-        <label className="setting-field">
+        <div className="setting-field">
           <span>{t('settings.where')}</span>
-          <select value={city.id} onChange={(event) => onCity(findCity(event.target.value))}>
-            {cities.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
+          <Select value={city.id} onValueChange={(val) => onCity(findCity(val))}>
+            <SelectTrigger aria-label={t('settings.where')}>
+              <SelectValue placeholder={city.name} />
+            </SelectTrigger>
+            <SelectContent>
+              {cities.map((item) => (
+                <SelectItem key={item.id} value={item.id}>
+                  {item.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <fieldset className="setting-field">
           <legend>{t('settings.circle')}</legend>
-          <div className="scope-options">
-            <label className={scope === 'all' ? 'selected' : ''}>
-              <input type="radio" name="scope" checked={scope === 'all'} onChange={() => onScope('all')} /> {t('settings.allAnimals')}
-            </label>
-            <label className={scope === 'home' ? 'selected' : ''}>
-              <input type="radio" name="scope" checked={scope === 'home'} onChange={() => onScope('home')} /> {t('settings.homeFriends')}
-            </label>
-          </div>
+          <RadioGroup value={scope} onValueChange={(val) => onScope(val as 'all' | 'home')} className="scope-options">
+            <RadioGroupItem value="all" id="scope-all" label={t('settings.allAnimals')} />
+            <RadioGroupItem value="home" id="scope-home" label={t('settings.homeFriends')} />
+          </RadioGroup>
         </fieldset>
-        <label className="setting-field">
+        <div className="setting-field">
           <span>{t('settings.startPage')}</span>
-          <select value={startPage} onChange={(event) => onStartPage(event.target.value)}>
-            {startPageOptions.map((option) => (
-              <option key={option.path} value={option.path}>
-                {t(option.key, option.fallback)}
-              </option>
-            ))}
-          </select>
+          <Select value={startPage} onValueChange={onStartPage}>
+            <SelectTrigger aria-label={t('settings.startPage')}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {startPageOptions.map((option) => (
+                <SelectItem key={option.path} value={option.path}>
+                  {t(option.key, option.fallback)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <small className="theme-season-note">{t('settings.startPageHint')}</small>
-        </label>
+        </div>
       </div>
       <fieldset className="setting-field blocks-field">
         <legend>{t('settings.blocks')}</legend>
         <div className="block-toggles">
           {blockOptions.map((option) => (
-            <label className="switch-row" key={option.key}>
-              <span className="switch-text">
-                {t(`blocks.${option.key}.label`, option.label)}
-                <small>{t(`blocks.${option.key}.hint`, option.hint)}</small>
-              </span>
-              <input type="checkbox" checked={blocks[option.key]} onChange={() => onToggleBlock(option.key)} />
-              <i className="switch" aria-hidden="true" />
-            </label>
+            <Switch
+              key={option.key}
+              checked={blocks[option.key]}
+              onCheckedChange={() => onToggleBlock(option.key)}
+              label={t(`blocks.${option.key}.label`, option.label)}
+              hint={t(`blocks.${option.key}.hint`, option.hint)}
+            />
           ))}
         </div>
         <small className="theme-season-note">{t('settings.allOff')}</small>
       </fieldset>
+      <fieldset className="setting-field blocks-field">
+        <legend>{t('settings.sectionsVisibility.title')}</legend>
+        <div className="block-toggles">
+          {extraSections.map((section) => {
+            const isVisible = !hiddenSections.includes(section.key)
+            return (
+              <Switch
+                key={section.key}
+                checked={isVisible}
+                onCheckedChange={() => toggleSection(section.key)}
+                label={t(`section.${section.key}`, section.label)}
+                hint={t(`section.${section.key}.hint`, section.hint)}
+              />
+            )
+          })}
+        </div>
+      </fieldset>
       <fieldset className="setting-field theme-field">
         <legend>{t('settings.theme')}</legend>
-        <div className="scope-options">
-          <label className={themeMode === 'system' ? 'selected' : ''}>
-            <input type="radio" name="theme" checked={themeMode === 'system'} onChange={() => onTheme('system')} />{' '}
-            {t('settings.themeSystem')}
-          </label>
-          <label className={themeMode === 'light' ? 'selected' : ''}>
-            <input type="radio" name="theme" checked={themeMode === 'light'} onChange={() => onTheme('light')} /> {t('settings.themeLight')}
-          </label>
-          <label className={themeMode === 'dark' ? 'selected' : ''}>
-            <input type="radio" name="theme" checked={themeMode === 'dark'} onChange={() => onTheme('dark')} /> {t('settings.themeDark')}
-          </label>
-        </div>
+        <RadioGroup value={themeMode} onValueChange={(val) => onTheme(val as 'system' | 'light' | 'dark')} className="scope-options">
+          <RadioGroupItem value="system" id="theme-system" label={t('settings.themeSystem')} />
+          <RadioGroupItem value="light" id="theme-light" label={t('settings.themeLight')} />
+          <RadioGroupItem value="dark" id="theme-dark" label={t('settings.themeDark')} />
+        </RadioGroup>
         <small className="theme-season-note">
           {season} {t('settings.palette')}
         </small>

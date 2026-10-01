@@ -42,7 +42,7 @@
   margin-top: 12px;
   padding: 22px 26px;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .training-today-icon {
   display: grid;
@@ -126,7 +126,7 @@
 }
 .calendar-nav:hover {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .calendar-week {
   display: grid;
@@ -222,7 +222,7 @@
   margin-top: 12px;
   padding: 22px 28px;
   background: var(--coral);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .copy-row p {
   margin: 7px 0 0;
@@ -231,6 +231,65 @@
   line-height: 1.55;
   opacity: 0.78;
 }
+.card-kicker {
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  color: inherit;
+  opacity: 0.65;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 17px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.copy-button:active {
+  transform: translateY(1px);
+}
+
+.training-toggle {
+  min-height: 38px;
+  padding: 0 15px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.training-toggle:hover {
+  background: transparent;
+  color: var(--accent);
+}
+
+.training-toggle.is-done {
+  background: transparent;
+  color: var(--accent);
+}
+
+.training-toggle.is-done:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
 .copy-row .copy-button {
   border: 1px solid var(--ink);
   background: var(--ink);
@@ -262,6 +321,15 @@
   .copy-row .copy-button {
     width: 100%;
     justify-content: center;
+  }
+  .training-toggle {
+    flex: 1;
+    min-width: 0;
+  }
+  .training-total,
+  .training-expect,
+  .calendar-week span {
+    font-size: 11px;
   }
 }
 

@@ -12,8 +12,10 @@ import { fun } from './fun'
 import { cat } from './cat'
 import { settings } from './settings'
 import { friends } from './friends'
+import { together } from './together'
+import { help } from './help'
 import { plural } from '../plural'
-import { useDailyStore } from '../../store'
+import { useDailyStore } from '../../store/daily/dailyStore'
 
 const DICTIONARIES: Dictionary[] = [
   nav,
@@ -28,6 +30,8 @@ const DICTIONARIES: Dictionary[] = [
   cat,
   settings,
   friends,
+  together,
+  help,
 ]
 
 const merge = (lang: Lang): Translations => Object.assign({}, ...DICTIONARIES.map((item) => item[lang]))

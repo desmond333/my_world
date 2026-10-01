@@ -1,3 +1,4 @@
+import { getAvailabilityWindows } from './availability'
 import { getSettings } from './settings'
 import { getTrainingDays, getTrainingSports } from './training'
 import { getFinanceBalance, getFinanceEntries, getFinanceRates } from './finance'
@@ -11,6 +12,7 @@ import { getNotes } from './notes'
 import { getShopState } from './shop'
 import { getViewModes } from './viewModes'
 import type { CollectionItem, SyncSnapshot } from '../../types'
+import { MINUTES_IN_DAY } from '../../types'
 
 export const getSyncSnapshot = async (db: D1Database, userId: string): Promise<SyncSnapshot> => {
   const [
@@ -33,6 +35,7 @@ export const getSyncSnapshot = async (db: D1Database, userId: string): Promise<S
     notes,
     shop,
     viewModes,
+    availability,
   ] = await Promise.all([
     getSettings(db, userId),
     getTrainingDays(db, userId),
@@ -53,6 +56,7 @@ export const getSyncSnapshot = async (db: D1Database, userId: string): Promise<S
     getNotes(db, userId, undefined, 1000, 0),
     getShopState(db, userId),
     getViewModes(db, userId),
+    getAvailabilityWindows(db, userId),
   ])
 
   const splitCollection = (items: CollectionItem[]) => ({
@@ -93,6 +97,9 @@ export const getSyncSnapshot = async (db: D1Database, userId: string): Promise<S
     notes,
     shop,
     viewModes,
+    availability: {
+      windows: availability,
+    },
   }
 }
 
@@ -428,8 +435,8 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
       statements.push(
         db
           .prepare(
-            `INSERT INTO notes (id, user_id, kind, title, body, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO notes (id, user_id, kind, title, body, parent_id, icon, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           )
           .bind(
             note.id || crypto.randomUUID(),
@@ -437,6 +444,8 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
             note.kind || 'note',
             note.title || '',
             note.body || '',
+            note.parentId ?? null,
+            note.icon ?? null,
             note.createdAt || now,
             note.updatedAt || now,
           ),
@@ -497,6 +506,48 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
           snapshot.viewModes.avatarMode || 'simple',
         ),
     )
+  }
+
+  if (snapshot.availability && Array.isArray(snapshot.availability.windows)) {
+    statements.push(db.prepare('DELETE FROM availability_windows WHERE user_id = ?').bind(userId))
+    for (const window of snapshot.availability.windows) {
+      const now = new Date().toISOString()
+      const startMin = Number(window.startMin)
+      const endMin = Number(window.endMin)
+
+      if (!Number.isInteger(startMin) || !Number.isInteger(endMin)) continue
+      if (startMin < 0 || startMin >= MINUTES_IN_DAY || endMin <= 0 || endMin > MINUTES_IN_DAY) continue
+      if (endMin <= startMin) continue
+
+      const scope = window.scope === 'date' ? 'date' : 'weekly'
+      const rawDay = Number(window.dayOfWeek)
+      const dayOfWeek = scope === 'weekly' && Number.isInteger(rawDay) ? rawDay : null
+      const date = scope === 'date' && typeof window.date === 'string' ? window.date.trim() : null
+
+      if (scope === 'weekly' && (dayOfWeek === null || dayOfWeek < 0 || dayOfWeek > 6)) continue
+      if (scope === 'date' && !date) continue
+
+      statements.push(
+        db
+          .prepare(
+            `INSERT INTO availability_windows (
+              id, user_id, scope, day_of_week, date, start_min, end_min, note, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          )
+          .bind(
+            window.id || crypto.randomUUID(),
+            userId,
+            scope,
+            dayOfWeek,
+            date,
+            startMin,
+            endMin,
+            (window.note || '').slice(0, 500),
+            window.createdAt || now,
+            window.updatedAt || now,
+          ),
+      )
+    }
   }
 
   const BATCH_SIZE = 100

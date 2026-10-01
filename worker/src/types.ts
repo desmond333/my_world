@@ -167,6 +167,29 @@ export type SentFriendTask = {
   createdAt: string
 }
 
+export type AvailabilityScope = 'weekly' | 'date'
+
+export const MINUTES_IN_DAY = 24 * 60
+
+export type AvailabilityWindow = {
+  id: string
+  userId: string
+  scope: AvailabilityScope
+  dayOfWeek: number | null
+  date: string | null
+  startMin: number
+  endMin: number
+  note: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type FriendAvailability = {
+  friendId: string
+  email: string
+  windows: AvailabilityWindow[]
+}
+
 export type LotteryStats = Record<string, { spins: number; wins: number; earned: number }>
 
 export type NoteKind = 'note' | 'dream'
@@ -176,6 +199,8 @@ export type NoteItem = {
   kind: NoteKind
   title: string
   body: string
+  parentId?: string | null
+  icon?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -227,6 +252,9 @@ export type SyncSnapshot = {
   birthdays: {
     ownBirthday: string
     birthdays: Birthday[]
+  }
+  availability: {
+    windows: AvailabilityWindow[]
   }
   collection: {
     movies: { wishlist: CollectionItem[]; watched: CollectionItem[] }

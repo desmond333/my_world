@@ -1,117 +1,90 @@
+import { and, desc, eq, inArray, like, ne, or } from 'drizzle-orm'
+import { getDb } from '../client'
+import { friendships, productivityItems, settings, users } from '../schema'
 import type { FriendItem, FriendRequest, FriendsData, ProductivityItem, SentFriendTask, TaskPriority } from '../../types'
 
-type FriendRow = {
-  friendship_id: string
-  other_id: string
-  email: string
-  created_at: string
-  allow_friend_tasks: number | null
-}
-
-type IncomingRow = {
-  friendship_id: string
-  sender_id: string
-  email: string
-  created_at: string
-}
-
-type OutgoingRow = {
-  friendship_id: string
-  receiver_id: string
-  email: string
-  created_at: string
-}
-
-type UserSearchRow = {
-  id: string
-  email: string
-}
-
-type FriendshipRow = {
-  id: string
-  user_id: string
-  friend_id: string
-  status: string
-}
-
-type SentTaskRow = {
-  id: string
-  recipient_id: string
-  recipient_email: string
-  title: string
-  date: string
-  done: number
-  done_at: string | null
-  priority: string | null
-  note: string
-  created_at: string
-}
-
 export const getFriendsData = async (db: D1Database, userId: string): Promise<FriendsData> => {
-  const friendsQuery = `
-    SELECT 
-      f.id as friendship_id,
-      f.created_at,
-      CASE WHEN f.user_id = ? THEN f.friend_id ELSE f.user_id END as other_id,
-      u.email,
-      s.allow_friend_tasks
-    FROM friendships f
-    JOIN users u ON u.id = (CASE WHEN f.user_id = ? THEN f.friend_id ELSE f.user_id END)
-    LEFT JOIN settings s ON s.user_id = u.id
-    WHERE (f.user_id = ? OR f.friend_id = ?) AND f.status = 'accepted'
-    ORDER BY u.email ASC
-  `
+  const appDb = getDb(db)
 
-  const incomingQuery = `
-    SELECT 
-      f.id as friendship_id,
-      f.user_id as sender_id,
-      f.created_at,
-      u.email
-    FROM friendships f
-    JOIN users u ON u.id = f.user_id
-    WHERE f.friend_id = ? AND f.status = 'pending'
-    ORDER BY f.created_at DESC
-  `
-
-  const outgoingQuery = `
-    SELECT 
-      f.id as friendship_id,
-      f.friend_id as receiver_id,
-      f.created_at,
-      u.email
-    FROM friendships f
-    JOIN users u ON u.id = f.friend_id
-    WHERE f.user_id = ? AND f.status = 'pending'
-    ORDER BY f.created_at DESC
-  `
-
-  const [friendsRes, incomingRes, outgoingRes] = await Promise.all([
-    db.prepare(friendsQuery).bind(userId, userId, userId, userId).all<FriendRow>(),
-    db.prepare(incomingQuery).bind(userId).all<IncomingRow>(),
-    db.prepare(outgoingQuery).bind(userId).all<OutgoingRow>(),
+  const [acceptedRows, incomingRows, outgoingRows] = await Promise.all([
+    appDb
+      .select({
+        id: friendships.id,
+        userId: friendships.userId,
+        friendId: friendships.friendId,
+        createdAt: friendships.createdAt,
+      })
+      .from(friendships)
+      .where(and(or(eq(friendships.userId, userId), eq(friendships.friendId, userId)), eq(friendships.status, 'accepted'))),
+    appDb
+      .select({
+        friendshipId: friendships.id,
+        senderId: friendships.userId,
+        createdAt: friendships.createdAt,
+        email: users.email,
+      })
+      .from(friendships)
+      .innerJoin(users, eq(friendships.userId, users.id))
+      .where(and(eq(friendships.friendId, userId), eq(friendships.status, 'pending')))
+      .orderBy(desc(friendships.createdAt)),
+    appDb
+      .select({
+        friendshipId: friendships.id,
+        receiverId: friendships.friendId,
+        createdAt: friendships.createdAt,
+        email: users.email,
+      })
+      .from(friendships)
+      .innerJoin(users, eq(friendships.friendId, users.id))
+      .where(and(eq(friendships.userId, userId), eq(friendships.status, 'pending')))
+      .orderBy(desc(friendships.createdAt)),
   ])
 
-  const friends: FriendItem[] = friendsRes.results.map((row) => ({
-    id: row.other_id,
-    friendshipId: row.friendship_id,
+  const otherIds = acceptedRows.map((row) => (row.userId === userId ? row.friendId : row.userId))
+  let friends: FriendItem[] = []
+
+  if (otherIds.length > 0) {
+    const userRows = await appDb
+      .select({
+        id: users.id,
+        email: users.email,
+        allowFriendTasks: settings.allowFriendTasks,
+      })
+      .from(users)
+      .leftJoin(settings, eq(users.id, settings.userId))
+      .where(inArray(users.id, otherIds))
+
+    const userMap = new Map(userRows.map((u) => [u.id, u]))
+
+    friends = acceptedRows
+      .map((row) => {
+        const otherId = row.userId === userId ? row.friendId : row.userId
+        const u = userMap.get(otherId)
+        if (!u) return null
+        return {
+          id: otherId,
+          friendshipId: row.id,
+          email: u.email,
+          allowFriendTasks: u.allowFriendTasks === null || u.allowFriendTasks === undefined ? true : Boolean(u.allowFriendTasks),
+          createdAt: row.createdAt,
+        }
+      })
+      .filter((item): item is FriendItem => item !== null)
+      .sort((a, b) => a.email.localeCompare(b.email))
+  }
+
+  const incoming: FriendRequest[] = incomingRows.map((row) => ({
+    id: row.senderId,
+    friendshipId: row.friendshipId,
     email: row.email,
-    allowFriendTasks: row.allow_friend_tasks === null || row.allow_friend_tasks === undefined ? true : Boolean(row.allow_friend_tasks),
-    createdAt: row.created_at,
+    createdAt: row.createdAt,
   }))
 
-  const incoming: FriendRequest[] = incomingRes.results.map((row) => ({
-    id: row.sender_id,
-    friendshipId: row.friendship_id,
+  const outgoing: FriendRequest[] = outgoingRows.map((row) => ({
+    id: row.receiverId,
+    friendshipId: row.friendshipId,
     email: row.email,
-    createdAt: row.created_at,
-  }))
-
-  const outgoing: FriendRequest[] = outgoingRes.results.map((row) => ({
-    id: row.receiver_id,
-    friendshipId: row.friendship_id,
-    email: row.email,
-    createdAt: row.created_at,
+    createdAt: row.createdAt,
   }))
 
   return { friends, incoming, outgoing }
@@ -125,32 +98,42 @@ export const searchUsers = async (
   const clean = query.trim().toLowerCase()
   if (!clean || clean.length < 2) return []
 
-  const users = await db
-    .prepare('SELECT id, email FROM users WHERE email LIKE ? AND id != ? LIMIT 15')
-    .bind(`%${clean}%`, currentUserId)
-    .all<UserSearchRow>()
+  const appDb = getDb(db)
+  const matchedUsers = await appDb
+    .select({
+      id: users.id,
+      email: users.email,
+    })
+    .from(users)
+    .where(and(like(users.email, `%${clean}%`), ne(users.id, currentUserId)))
+    .limit(15)
 
-  if (!users.results.length) return []
+  if (!matchedUsers.length) return []
 
-  const userIds = users.results.map((u) => u.id)
-  const placeholders = userIds.map(() => '?').join(',')
+  const userIds = matchedUsers.map((u) => u.id)
 
-  const friendships = await db
-    .prepare(
-      `SELECT id, user_id, friend_id, status FROM friendships
-       WHERE (user_id = ? AND friend_id IN (${placeholders}))
-          OR (friend_id = ? AND user_id IN (${placeholders}))`,
+  const relatedFriendships = await appDb
+    .select({
+      id: friendships.id,
+      userId: friendships.userId,
+      friendId: friendships.friendId,
+      status: friendships.status,
+    })
+    .from(friendships)
+    .where(
+      or(
+        and(eq(friendships.userId, currentUserId), inArray(friendships.friendId, userIds)),
+        and(eq(friendships.friendId, currentUserId), inArray(friendships.userId, userIds)),
+      ),
     )
-    .bind(currentUserId, ...userIds, currentUserId, ...userIds)
-    .all<FriendshipRow>()
 
   const map = new Map<string, { status: string; id: string; isSender: boolean }>()
-  for (const f of friendships.results) {
-    const otherId = f.user_id === currentUserId ? f.friend_id : f.user_id
-    map.set(otherId, { status: f.status, id: f.id, isSender: f.user_id === currentUserId })
+  for (const f of relatedFriendships) {
+    const otherId = f.userId === currentUserId ? f.friendId : f.userId
+    map.set(otherId, { status: f.status, id: f.id, isSender: f.userId === currentUserId })
   }
 
-  return users.results.map((user) => {
+  return matchedUsers.map((user) => {
     const relation = map.get(user.id)
     if (!relation) {
       return { id: user.id, email: user.email, relationship: 'none' }
@@ -180,7 +163,12 @@ export const sendFriendRequest = async (
     return { success: false, error: 'Target user is required' }
   }
 
-  const target = await db.prepare('SELECT id, email FROM users WHERE id = ? OR email = ?').bind(clean, clean).first<UserSearchRow>()
+  const appDb = getDb(db)
+  const target = await appDb
+    .select({ id: users.id, email: users.email })
+    .from(users)
+    .where(or(eq(users.id, clean), eq(users.email, clean)))
+    .get()
 
   if (!target) {
     return { success: false, error: 'USER_NOT_FOUND' }
@@ -190,12 +178,21 @@ export const sendFriendRequest = async (
     return { success: false, error: 'CANNOT_FRIEND_SELF' }
   }
 
-  const existing = await db
-    .prepare(
-      'SELECT id, user_id, friend_id, status FROM friendships WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)',
+  const existing = await appDb
+    .select({
+      id: friendships.id,
+      userId: friendships.userId,
+      friendId: friendships.friendId,
+      status: friendships.status,
+    })
+    .from(friendships)
+    .where(
+      or(
+        and(eq(friendships.userId, currentUserId), eq(friendships.friendId, target.id)),
+        and(eq(friendships.userId, target.id), eq(friendships.friendId, currentUserId)),
+      ),
     )
-    .bind(currentUserId, target.id, target.id, currentUserId)
-    .first<FriendshipRow>()
+    .get()
 
   const now = new Date().toISOString()
 
@@ -203,47 +200,66 @@ export const sendFriendRequest = async (
     if (existing.status === 'accepted') {
       return { success: false, error: 'ALREADY_FRIENDS' }
     }
-    if (existing.status === 'pending' && existing.user_id === target.id) {
-      await db.prepare('UPDATE friendships SET status = ?, updated_at = ? WHERE id = ?').bind('accepted', now, existing.id).run()
+    if (existing.status === 'pending' && existing.userId === target.id) {
+      await appDb.update(friendships).set({ status: 'accepted', updatedAt: now }).where(eq(friendships.id, existing.id))
       return { success: true, status: 'accepted', friendshipId: existing.id }
     }
-    if (existing.status === 'pending' && existing.user_id === currentUserId) {
+    if (existing.status === 'pending' && existing.userId === currentUserId) {
       return { success: false, error: 'REQUEST_ALREADY_SENT', friendshipId: existing.id }
     }
   }
 
   const friendshipId = crypto.randomUUID()
-  await db
-    .prepare('INSERT INTO friendships (id, user_id, friend_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)')
-    .bind(friendshipId, currentUserId, target.id, 'pending', now, now)
-    .run()
+  await appDb.insert(friendships).values({
+    id: friendshipId,
+    userId: currentUserId,
+    friendId: target.id,
+    status: 'pending',
+    createdAt: now,
+    updatedAt: now,
+  })
 
   return { success: true, status: 'pending', friendshipId }
 }
 
 export const acceptFriendRequest = async (db: D1Database, currentUserId: string, friendshipId: string): Promise<boolean> => {
+  const appDb = getDb(db)
   const now = new Date().toISOString()
-  const res = await db
-    .prepare('UPDATE friendships SET status = ?, updated_at = ? WHERE id = ? AND friend_id = ? AND status = ?')
-    .bind('accepted', now, friendshipId, currentUserId, 'pending')
+  const res = await appDb
+    .update(friendships)
+    .set({ status: 'accepted', updatedAt: now })
+    .where(and(eq(friendships.id, friendshipId), eq(friendships.friendId, currentUserId), eq(friendships.status, 'pending')))
     .run()
 
   return (res.meta.changes ?? 0) > 0
 }
 
 export const declineFriendRequest = async (db: D1Database, currentUserId: string, friendshipId: string): Promise<boolean> => {
-  const res = await db
-    .prepare('DELETE FROM friendships WHERE id = ? AND (friend_id = ? OR user_id = ?) AND status = ?')
-    .bind(friendshipId, currentUserId, currentUserId, 'pending')
+  const appDb = getDb(db)
+  const res = await appDb
+    .delete(friendships)
+    .where(
+      and(
+        eq(friendships.id, friendshipId),
+        or(eq(friendships.friendId, currentUserId), eq(friendships.userId, currentUserId)),
+        eq(friendships.status, 'pending'),
+      ),
+    )
     .run()
 
   return (res.meta.changes ?? 0) > 0
 }
 
 export const removeFriend = async (db: D1Database, currentUserId: string, friendId: string): Promise<boolean> => {
-  const res = await db
-    .prepare('DELETE FROM friendships WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)')
-    .bind(currentUserId, friendId, friendId, currentUserId)
+  const appDb = getDb(db)
+  const res = await appDb
+    .delete(friendships)
+    .where(
+      or(
+        and(eq(friendships.userId, currentUserId), eq(friendships.friendId, friendId)),
+        and(eq(friendships.userId, friendId), eq(friendships.friendId, currentUserId)),
+      ),
+    )
     .run()
 
   return (res.meta.changes ?? 0) > 0
@@ -256,46 +272,61 @@ export const assignTaskToFriend = async (
   friendId: string,
   task: { title: string; date?: string; priority?: TaskPriority; note?: string },
 ): Promise<{ success: boolean; task?: ProductivityItem; error?: string }> => {
-  const friendship = await db
-    .prepare(
-      `SELECT id FROM friendships 
-       WHERE ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) 
-         AND status = 'accepted'`,
+  const appDb = getDb(db)
+  const friendship = await appDb
+    .select({ id: friendships.id })
+    .from(friendships)
+    .where(
+      and(
+        or(
+          and(eq(friendships.userId, currentUserId), eq(friendships.friendId, friendId)),
+          and(eq(friendships.userId, friendId), eq(friendships.friendId, currentUserId)),
+        ),
+        eq(friendships.status, 'accepted'),
+      ),
     )
-    .bind(currentUserId, friendId, friendId, currentUserId)
-    .first<{ id: string }>()
+    .get()
 
   if (!friendship) {
     return { success: false, error: 'NOT_FRIENDS' }
   }
 
-  const friendSettings = await db
-    .prepare('SELECT allow_friend_tasks FROM settings WHERE user_id = ?')
-    .bind(friendId)
-    .first<{ allow_friend_tasks: number | null }>()
+  const friendSettings = await appDb
+    .select({ allowFriendTasks: settings.allowFriendTasks })
+    .from(settings)
+    .where(eq(settings.userId, friendId))
+    .get()
 
-  if (friendSettings && friendSettings.allow_friend_tasks === 0) {
+  if (friendSettings && friendSettings.allowFriendTasks === 0) {
     return { success: false, error: 'FRIEND_TASKS_DISABLED' }
   }
 
-  const taskId = crypto.randomUUID()
-  const createdAt = new Date().toISOString()
   const cleanTitle = task.title.trim()
   if (!cleanTitle) {
     return { success: false, error: 'TITLE_REQUIRED' }
   }
 
+  const taskId = crypto.randomUUID()
+  const createdAt = new Date().toISOString()
   const priority = task.priority || 'medium'
   const note = task.note || ''
   const date = task.date || ''
 
-  await db
-    .prepare(
-      `INSERT INTO productivity_items (id, user_id, kind, title, date, repeat, done, done_at, priority, note, sender_id, sender_name, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .bind(taskId, friendId, 'task', cleanTitle, date, 'none', 0, null, priority, note, currentUserId, currentUserEmail, createdAt)
-    .run()
+  await appDb.insert(productivityItems).values({
+    id: taskId,
+    userId: friendId,
+    kind: 'task',
+    title: cleanTitle,
+    date,
+    repeat: 'none',
+    done: 0,
+    doneAt: null,
+    priority,
+    note,
+    senderId: currentUserId,
+    senderName: currentUserEmail,
+    createdAt,
+  })
 
   return {
     success: true,
@@ -317,37 +348,36 @@ export const assignTaskToFriend = async (
 }
 
 export const getSentFriendTasks = async (db: D1Database, currentUserId: string): Promise<SentFriendTask[]> => {
-  const query = `
-    SELECT 
-      p.id,
-      p.user_id as recipient_id,
-      u.email as recipient_email,
-      p.title,
-      p.date,
-      p.done,
-      p.done_at,
-      p.priority,
-      p.note,
-      p.created_at
-    FROM productivity_items p
-    JOIN users u ON p.user_id = u.id
-    WHERE p.sender_id = ? AND p.user_id != ?
-    ORDER BY p.created_at DESC
-    LIMIT 50
-  `
+  const appDb = getDb(db)
+  const rows = await appDb
+    .select({
+      id: productivityItems.id,
+      recipientId: productivityItems.userId,
+      recipientEmail: users.email,
+      title: productivityItems.title,
+      date: productivityItems.date,
+      done: productivityItems.done,
+      doneAt: productivityItems.doneAt,
+      priority: productivityItems.priority,
+      note: productivityItems.note,
+      createdAt: productivityItems.createdAt,
+    })
+    .from(productivityItems)
+    .innerJoin(users, eq(productivityItems.userId, users.id))
+    .where(and(eq(productivityItems.senderId, currentUserId), ne(productivityItems.userId, currentUserId)))
+    .orderBy(desc(productivityItems.createdAt))
+    .limit(50)
 
-  const { results } = await db.prepare(query).bind(currentUserId, currentUserId).all<SentTaskRow>()
-
-  return results.map((row) => ({
+  return rows.map((row) => ({
     id: row.id,
-    recipientId: row.recipient_id,
-    recipientEmail: row.recipient_email,
+    recipientId: row.recipientId,
+    recipientEmail: row.recipientEmail,
     title: row.title,
     date: row.date,
     done: Boolean(row.done),
-    doneAt: row.done_at,
+    doneAt: row.doneAt,
     priority: (row.priority as TaskPriority) || undefined,
     note: row.note || undefined,
-    createdAt: row.created_at,
+    createdAt: row.createdAt,
   }))
 }

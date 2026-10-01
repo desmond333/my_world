@@ -1,5 +1,5 @@
 import { SlidersHorizontal } from 'lucide-react'
-import { AppTopbar } from '../../../components/AppTopbar/AppTopbar'
+import { AppTopbar } from '../../../widgets'
 import { formatFullDate } from '../../../lib'
 import { useTranslation } from '../../../lib/i18n'
 import { ViewModeToggle } from '../../../shared/ui'

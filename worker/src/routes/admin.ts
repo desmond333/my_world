@@ -1,29 +1,67 @@
 import { Hono } from 'hono'
+import { desc, eq, or } from 'drizzle-orm'
+import { getDb } from '../db/client'
+import {
+  availabilityWindows,
+  birthdays,
+  collectionItems,
+  favorites,
+  financeBalance,
+  financeEntries,
+  financeRates,
+  friendships,
+  lotteryStats,
+  notes,
+  ownBirthday,
+  productivityItems,
+  productivityMonths,
+  productivityMood,
+  refreshTokens,
+  settings,
+  shopState,
+  subscriptions,
+  trainingDays,
+  trainingSports,
+  users,
+  viewModes,
+} from '../db/schema'
 import { getSyncSnapshot } from '../db/queries/sync'
 import { adminMiddleware } from '../middleware/admin'
 import { authMiddleware } from '../middleware/auth'
 import type { Env } from '../types'
-
-type AdminUserRow = {
-  id: string
-  email: string
-  role: string
-  created_at: string
-}
 
 export const adminRouter = new Hono<{ Bindings: Env }>()
 
 adminRouter.use('*', authMiddleware, adminMiddleware)
 
 adminRouter.get('/users', async (c) => {
-  const { results } = await c.env.DB.prepare('SELECT id, email, role, created_at FROM users ORDER BY created_at DESC').all<AdminUserRow>()
+  const appDb = getDb(c.env.DB)
+  const results = await appDb
+    .select({
+      id: users.id,
+      email: users.email,
+      role: users.role,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .orderBy(desc(users.createdAt))
 
   return c.json(results)
 })
 
 adminRouter.get('/users/:userId', async (c) => {
   const targetId = c.req.param('userId')
-  const user = await c.env.DB.prepare('SELECT id, email, role, created_at FROM users WHERE id = ?').bind(targetId).first<AdminUserRow>()
+  const appDb = getDb(c.env.DB)
+  const user = await appDb
+    .select({
+      id: users.id,
+      email: users.email,
+      role: users.role,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.id, targetId))
+    .get()
 
   if (!user) {
     return c.json({ error: 'User not found', code: 'NOT_FOUND' }, 404)
@@ -34,7 +72,8 @@ adminRouter.get('/users/:userId', async (c) => {
 
 adminRouter.get('/users/:userId/sync', async (c) => {
   const targetId = c.req.param('userId')
-  const user = await c.env.DB.prepare('SELECT id FROM users WHERE id = ?').bind(targetId).first<{ id: string }>()
+  const appDb = getDb(c.env.DB)
+  const user = await appDb.select({ id: users.id }).from(users).where(eq(users.id, targetId)).get()
 
   if (!user) {
     return c.json({ error: 'User not found', code: 'NOT_FOUND' }, 404)
@@ -46,37 +85,30 @@ adminRouter.get('/users/:userId/sync', async (c) => {
 
 adminRouter.delete('/users/:userId', async (c) => {
   const targetId = c.req.param('userId')
+  const appDb = getDb(c.env.DB)
 
-  const tables = [
-    'refresh_tokens',
-    'settings',
-    'training_days',
-    'training_sports',
-    'finance_entries',
-    'finance_balance',
-    'finance_rates',
-    'productivity_items',
-    'productivity_months',
-    'productivity_mood',
-    'subscriptions',
-    'birthdays',
-    'own_birthday',
-    'collection_items',
-    'favorites',
-    'lottery_stats',
-    'notes',
-    'shop_state',
-    'view_modes',
-    'users',
-  ]
-
-  const statements = tables.map((tbl) =>
-    c.env.DB.prepare(`DELETE FROM ${tbl} WHERE ${tbl === 'users' ? 'id' : 'user_id'} = ?`).bind(targetId),
-  )
-
-  statements.unshift(c.env.DB.prepare('DELETE FROM friendships WHERE user_id = ? OR friend_id = ?').bind(targetId, targetId))
-
-  await c.env.DB.batch(statements)
+  await appDb.delete(friendships).where(or(eq(friendships.userId, targetId), eq(friendships.friendId, targetId)))
+  await appDb.delete(refreshTokens).where(eq(refreshTokens.userId, targetId))
+  await appDb.delete(availabilityWindows).where(eq(availabilityWindows.userId, targetId))
+  await appDb.delete(settings).where(eq(settings.userId, targetId))
+  await appDb.delete(trainingDays).where(eq(trainingDays.userId, targetId))
+  await appDb.delete(trainingSports).where(eq(trainingSports.userId, targetId))
+  await appDb.delete(financeEntries).where(eq(financeEntries.userId, targetId))
+  await appDb.delete(financeBalance).where(eq(financeBalance.userId, targetId))
+  await appDb.delete(financeRates).where(eq(financeRates.userId, targetId))
+  await appDb.delete(productivityItems).where(eq(productivityItems.userId, targetId))
+  await appDb.delete(productivityMonths).where(eq(productivityMonths.userId, targetId))
+  await appDb.delete(productivityMood).where(eq(productivityMood.userId, targetId))
+  await appDb.delete(subscriptions).where(eq(subscriptions.userId, targetId))
+  await appDb.delete(birthdays).where(eq(birthdays.userId, targetId))
+  await appDb.delete(ownBirthday).where(eq(ownBirthday.userId, targetId))
+  await appDb.delete(collectionItems).where(eq(collectionItems.userId, targetId))
+  await appDb.delete(favorites).where(eq(favorites.userId, targetId))
+  await appDb.delete(lotteryStats).where(eq(lotteryStats.userId, targetId))
+  await appDb.delete(notes).where(eq(notes.userId, targetId))
+  await appDb.delete(shopState).where(eq(shopState.userId, targetId))
+  await appDb.delete(viewModes).where(eq(viewModes.userId, targetId))
+  await appDb.delete(users).where(eq(users.id, targetId))
 
   return c.json({ success: true })
 })

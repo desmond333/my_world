@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { hybridPersistStorage } from '../../lib/storage'
-import { scheduleDebouncedSync } from '../../services/api/syncService'
-import { BUILTIN_SPORTS, STRENGTH_ID, toggleIn } from '../../lib'
+import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
+import { BUILTIN_SPORTS, STRENGTH_ID, toggleIn } from '../../lib/training'
 import type { TrainingSport } from '../../data'
 import type { TrainingState } from '../types'
 

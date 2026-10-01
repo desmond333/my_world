@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'myworld-access-token'
+const TOKEN_KEY = 'tau-access-token'
 
 let inMemoryToken: string | null = null
 

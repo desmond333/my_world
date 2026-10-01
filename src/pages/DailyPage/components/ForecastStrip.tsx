@@ -1,5 +1,5 @@
 import { Cake, Flower2, Shield, Sparkles, Star } from 'lucide-react'
-import { WeatherIcon } from '../../../components/WeatherIcon/WeatherIcon'
+import { WeatherIcon } from '../../../shared/ui'
 import { TEMP_BANDS, dayMonth, dayName, getDaySpecialEvent, getTemperatureColor, isRainyDay, weatherLabel } from '../../../lib'
 import { useTranslation } from '../../../lib/i18n'
 import { useBirthdayStore } from '../../../store'
