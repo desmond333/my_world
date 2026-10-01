@@ -1,13 +1,21 @@
 import { create } from 'zustand'
+import { STORAGE_KEYS } from '../../lib/storage'
 import { persist } from 'zustand/middleware'
 import { apiFetch, getAuthToken, setAuthToken } from '../../services/api/apiClient'
 import { pullSync, pushSync } from '../../services/api/syncService'
+import { useShopStore } from '../shop/shopStore'
 
 export type UserProfile = {
   id: string
   email: string
   role: 'user' | 'admin'
   createdAt?: string
+}
+
+export type ReferralStats = {
+  code: string
+  invited: number
+  earned: number
 }
 
 export type AuthState = {
@@ -17,15 +25,20 @@ export type AuthState = {
   error: string | null
   lastSyncedAt: string | null
   isSyncing: boolean
+  referralStats: ReferralStats | null
+  lastReferralReward: number
+  referralStatus: 'none' | 'applied' | 'invalid'
   login: (email: string, password: string) => Promise<boolean>
-  register: (email: string, password: string) => Promise<boolean>
+  register: (email: string, password: string, referralCode?: string) => Promise<boolean>
   logout: () => Promise<void>
   checkAuth: () => Promise<boolean>
   syncData: (direction?: 'push' | 'pull') => Promise<boolean>
+  fetchReferral: () => Promise<void>
+  clearReferralReward: () => void
   clearError: () => void
 }
 
-const STORAGE_KEY = 'tau-auth-state'
+const STORAGE_KEY = STORAGE_KEYS.authState
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -36,8 +49,13 @@ export const useAuthStore = create<AuthState>()(
       error: null,
       lastSyncedAt: null,
       isSyncing: false,
+      referralStats: null,
+      lastReferralReward: 0,
+      referralStatus: 'none',
 
       clearError: () => set({ error: null }),
+
+      clearReferralReward: () => set({ lastReferralReward: 0, referralStatus: 'none' }),
 
       login: async (email, password) => {
         set({ status: 'loading', error: null })
@@ -67,23 +85,33 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (email, password) => {
+      register: async (email, password, referralCode) => {
         set({ status: 'loading', error: null })
         try {
           const res = await apiFetch<{
             user: UserProfile
             accessToken: string
+            referralCode?: string | null
+            referralReward?: number
+            referralStatus?: 'none' | 'applied' | 'invalid'
           }>('/auth/register', {
             method: 'POST',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ email, password, referralCode: referralCode?.trim() || undefined }),
           })
 
           setAuthToken(res.accessToken)
+          const reward = res.referralReward ?? 0
+          if (reward > 0) {
+            useShopStore.getState().addCoins(reward)
+          }
           set({
             user: res.user,
             token: res.accessToken,
             status: 'authenticated',
             error: null,
+            referralStats: res.referralCode ? { code: res.referralCode, invited: 0, earned: 0 } : null,
+            lastReferralReward: reward,
+            referralStatus: res.referralStatus ?? 'none',
           })
 
           void get().syncData('push')
@@ -154,6 +182,16 @@ export const useAuthStore = create<AuthState>()(
           console.error(err)
           set({ isSyncing: false })
           return false
+        }
+      },
+
+      fetchReferral: async () => {
+        if (!get().user) return
+        try {
+          const stats = await apiFetch<ReferralStats>('/auth/referral')
+          set({ referralStats: stats })
+        } catch {
+          void 0
         }
       },
     }),

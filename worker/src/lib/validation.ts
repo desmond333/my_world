@@ -9,6 +9,7 @@ export const loginSchema = v.object({
 export const registerSchema = v.object({
   email: v.pipe(v.string(), v.maxLength(255), v.email()),
   password: v.pipe(v.string(), v.minLength(6), v.maxLength(128)),
+  referralCode: v.optional(v.pipe(v.string(), v.maxLength(32))),
 })
 
 export const createNoteSchema = v.object({

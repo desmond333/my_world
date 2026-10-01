@@ -8,8 +8,10 @@ const testEnv = env as unknown as Env
 describe('Worker App Endpoints', () => {
   beforeAll(async () => {
     await testEnv.DB.exec(
-      'CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT "user", created_at TEXT NOT NULL);' +
-        'CREATE TABLE IF NOT EXISTS refresh_tokens (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT NOT NULL, expires_at TEXT NOT NULL);',
+      'CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT "user", created_at TEXT NOT NULL, referral_code TEXT);' +
+        'CREATE TABLE IF NOT EXISTS refresh_tokens (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT NOT NULL, expires_at TEXT NOT NULL);' +
+        'CREATE TABLE IF NOT EXISTS shop_state (user_id TEXT PRIMARY KEY, coins INTEGER NOT NULL DEFAULT 1000, unlocked_parts_json TEXT NOT NULL DEFAULT "{}", active_cat_skin TEXT NOT NULL DEFAULT "classic", active_theme_skin TEXT NOT NULL DEFAULT "default", greeting_sent INTEGER NOT NULL DEFAULT 0, greeting_friend_name TEXT NOT NULL DEFAULT "", greeting_timestamp INTEGER, greeting_reward_claimed INTEGER NOT NULL DEFAULT 0, has_pending_greeting_reply INTEGER NOT NULL DEFAULT 0);' +
+        'CREATE TABLE IF NOT EXISTS referrals (id TEXT PRIMARY KEY, referrer_id TEXT NOT NULL, referee_id TEXT NOT NULL UNIQUE, code TEXT NOT NULL, referrer_reward INTEGER NOT NULL DEFAULT 0, referee_reward INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);',
     )
   })
 
@@ -67,5 +69,66 @@ describe('Worker App Endpoints', () => {
   it('rejects websocket request without upgrade header', async () => {
     const res = await app.request('/api/realtime/ws', {}, testEnv)
     expect(res.status).toBe(426)
+  })
+
+  it('grants referral rewards when registering with a friend code', async () => {
+    const headers = { 'content-type': 'application/json' }
+
+    const referrerRes = await app.request(
+      '/auth/register',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email: `referrer-${Date.now()}@example.com`, password: 'secret123' }),
+      },
+      testEnv,
+    )
+    expect(referrerRes.status).toBe(201)
+    const referrer = (await referrerRes.json()) as { referralCode: string; user: { id: string } }
+    expect(referrer.referralCode).toBeTruthy()
+
+    const refereeRes = await app.request(
+      '/auth/register',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          email: `referee-${Date.now()}@example.com`,
+          password: 'secret123',
+          referralCode: referrer.referralCode,
+        }),
+      },
+      testEnv,
+    )
+    expect(refereeRes.status).toBe(201)
+    const referee = (await refereeRes.json()) as { referralReward: number; referralStatus: string; user: { id: string } }
+    expect(referee.referralReward).toBe(100)
+    expect(referee.referralStatus).toBe('applied')
+
+    const referrerRow = await testEnv.DB.prepare('SELECT coins FROM shop_state WHERE user_id = ?')
+      .bind(referrer.user.id)
+      .first<{ coins: number }>()
+    expect(referrerRow?.coins).toBe(1250)
+
+    const refereeRow = await testEnv.DB.prepare('SELECT coins FROM shop_state WHERE user_id = ?')
+      .bind(referee.user.id)
+      .first<{ coins: number }>()
+    expect(refereeRow?.coins).toBe(1100)
+  })
+
+  it('ignores an unknown referral code without failing registration', async () => {
+    const res = await app.request(
+      '/auth/register',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: `unknown-ref-${Date.now()}@example.com`, password: 'secret123', referralCode: 'NOPE0000' }),
+      },
+      testEnv,
+    )
+    expect(res.status).toBe(201)
+    const data = (await res.json()) as { referralStatus: string; referralReward: number }
+    expect(data.referralStatus).toBe('invalid')
+    expect(data.referralReward).toBe(0)
   })
 })

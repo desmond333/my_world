@@ -6,6 +6,22 @@ export const users = sqliteTable('users', {
   passwordHash: text('password_hash').notNull(),
   role: text('role').notNull().default('user'),
   createdAt: text('created_at').notNull(),
+  referralCode: text('referral_code').unique(),
+})
+
+export const referrals = sqliteTable('referrals', {
+  id: text('id').primaryKey(),
+  referrerId: text('referrer_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  refereeId: text('referee_id')
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  code: text('code').notNull(),
+  referrerReward: integer('referrer_reward').notNull().default(0),
+  refereeReward: integer('referee_reward').notNull().default(0),
+  createdAt: text('created_at').notNull(),
 })
 
 export const refreshTokens = sqliteTable('refresh_tokens', {

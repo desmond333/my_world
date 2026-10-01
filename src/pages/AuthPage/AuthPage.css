@@ -419,3 +419,119 @@
   border-color: rgba(239, 68, 68, 0.4);
   background: rgba(239, 68, 68, 0.05);
 }
+
+/* referral */
+.auth-referral-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.auth-referral-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.auth-referral-head strong {
+  color: var(--fg);
+}
+
+.auth-referral-desc {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.auth-referral-code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-referral-code {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px dashed var(--accent);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    700 15px 'DM Mono',
+    monospace;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
+.auth-referral-copy,
+.auth-referral-share {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.auth-referral-copy:hover,
+.auth-referral-share:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.auth-referral-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.auth-referral-stats strong {
+  color: var(--fg);
+}
+
+.auth-referral-reward {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-color: var(--accent) !important;
+  color: var(--fg) !important;
+}
+
+.auth-referral-reward span {
+  flex: 1;
+}
+
+.auth-referral-dismiss {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.auth-referral-invalid {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-color: var(--coral) !important;
+  color: var(--fg) !important;
+}
+
+.auth-referral-invalid span {
+  flex: 1;
+}

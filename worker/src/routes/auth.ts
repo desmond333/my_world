@@ -4,6 +4,15 @@ import { vValidator } from '@hono/valibot-validator'
 import { and, eq, gt } from 'drizzle-orm'
 import { getDb } from '../db/client'
 import { refreshTokens, users } from '../db/schema'
+import {
+  REFEREE_REWARD,
+  REFERRER_REWARD,
+  applyReferralRewards,
+  findUserByReferralCode,
+  getOrCreateReferralCode,
+  getReferralStats,
+  normalizeReferralCode,
+} from '../db/queries/referrals'
 import { generateSecureToken, hashPassword, hashToken, verifyPassword } from '../lib/crypto'
 import { createAccessToken } from '../lib/jwt'
 import { loginSchema, registerSchema } from '../lib/validation'
@@ -37,7 +46,7 @@ authRouter.post(
     }
   }),
   async (c) => {
-    const { email: rawEmail, password } = c.req.valid('json')
+    const { email: rawEmail, password, referralCode } = c.req.valid('json')
     const email = rawEmail.trim().toLowerCase()
 
     const appDb = getDb(c.env.DB)
@@ -61,6 +70,35 @@ authRouter.post(
       createdAt,
     })
 
+    let referralReward = 0
+    let referralStatus: 'none' | 'applied' | 'invalid' = 'none'
+    if (referralCode && referralCode.trim()) {
+      referralStatus = 'invalid'
+      try {
+        const referrer = await findUserByReferralCode(c.env.DB, referralCode)
+        if (referrer && referrer.id !== userId) {
+          await applyReferralRewards(c.env.DB, {
+            referrerId: referrer.id,
+            refereeId: userId,
+            code: normalizeReferralCode(referralCode),
+            referrerReward: REFERRER_REWARD,
+            refereeReward: REFEREE_REWARD,
+          })
+          referralReward = REFEREE_REWARD
+          referralStatus = 'applied'
+        }
+      } catch {
+        void 0
+      }
+    }
+
+    let ownReferralCode: string | null = null
+    try {
+      ownReferralCode = await getOrCreateReferralCode(c.env.DB, userId)
+    } catch {
+      void 0
+    }
+
     const secret = c.env.JWT_SECRET || 'fallback-secret-key-replace-in-production'
     const accessToken = await createAccessToken(userId, role, secret)
 
@@ -82,6 +120,9 @@ authRouter.post(
       {
         user: { id: userId, email, role },
         accessToken,
+        referralCode: ownReferralCode,
+        referralReward,
+        referralStatus,
       },
       201,
     )
@@ -211,4 +252,14 @@ authRouter.get('/me', authMiddleware, async (c) => {
     role: user.role,
     createdAt: user.createdAt,
   })
+})
+
+authRouter.get('/referral', authMiddleware, async (c) => {
+  const userContext = c.get('user')
+  try {
+    const stats = await getReferralStats(c.env.DB, userContext.userId)
+    return c.json(stats)
+  } catch {
+    return c.json({ error: 'Failed to load referral stats', code: 'REFERRAL_ERROR' }, 500)
+  }
 })

@@ -1,8 +1,25 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Cake, Cloud, Crown, Lock, LogIn, LogOut, Mail, RefreshCw, ShieldCheck, User, UserPlus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import {
+  Cake,
+  Check,
+  Cloud,
+  Copy,
+  Crown,
+  Gift,
+  Lock,
+  LogIn,
+  LogOut,
+  Mail,
+  RefreshCw,
+  Share2,
+  ShieldCheck,
+  User,
+  UserPlus,
+} from 'lucide-react'
 import { AppTopbar } from '../../widgets'
 import { displayBirthday } from '../../lib'
+import { useCopyFeedback } from '../../hooks'
 import { useTranslation } from '../../lib/i18n'
 import { useAuthStore, useBirthdayStore } from '../../store'
 import './AuthPage.css'
@@ -21,13 +38,34 @@ export const AuthPage = () => {
   const logout = useAuthStore((state) => state.logout)
   const syncData = useAuthStore((state) => state.syncData)
   const clearError = useAuthStore((state) => state.clearError)
+  const referralStats = useAuthStore((state) => state.referralStats)
+  const lastReferralReward = useAuthStore((state) => state.lastReferralReward)
+  const referralStatus = useAuthStore((state) => state.referralStatus)
+  const fetchReferral = useAuthStore((state) => state.fetchReferral)
+  const clearReferralReward = useAuthStore((state) => state.clearReferralReward)
   const ownBirthday = useBirthdayStore((state) => state.ownBirthday)
   const setOwnBirthday = useBirthdayStore((state) => state.setOwnBirthday)
 
-  const [tab, setTab] = useState<'login' | 'register'>('login')
+  const { copy } = useCopyFeedback()
+  const [searchParams] = useSearchParams()
+
+  const [tab, setTab] = useState<'login' | 'register'>(() => (searchParams.get('ref') ? 'register' : 'login'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [referralCode, setReferralCode] = useState(() => searchParams.get('ref')?.trim() ?? '')
+  const [referralCopied, setReferralCopied] = useState(false)
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (user) void fetchReferral()
+  }, [user, fetchReferral])
+
+  const handleCopyReferral = () => {
+    if (!referralStats?.code) return
+    void copy(referralStats.code)
+    setReferralCopied(true)
+    window.setTimeout(() => setReferralCopied(false), 2000)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +75,7 @@ export const AuthPage = () => {
     if (tab === 'login') {
       await login(email, password)
     } else {
-      await register(email, password)
+      await register(email, password, referralCode)
     }
   }
 
@@ -106,6 +144,85 @@ export const AuthPage = () => {
               {syncFeedback && (
                 <div className="auth-notice-box" style={{ borderColor: 'var(--accent)', color: 'var(--fg)' }}>
                   {syncFeedback}
+                </div>
+              )}
+
+              {lastReferralReward > 0 && (
+                <div className="auth-notice-box auth-referral-reward" role="status">
+                  <Gift size={16} />
+                  <span>
+                    {isEn
+                      ? `You received ${lastReferralReward} coins for joining by invitation!`
+                      : `Тебе начислено ${lastReferralReward} коинов за регистрацию по приглашению!`}
+                  </span>
+                  <button
+                    type="button"
+                    className="auth-referral-dismiss"
+                    onClick={clearReferralReward}
+                    aria-label={isEn ? 'Dismiss' : 'Скрыть'}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
+              {referralStatus === 'invalid' && (
+                <div className="auth-notice-box auth-referral-invalid" role="status">
+                  <Gift size={16} />
+                  <span>
+                    {isEn
+                      ? 'Friend referral code was not found — the account was created without the bonus.'
+                      : 'Код друга не найден — аккаунт создан без бонуса.'}
+                  </span>
+                  <button
+                    type="button"
+                    className="auth-referral-dismiss"
+                    onClick={clearReferralReward}
+                    aria-label={isEn ? 'Dismiss' : 'Скрыть'}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
+              {referralStats && (
+                <div className="auth-referral-box">
+                  <div className="auth-referral-head">
+                    <Gift size={16} />
+                    <strong>{isEn ? 'Invite friends' : 'Пригласи друзей'}</strong>
+                  </div>
+                  <p className="auth-referral-desc">
+                    {isEn
+                      ? 'A friend signs up with your code — you get 250 coins, they get 100. Rewarded once they actually register.'
+                      : 'Друг регистрируется с твоим кодом — ты получаешь 250 коинов, он 100. Награда начисляется, когда друг реально создаёт аккаунт.'}
+                  </p>
+                  <div className="auth-referral-code-row">
+                    <code className="auth-referral-code">{referralStats.code}</code>
+                    <button
+                      type="button"
+                      className="auth-referral-copy"
+                      onClick={handleCopyReferral}
+                      title={isEn ? 'Copy code' : 'Скопировать код'}
+                    >
+                      {referralCopied ? <Check size={14} /> : <Copy size={14} />}
+                    </button>
+                    <button
+                      type="button"
+                      className="auth-referral-share"
+                      title={isEn ? 'Copy invite link' : 'Скопировать ссылку-приглашение'}
+                      onClick={() => void copy(`${window.location.origin}/auth?ref=${referralStats.code}`)}
+                    >
+                      <Share2 size={14} />
+                    </button>
+                  </div>
+                  <div className="auth-referral-stats">
+                    <span>
+                      {isEn ? 'Invited' : 'Приглашено'}: <strong>{referralStats.invited}</strong>
+                    </span>
+                    <span>
+                      {isEn ? 'Earned' : 'Заработано'}: <strong>{referralStats.earned} 🪙</strong>
+                    </span>
+                  </div>
                 </div>
               )}
 
@@ -190,6 +307,23 @@ export const AuthPage = () => {
                     />
                   </div>
                 </div>
+
+                {tab === 'register' && (
+                  <div className="auth-field">
+                    <label htmlFor="auth-referral">{isEn ? 'Friend referral code (optional)' : 'Код друга (необязательно)'}</label>
+                    <div className="auth-input-wrapper">
+                      <Gift size={16} className="auth-input-icon" />
+                      <input
+                        id="auth-referral"
+                        type="text"
+                        placeholder="ABC12345"
+                        className="auth-input"
+                        value={referralCode}
+                        onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <button type="submit" className="auth-submit-btn" disabled={status === 'loading'}>
                   {status === 'loading' ? (

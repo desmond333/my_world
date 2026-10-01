@@ -1,0 +1,26 @@
+export const STORAGE_KEYS = {
+  authState: 'tau-auth-state',
+  accessToken: 'tau-access-token',
+  daily: 'animal-of-the-day',
+  favorites: 'animal-favorites',
+  finance: 'animal-finance',
+  productivity: 'animal-productivity',
+  training: 'animal-training',
+  subscriptions: 'animal-subscriptions',
+  birthdays: 'animal-birthdays',
+  lottery: 'animal-lottery',
+  notes: 'animal-notes',
+  movies: 'animal-movies',
+  books: 'animal-books',
+  games: 'animal-games',
+  shop: 'tau-shop-economy',
+  viewModes: 'app-view-modes',
+  premium: 'tau-premium',
+  catHidden: 'tau_cat_hidden',
+  stathamTrophies: 'statham-lottery-trophies',
+  georgianFavorites: 'georgian-favorite-phrases',
+  notesTreeExpanded: 'animal-notes-tree-expanded',
+  onboardingHint: 'tau_onboarding_hint_seen',
+} as const
+
+export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS]

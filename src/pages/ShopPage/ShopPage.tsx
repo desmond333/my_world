@@ -17,6 +17,7 @@ import {
   Sparkles,
   Square,
   Swords,
+  UserPlus,
   Volume2,
   Wand2,
   X,
@@ -779,6 +780,23 @@ export const ShopPage = () => {
                 </p>
                 <Link to="/misc/lottery" className="earn-link">
                   {isEn ? 'To the arena →' : 'На арену →'}
+                </Link>
+              </div>
+            </div>
+
+            <div className="earn-way-card">
+              <div className="earn-way-icon">
+                <UserPlus size={20} />
+              </div>
+              <div className="earn-way-info">
+                <strong>{isEn ? 'Invite a Friend' : 'Пригласи друга'}</strong>
+                <p>
+                  {isEn
+                    ? 'Share your referral code. When a friend signs up, you get +250 🪙 and they get +100 🪙.'
+                    : 'Поделись своим реферальным кодом. Когда друг зарегистрируется, ты получишь +250 🪙, а он +100 🪙.'}
+                </p>
+                <Link to="/auth" className="earn-link">
+                  {isEn ? 'Get my code →' : 'Мой код →'}
                 </Link>
               </div>
             </div>

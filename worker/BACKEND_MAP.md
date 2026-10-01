@@ -22,7 +22,7 @@
   - Access Token: JWT (Web Crypto API `HMAC SHA-256`), срок жизни 15 минут, передаётся в заголовке `Authorization: Bearer <token>`.
   - Refresh Token: криптографический случайный токен, хэш которого хранится в таблице `refresh_tokens`, срок жизни 30 дней, передаётся в `httpOnly`, `Secure`, `SameSite=Lax` куке `refresh_token`.
   - Хеширование паролей: PBKDF2 (`Web Crypto API`, 100 000 итераций, соль 16 байт, SHA-256).
-- **Деплой и миграции**: Wrangler CLI (`wrangler.toml`, `migrations/0001_init.sql`, `migrations/0002_friends_and_tasks.sql`, `migrations/0003_notes_parent_id.sql`, `migrations/0004_availability_windows.sql`).
+- **Деплой и миграции**: Wrangler CLI (`wrangler.toml`, `migrations/0001_init.sql`, `migrations/0002_friends_and_tasks.sql`, `migrations/0003_notes_parent_id.sql`, `migrations/0004_availability_windows.sql`, `migrations/0005_referrals.sql`).
 - **Безопасность**:
   - `secureHeaders` middleware (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy).
   - Rate Limiting middleware (`src/middleware/rateLimit.ts`): скользящее окно запросов для `/auth/login` и `/auth/register` для защиты от перебора паролей (brute force) со стандартными заголовками `X-RateLimit-*` и `Retry-After: <seconds>`.
@@ -45,7 +45,8 @@ worker/
 │   ├── 0001_init.sql          # Полная схема БД D1 (все 16 таблиц + индексы)
 │   ├── 0002_friends_and_tasks.sql # Таблица friendships, allow_friend_tasks, sender_id/name
 │   ├── 0003_notes_parent_id.sql # Иерархические заметки (parent_id, icon)
-│   └── 0004_availability_windows.sql # Таблица availability_windows (окна доступности)
+│   ├── 0004_availability_windows.sql # Таблица availability_windows (окна доступности)
+│   └── 0005_referrals.sql     # Реферальные коды и таблица referrals
 ├── vitest.config.ts           # Настройка @cloudflare/vitest-pool-workers
 ├── src/
 │   ├── index.ts               # Точка входа Hono, цепочка роутов, AppType для Hono RPC
@@ -133,6 +134,7 @@ worker/
 | `view_modes`           | Состояние режимов simple/normal               | `user_id`, `global_mode`, `page_modes_json`, `avatar_mode`                                                                       |
 | `friendships`          | Связи друзей и заявки                         | `id`, `user_id`, `friend_id`, `status` (`pending` \| `accepted`), `created_at`, `updated_at`                                     |
 | `availability_windows` | Окна доступности пользователя                 | `id`, `user_id`, `scope` (`weekly` \| `date`), `day_of_week`, `date`, `start_min`, `end_min`, `note`, `created_at`, `updated_at` |
+| `referrals`            | Рефералы (кто кого пригласил)                 | `id`, `referrer_id`, `referee_id` (UNIQUE), `code`, `referrer_reward`, `referee_reward`, `created_at`                            |
 
 ---
 
@@ -147,6 +149,7 @@ worker/
 | `POST` | `/auth/refresh`  | Cookie | —                   | Обновление токена доступа     | `{ accessToken }`                           |
 | `POST` | `/auth/logout`   | Public | —                   | Выход и инвалидация сессии    | `{ success: true }`                         |
 | `GET`  | `/auth/me`       | Bearer | —                   | Текущий профиль пользователя  | `{ id, email, role, createdAt }`            |
+| `GET`  | `/auth/referral` | Bearer | —                   | Реферальный код и статистика  | `{ code, invited, earned }`                 |
 
 ### 4.2. Полная синхронизация состояния (`/api/sync`)
 
