@@ -30,99 +30,98 @@ export type NotesHelpModalProps = {
 type TabKey = 'slash' | 'blocks' | 'keys' | 'media' | 'tree'
 
 export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
-  const { t, lang } = useTranslation()
-  const isEn = lang === 'en'
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabKey>('slash')
 
   const commands = [
     {
       cmd: '/h1',
-      title: isEn ? 'Heading 1' : 'Заголовок 1',
-      desc: isEn ? 'Large section header' : 'Крупный заголовок раздела',
+      title: t('notesHelp.heading-1', 'Заголовок 1'),
+      desc: t('notesHelp.large-section-header', 'Крупный заголовок раздела'),
       icon: Heading1,
     },
     {
       cmd: '/h2',
-      title: isEn ? 'Heading 2' : 'Заголовок 2',
-      desc: isEn ? 'Medium subsection header' : 'Средний заголовок подраздела',
+      title: t('notesHelp.heading-2', 'Заголовок 2'),
+      desc: t('notesHelp.medium-subsection-header', 'Средний заголовок подраздела'),
       icon: Heading2,
     },
     {
       cmd: '/h3',
-      title: isEn ? 'Heading 3' : 'Заголовок 3',
-      desc: isEn ? 'Small section header' : 'Компактный заголовок секции',
+      title: t('notesHelp.heading-3', 'Заголовок 3'),
+      desc: t('notesHelp.small-section-header', 'Компактный заголовок секции'),
       icon: Heading3,
     },
     {
       cmd: '/todo',
-      title: isEn ? 'To-do item' : 'Список задач',
-      desc: isEn ? 'Checkbox item with completion toggle' : 'Чек-бокс для выполнения задач',
+      title: t('notesHelp.to-do-item', 'Список задач'),
+      desc: t('notesHelp.checkbox-item-with-completion-toggle', 'Чек-бокс для выполнения задач'),
       icon: CheckSquare,
     },
     {
       cmd: '/bullet',
-      title: isEn ? 'Bullet list' : 'Маркированный список',
-      desc: isEn ? 'Simple bullet point' : 'Список с маркерами-точками',
+      title: t('notesHelp.bullet-list', 'Маркированный список'),
+      desc: t('notesHelp.simple-bullet-point', 'Список с маркерами-точками'),
       icon: List,
     },
     {
       cmd: '/quote',
-      title: isEn ? 'Quote' : 'Цитата',
-      desc: isEn ? 'Blockquote with accent line' : 'Цитата с акцентной полосой',
+      title: t('notesHelp.quote'),
+      desc: t('notesHelp.blockquote-with-accent-line', 'Цитата с акцентной полосой'),
       icon: Quote,
     },
     {
       cmd: '/callout',
-      title: isEn ? 'Callout' : 'Выделенная рамка',
-      desc: isEn ? 'Framed note with emoji icon' : 'Заметная рамка с эмодзи',
+      title: t('notesHelp.callout'),
+      desc: t('notesHelp.framed-note-with-emoji-icon', 'Заметная рамка с эмодзи'),
       icon: Info,
     },
     {
       cmd: '/code',
-      title: isEn ? 'Code block' : 'Блок кода',
-      desc: isEn ? 'Code snippet with syntax support' : 'Блок кода с указанием языка',
+      title: t('notesHelp.code-block', 'Блок кода'),
+      desc: t('notesHelp.code-snippet-with-syntax-support', 'Блок кода с указанием языка'),
       icon: Code,
     },
     {
       cmd: '/divider',
-      title: isEn ? 'Divider' : 'Разделитель',
-      desc: isEn ? 'Horizontal dividing rule' : 'Горизонтальная черта-разделитель',
+      title: t('notesHelp.divider'),
+      desc: t('notesHelp.horizontal-dividing-rule', 'Горизонтальная черта-разделитель'),
       icon: Minus,
     },
     {
       cmd: '/image',
-      title: isEn ? 'Image' : 'Изображение',
-      desc: isEn ? 'Photo, upload or link' : 'Загрузка с устройства или по ссылке',
+      title: t('notesHelp.image'),
+      desc: t('notesHelp.photo-upload-or-link', 'Загрузка с устройства или по ссылке'),
       icon: Image,
     },
     {
       cmd: '/audio',
-      title: isEn ? 'Audio' : 'Аудио',
-      desc: isEn ? 'Music or voice with embedded player' : 'Аудиофайл со встроенным плеером',
+      title: t('notesHelp.audio'),
+      desc: t('notesHelp.music-or-voice-with-embedded-player', 'Аудиофайл со встроенным плеером'),
       icon: Music,
     },
     {
       cmd: '/pdf',
-      title: isEn ? 'PDF Document' : 'PDF документ',
-      desc: isEn ? 'Embedded PDF viewer' : 'Документ PDF с предпросмотром',
+      title: t('notesHelp.pdf-document', 'PDF документ'),
+      desc: t('notesHelp.embedded-pdf-viewer', 'Документ PDF с предпросмотром'),
       icon: FileText,
     },
   ]
 
   const shortcuts = [
-    { key: '/', desc: isEn ? 'Open slash block menu anywhere in text' : 'Открыть меню вставки блоков прямо в тексте' },
-    { key: 'Enter', desc: isEn ? 'Create new paragraph below' : 'Создать новый текстовый блок строкой ниже' },
-    { key: 'Shift + Enter', desc: isEn ? 'Line break inside current block' : 'Перенос строки внутри текущего блока' },
+    { key: '/', desc: t('notesHelp.open-slash-block-menu-anywhere-in-text', 'Открыть меню вставки блоков прямо в тексте') },
+    { key: 'Enter', desc: t('notesHelp.create-new-paragraph-below', 'Создать новый текстовый блок строкой ниже') },
+    { key: 'Shift + Enter', desc: t('notesHelp.line-break-inside-current-block', 'Перенос строки внутри текущего блока') },
     {
       key: 'Backspace',
-      desc: isEn ? 'Reset block type or remove empty block' : 'В пустом блоке сбрасывает тип на обычный текст или удаляет его',
+      desc: t('notesHelp.reset-block-type-or-remove-empty-block', 'В пустом блоке сбрасывает тип на обычный текст или удаляет его'),
     },
     {
       key: '↑ / ↓',
-      desc: isEn ? 'Navigate through slash menu or between blocks' : 'Навигация по выпадающему меню команд или между блоками',
+      desc: t('notesHelp.navigate-through-slash-menu-or-between-blocks', 'Навигация по выпадающему меню команд или между блоками'),
     },
-    { key: 'Escape', desc: isEn ? 'Close slash menu' : 'Закрыть меню команд' },
-    { key: 'Ctrl + V', desc: isEn ? 'Paste screenshot or image directly' : 'Вставить скриншот или картинку прямо из буфера обмена' },
+    { key: 'Escape', desc: t('notesHelp.close-slash-menu', 'Закрыть меню команд') },
+    { key: 'Ctrl + V', desc: t('notesHelp.paste-screenshot-or-image-directly', 'Вставить скриншот или картинку прямо из буфера обмена') },
   ]
 
   return (
@@ -135,7 +134,7 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
             onClick={() => setActiveTab('slash')}
           >
             <Command size={14} />
-            <span>{isEn ? 'Slash commands (/)' : 'Команды (/)'}</span>
+            <span>{t('notesHelp.slash-commands', 'Команды (/)')}</span>
           </button>
           <button
             type="button"
@@ -143,7 +142,7 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
             onClick={() => setActiveTab('blocks')}
           >
             <GripVertical size={14} />
-            <span>{isEn ? 'Drag & Drop' : 'Управление блоками'}</span>
+            <span>{t('notesHelp.drag-drop', 'Управление блоками')}</span>
           </button>
           <button
             type="button"
@@ -151,7 +150,7 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
             onClick={() => setActiveTab('keys')}
           >
             <Keyboard size={14} />
-            <span>{isEn ? 'Shortcuts' : 'Горячие клавиши'}</span>
+            <span>{t('notesHelp.shortcuts')}</span>
           </button>
           <button
             type="button"
@@ -159,7 +158,7 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
             onClick={() => setActiveTab('media')}
           >
             <Image size={14} />
-            <span>{isEn ? 'Media' : 'Медиафайлы'}</span>
+            <span>{t('notesHelp.media')}</span>
           </button>
           <button
             type="button"
@@ -167,7 +166,7 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
             onClick={() => setActiveTab('tree')}
           >
             <FolderTree size={14} />
-            <span>{isEn ? 'Page Tree' : 'Дерево страниц'}</span>
+            <span>{t('notesHelp.page-tree', 'Дерево страниц')}</span>
           </button>
         </div>
 
@@ -175,9 +174,10 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
           {activeTab === 'slash' && (
             <>
               <p className="notes-help-lead">
-                {isEn
-                  ? 'Type / in any block to quickly insert headers, lists, code, callouts or media. Start typing letters to filter commands instantly.'
-                  : 'Нажмите символ / в любой строке, чтобы быстро выбрать и превратить блок в заголовок, список, цитату, выноску или медиа. Начните вводить текст после слэша для мгновенного поиска.'}
+                {t(
+                  'notesHelp.type-in-any-block-to-quickly-insert-headers-list',
+                  'Нажмите символ / в любой строке, чтобы быстро выбрать и превратить блок в заголовок, список, цитату, выноску или медиа. Начните вводить текст после слэша для мгновенного поиска.',
+                )}
               </p>
               <div className="notes-help-grid">
                 {commands.map((cmd) => {
@@ -204,11 +204,12 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                   <GripVertical size={16} />
                 </span>
                 <div className="notes-help-feature-body">
-                  <strong>{isEn ? 'Six Dots Handle (Drag & Drop)' : 'Ручка из 6 точек (Drag-and-Drop)'}</strong>
+                  <strong>{t('notesHelp.six-dots-handle-drag-drop', 'Ручка из 6 точек (Drag-and-Drop)')}</strong>
                   <p>
-                    {isEn
-                      ? 'Hover over any block on the left to reveal the 6-dots handle. Click and drag it up or down to reorder blocks in your document.'
-                      : 'При наведении курсора на блок слева появляется ручка с 6 точками. Зажмите её левой кнопкой мыши и перетащите блок на любое новое место.'}
+                    {t(
+                      'notesHelp.hover-over-any-block-on-the-left-to-reveal-the-6',
+                      'При наведении курсора на блок слева появляется ручка с 6 точками. Зажмите её левой кнопкой мыши и перетащите блок на любое новое место.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -218,11 +219,12 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                   <Sparkles size={16} />
                 </span>
                 <div className="notes-help-feature-body">
-                  <strong>{isEn ? 'Block Actions Menu (···)' : 'Меню блока (···)'}</strong>
+                  <strong>{t('notesHelp.block-actions-menu', 'Меню блока (···)')}</strong>
                   <p>
-                    {isEn
-                      ? 'Use the block action menu to duplicate a block or delete it. You can also use the + button to quickly insert a new empty block below.'
-                      : 'Через меню действий можно дублировать текущий блок со всем содержимым или удалить его. Кнопка + слева быстро вставляет новый блок под текущим.'}
+                    {t(
+                      'notesHelp.use-the-block-action-menu-to-duplicate-a-block-o',
+                      'Через меню действий можно дублировать текущий блок со всем содержимым или удалить его. Кнопка + слева быстро вставляет новый блок под текущим.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -247,11 +249,12 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                   <Image size={16} />
                 </span>
                 <div className="notes-help-feature-body">
-                  <strong>{isEn ? 'Drag & Drop files' : 'Перетаскивание файлов прямо в окно'}</strong>
+                  <strong>{t('notesHelp.drag-drop-files', 'Перетаскивание файлов прямо в окно')}</strong>
                   <p>
-                    {isEn
-                      ? 'You can drag images, audio tracks, and PDF documents from your computer directly into the editor. They will be embedded automatically.'
-                      : 'Перетащите файл картинки, аудиозаписи или PDF-документа из папки на компьютере прямо в окно заметки. Блок создастся автоматически.'}
+                    {t(
+                      'notesHelp.you-can-drag-images-audio-tracks-and-pdf-documen',
+                      'Перетащите файл картинки, аудиозаписи или PDF-документа из папки на компьютере прямо в окно заметки. Блок создастся автоматически.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -261,11 +264,12 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                   <Keyboard size={16} />
                 </span>
                 <div className="notes-help-feature-body">
-                  <strong>{isEn ? 'Clipboard paste (Ctrl+V)' : 'Вставка скриншота из буфера (Ctrl+V)'}</strong>
+                  <strong>{t('notesHelp.clipboard-paste-ctrl-v', 'Вставка скриншота из буфера (Ctrl+V)')}</strong>
                   <p>
-                    {isEn
-                      ? 'Take a screenshot with PrintScreen or snipping tool and press Ctrl+V directly in the note to paste the image.'
-                      : 'Сделайте скриншот экрана и нажмите Ctrl+V прямо в редакторе — изображение сразу появится как блок картинки.'}
+                    {t(
+                      'notesHelp.take-a-screenshot-with-printscreen-or-snipping-t',
+                      'Сделайте скриншот экрана и нажмите Ctrl+V прямо в редакторе — изображение сразу появится как блок картинки.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -275,11 +279,12 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                   <FileText size={16} />
                 </span>
                 <div className="notes-help-feature-body">
-                  <strong>{isEn ? 'Built-in preview & players' : 'Встроенный плеер и просмотр PDF'}</strong>
+                  <strong>{t('notesHelp.built-in-preview-players', 'Встроенный плеер и просмотр PDF')}</strong>
                   <p>
-                    {isEn
-                      ? 'Audio files have a full playback controller. PDF documents can be previewed in an embedded viewer or downloaded.'
-                      : 'Для аудио файлов доступен встроенный аудиоплеер, а для PDF — удобный предпросмотр документа и скачивание в один клик.'}
+                    {t(
+                      'notesHelp.audio-files-have-a-full-playback-controller-pdf-',
+                      'Для аудио файлов доступен встроенный аудиоплеер, а для PDF — удобный предпросмотр документа и скачивание в один клик.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -293,11 +298,12 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                   <FolderTree size={16} />
                 </span>
                 <div className="notes-help-feature-body">
-                  <strong>{isEn ? 'Infinite Nesting' : 'Бесконечная вложенность'}</strong>
+                  <strong>{t('notesHelp.infinite-nesting', 'Бесконечная вложенность')}</strong>
                   <p>
-                    {isEn
-                      ? 'Create subpages inside any note like computer folders. Click + next to a note in the sidebar to add a nested subpage.'
-                      : 'Создавайте страницы внутри других страниц на любую глубину. Нажмите + у любой заметки в боковом меню, чтобы создать дочернюю страницу.'}
+                    {t(
+                      'notesHelp.create-subpages-inside-any-note-like-computer-fo',
+                      'Создавайте страницы внутри других страниц на любую глубину. Нажмите + у любой заметки в боковом меню, чтобы создать дочернюю страницу.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -307,11 +313,12 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                   <Command size={16} />
                 </span>
                 <div className="notes-help-feature-body">
-                  <strong>{isEn ? 'Moving Pages & Breadcrumbs' : 'Перемещение страниц и навигация'}</strong>
+                  <strong>{t('notesHelp.moving-pages-breadcrumbs', 'Перемещение страниц и навигация')}</strong>
                   <p>
-                    {isEn
-                      ? 'Use the Move button in the breadcrumb trail to reassign a page to a new parent or move it to root. Breadcrumbs at the top show full path.'
-                      : 'Кнопка «Переместить» в цепочке навигации вверху позволяет сменить родительскую страницу в любой момент.'}
+                    {t(
+                      'notesHelp.use-the-move-button-in-the-breadcrumb-trail-to-r',
+                      'Кнопка «Переместить» в цепочке навигации вверху позволяет сменить родительскую страницу в любой момент.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -321,7 +328,7 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
 
         <div className="notes-help-footer">
           <Button variant="outline" size="sm" onClick={onClose}>
-            {isEn ? 'Got it' : 'Понятно'}
+            {t('notesHelp.got-it', 'Понятно')}
           </Button>
         </div>
       </div>

@@ -9,14 +9,12 @@ import { LotteryDrawTab } from './LotteryDrawTab'
 import './Lottery.css'
 
 export const LotteryPage = () => {
-  const { lang, t } = useTranslation()
+  const { t } = useTranslation()
   const [tab, setTab] = useState('draw')
 
   const isUnlocked = useShopStore((state) => state.isUnlocked('lottery'))
   const buyPart = useShopStore((state) => state.buyPart)
   const userCoins = useShopStore((state) => state.coins)
-
-  const isEn = lang === 'en'
 
   if (!isUnlocked) {
     const canAfford = userCoins >= 250
@@ -29,20 +27,21 @@ export const LotteryPage = () => {
             <Shield size={20} className="lottery-shield-badge" />
           </div>
 
-          <h1>{isEn ? 'Lottery of Luck' : 'Лотерея удачи'}</h1>
+          <h1>{t('lottery.lottery-of-luck', 'Лотерея удачи')}</h1>
           <p className="lottery-locked-intro">
-            {isEn
-              ? 'Spin the wheel, flip the coin and clash the kingdoms. Unlock full access to try your luck and lead armies into battle!'
-              : 'Крути колесо, бросай монетку и сталкивай королевства. Открой доступ, чтобы испытать удачу и повести армии в бой!'}
+            {t(
+              'lottery.spin-the-wheel-flip-the-coin-and-clash-the-kingd',
+              'Крути колесо, бросай монетку и сталкивай королевства. Открой доступ, чтобы испытать удачу и повести армии в бой!',
+            )}
           </p>
 
           <div className="lottery-locked-pricing">
             <div className="locked-balance-pill">
-              <span>{isEn ? 'Your Treasury:' : 'Твоя казна:'}</span>
+              <span>{t('lottery.your-treasury', 'Твоя казна:')}</span>
               <strong>🪙 {userCoins}</strong>
             </div>
             <div className="locked-cost-pill">
-              <span>{isEn ? 'Unlock Price:' : 'Цена открытия:'}</span>
+              <span>{t('lottery.unlock-price', 'Цена открытия:')}</span>
               <strong>250 🪙</strong>
             </div>
           </div>
@@ -51,19 +50,20 @@ export const LotteryPage = () => {
             {canAfford ? (
               <button type="button" className="lottery-unlock-btn" onClick={() => buyPart('lottery')}>
                 <Sparkles size={16} />
-                <span>{isEn ? 'Unlock for 250 Coins 🪙' : 'Разблокировать за 250 🪙'}</span>
+                <span>{t('lottery.unlock-for-250-coins', 'Разблокировать за 250 🪙')}</span>
               </button>
             ) : (
               <p className="lottery-no-coins">
-                {isEn
-                  ? 'Not enough coins. Complete tasks or earn them in the shop!'
-                  : 'Недостаточно коинов. Выполняй задачи или пополни казну в Магазине!'}
+                {t(
+                  'lottery.not-enough-coins-complete-tasks-or-earn-them-in-',
+                  'Недостаточно коинов. Выполняй задачи или пополни казну в Магазине!',
+                )}
               </p>
             )}
 
             <Link to="/shop" className="lottery-shop-link">
               <Coins size={15} />
-              <span>{isEn ? 'Go to Royal Shop' : 'В Королевский магазин'}</span>
+              <span>{t('lottery.go-to-royal-shop', 'В Королевский магазин')}</span>
             </Link>
           </div>
         </div>

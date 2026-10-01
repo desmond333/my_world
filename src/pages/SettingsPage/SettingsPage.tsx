@@ -112,7 +112,7 @@ export const SettingsPage = () => {
     downloadBackupFile()
     setFeedback({
       type: 'success',
-      message: isEn ? 'Backup file downloaded successfully!' : 'Файл резервной копии успешно скачан!',
+      message: t('settings.backup-file-downloaded-successfully', 'Файл резервной копии успешно скачан!'),
     })
     setTimeout(() => setFeedback(null), 3500)
   }
@@ -152,7 +152,7 @@ export const SettingsPage = () => {
     refreshStats()
     setFeedback({
       type: 'success',
-      message: `${t('settings.data.cacheCleared')} (${res.clearedKeys} ${isEn ? 'items' : 'записей'})`,
+      message: `${t('settings.data.cacheCleared')} (${res.clearedKeys} ${t('settings.items')})`,
     })
     setTimeout(() => setFeedback(null), 3500)
   }
@@ -409,7 +409,7 @@ export const SettingsPage = () => {
               </div>
               <div className="storage-metric-val">
                 <strong>{stats?.formattedSize ?? '—'}</strong>
-                <span className="storage-metric-count">{stats ? `(${stats.itemsCount} ${isEn ? 'entries' : 'записей'})` : ''}</span>
+                <span className="storage-metric-count">{stats ? `(${stats.itemsCount} ${t('settings.entries')})` : ''}</span>
               </div>
             </div>
 
@@ -430,28 +430,32 @@ export const SettingsPage = () => {
           <div className="settings-data-actions-grid">
             <div className="settings-data-card">
               <div className="data-card-info">
-                <strong>{isEn ? 'Cloud Sync & Account' : 'Облако и синхронизация'}</strong>
+                <strong>{t('settings.cloud-sync-account', 'Облако и синхронизация')}</strong>
                 <p>
                   {user
-                    ? isEn
-                      ? `Signed in as ${user.email} (${user.role})`
-                      : `Вы вошли как ${user.email} (${user.role === 'admin' ? 'Администратор' : 'Пользователь'})`
-                    : isEn
-                      ? 'Offline mode. Connect to Cloudflare D1 to backup and sync across devices.'
-                      : 'Офлайн-режим. Подключись к Cloudflare D1 для бэкапа и синхронизации.'}
+                    ? t('settings.signedInAs', undefined, {
+                        email: user.email,
+                        role: user.role === 'admin' ? t('common.roleAdmin') : t('common.roleUser'),
+                      })
+                    : t(
+                        'settings.offline-mode-connect-to-cloudflare-d1-to-backup-',
+                        'Офлайн-режим. Подключись к Cloudflare D1 для бэкапа и синхронизации.',
+                      )}
                 </p>
               </div>
               <div className="data-card-btns">
                 <Link to="/auth" className="settings-action-btn is-primary" style={{ textDecoration: 'none' }}>
                   <Cloud size={14} />
                   <span>
-                    {user ? (isEn ? 'Manage Account' : 'Управление аккаунтом') : isEn ? 'Sign In / Register' : 'Войти / Создать аккаунт'}
+                    {user
+                      ? t('settings.manage-account', 'Управление аккаунтом')
+                      : t('settings.sign-in-register', 'Войти / Создать аккаунт')}
                   </span>
                 </Link>
                 {user?.role === 'admin' && (
                   <Link to="/admin" className="settings-action-btn is-outline" style={{ textDecoration: 'none' }}>
                     <Crown size={14} />
-                    <span>{isEn ? 'Admin Panel' : 'Админ-панель'}</span>
+                    <span>{t('settings.admin-panel', 'Админ-панель')}</span>
                   </Link>
                 )}
               </div>

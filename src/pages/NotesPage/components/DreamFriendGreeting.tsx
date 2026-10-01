@@ -10,7 +10,7 @@ type DreamFriendGreetingProps = {
 }
 
 export const DreamFriendGreeting = ({ onShowToast }: DreamFriendGreetingProps) => {
-  const { lang } = useTranslation()
+  const { t } = useTranslation()
   const hasPendingReply = useShopStore((state) => state.hasPendingGreetingReply)
   const friendName = useShopStore((state) => state.greetingFriendName)
   const sendGreeting = useShopStore((state) => state.sendFriendGreeting)
@@ -20,9 +20,7 @@ export const DreamFriendGreeting = ({ onShowToast }: DreamFriendGreetingProps) =
   const [formOpen, setFormOpen] = useState(false)
   const [claimedNotice, setClaimedNotice] = useState(false)
 
-  const isEn = lang === 'en'
-
-  const presets = isEn ? ['Best Friend', 'Soulmate', 'Night Wanderer'] : ['Лучший друг', 'Родственная душа', 'Ночной странник']
+  const presets = [t('notesDream.preset.bestFriend'), t('notesDream.preset.soulmate'), t('notesDream.preset.nightWanderer')]
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,18 +29,14 @@ export const DreamFriendGreeting = ({ onShowToast }: DreamFriendGreetingProps) =
     setInputName('')
     setFormOpen(false)
     playCatPurr()
-    onShowToast(
-      isEn
-        ? `Dream letter sent to ${name}! Check back on your next visit 🌙`
-        : `Письмо отправлено ${name}! Ожидай ответа при следующем входе 🌙`,
-    )
+    onShowToast(t('notesDream.sent', undefined, { name }))
   }
 
   const handleClaim = () => {
     claimReply()
     setClaimedNotice(true)
     playCatMeow()
-    onShowToast(isEn ? '+100 Coins added to your Treasury! 🪙' : '+100 коинов зачислено в казну! 🪙')
+    onShowToast(t('notesDream.100-coins-added-to-your-treasury', '+100 коинов зачислено в казну! 🪙'))
     setTimeout(() => {
       setClaimedNotice(false)
     }, 2500)
@@ -59,22 +53,20 @@ export const DreamFriendGreeting = ({ onShowToast }: DreamFriendGreetingProps) =
               <Heart size={16} className="dream-heart-badge" />
             </div>
 
-            <h3 className="dream-reply-title">{isEn ? 'Dream Letter Received!' : 'Ответ из мира снов получен!'}</h3>
+            <h3 className="dream-reply-title">{t('notesDream.dream-letter-received', 'Ответ из мира снов получен!')}</h3>
 
             <p className="dream-reply-text">
-              {isEn
-                ? `Your friend ${friendName || 'a kindred spirit'} felt your warm dream greeting, smiled back across the night sky, and sent you a magical gift:`
-                : `Твой друг ${friendName || 'родственная душа'} почувствовал твой ночной привет, ответил взаимностью сквозь сновидение и передал подарок:`}
+              {t('notesDream.replyText', undefined, { name: friendName || t('notesDream.kindredSpirit') })}
             </p>
 
             <div className="dream-reply-reward">
               <Coins size={22} className="dream-coins-icon" />
-              <span className="dream-reward-amount">+100 {isEn ? 'Coins' : 'Коинов'}</span>
+              <span className="dream-reward-amount">+100 {t('notesDream.coins')}</span>
             </div>
 
             <button type="button" className="dream-claim-btn" onClick={handleClaim}>
               <Sparkles size={15} />
-              <span>{isEn ? 'Claim 100 Coins 🪙' : 'Забрать 100 коинов 🪙'}</span>
+              <span>{t('notesDream.claim-100-coins', 'Забрать 100 коинов 🪙')}</span>
             </button>
           </div>
         </div>
@@ -84,13 +76,13 @@ export const DreamFriendGreeting = ({ onShowToast }: DreamFriendGreetingProps) =
         {!formOpen ? (
           <button type="button" className="dream-greeting-trigger" onClick={() => setFormOpen(true)}>
             <Mail size={14} className="dream-trigger-mail" />
-            <span>{isEn ? 'Send a dream greeting to a friend 💌' : 'Отправить приветствие другу через сны 💌'}</span>
+            <span>{t('notesDream.send-a-dream-greeting-to-a-friend', 'Отправить приветствие другу через сны 💌')}</span>
           </button>
         ) : (
           <form className="dream-greeting-form" onSubmit={handleSend}>
             <div className="dream-form-header">
               <span className="dream-form-label">
-                <Send size={13} /> {isEn ? 'Send greeting across dreams' : 'Приветствие сквозь сновидение'}
+                <Send size={13} /> {t('notesDream.send-greeting-across-dreams', 'Приветствие сквозь сновидение')}
               </span>
               <button type="button" className="dream-form-close" onClick={() => setFormOpen(false)}>
                 <X size={13} />
@@ -109,14 +101,14 @@ export const DreamFriendGreeting = ({ onShowToast }: DreamFriendGreetingProps) =
               <input
                 type="text"
                 className="dream-friend-input"
-                placeholder={isEn ? "Friend's name (e.g. Alex)..." : 'Имя друга (напр. Алекс)...'}
+                placeholder={t('notesDream.namePlaceholder')}
                 value={inputName}
                 onChange={(e) => setInputName(e.target.value)}
                 autoFocus
               />
               <button type="submit" className="dream-send-btn">
                 <Send size={13} />
-                <span>{isEn ? 'Send ✨' : 'Отправить ✨'}</span>
+                <span>{t('notesDream.send')}</span>
               </button>
             </div>
           </form>

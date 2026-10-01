@@ -236,7 +236,7 @@ export const HelpPage = () => {
                 aria-label={t('help.search.placeholder')}
               />
               {query && (
-                <button type="button" onClick={() => setQuery('')} aria-label={t('help.search.clear', 'Clear search')}>
+                <button type="button" onClick={() => setQuery('')} aria-label={t('help.search.clear')}>
                   <X size={15} />
                 </button>
               )}

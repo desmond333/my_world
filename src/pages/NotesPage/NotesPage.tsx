@@ -392,7 +392,7 @@ export type NotesPageProps = {
 }
 
 export const NotesPage = ({ fixedKind, hideTopbar = false }: NotesPageProps = {}) => {
-  const { t, locale, lang } = useTranslation()
+  const { t, locale } = useTranslation()
   const { isSimple } = usePageViewMode('notes')
   const notes = useNotesStore((state) => state.notes)
   const add = useNotesStore((state) => state.add)
@@ -446,37 +446,34 @@ export const NotesPage = ({ fixedKind, hideTopbar = false }: NotesPageProps = {}
   const handleCopyAllForAI = async () => {
     if (filteredNotes.length === 0) return
 
-    const isEn = lang === 'en'
     const headerTitle =
       activeTab === 'dream'
-        ? isEn
-          ? `🌙 DREAM DIARY (${filteredNotes.length} entries)`
-          : `🌙 ДНЕВНИК СНОВ (${filteredNotes.length} записей)`
-        : isEn
-          ? `📝 NOTES COLLECTION (${filteredNotes.length} entries)`
-          : `📝 СБОРНИК ЗАМЕТОК (${filteredNotes.length} записей)`
+        ? t('notes.dreamHeader', undefined, { count: filteredNotes.length })
+        : t('notes.notesHeader', undefined, { count: filteredNotes.length })
 
     const promptContext =
       activeTab === 'dream'
-        ? isEn
-          ? `*Context: Personal dream journal entries for psychological, symbolic, and pattern analysis with LLM.*`
-          : `*Контекст: Записи личного дневника снов для психологического, символического анализа и поиска паттернов в ИИ.*`
-        : isEn
-          ? `*Context: Structured notes for review, summarization, and key insight extraction with LLM.*`
-          : `*Контекст: Структурированные заметки для анализа, суммаризации и выделения ключевых выводов в ИИ.*`
+        ? t(
+            'notes.context-personal-dream-journal-entries-for-psych',
+            '*Контекст: Записи личного дневника снов для психологического, символического анализа и поиска паттернов в ИИ.*',
+          )
+        : t(
+            'notes.context-structured-notes-for-review-summarizatio',
+            '*Контекст: Структурированные заметки для анализа, суммаризации и выделения ключевых выводов в ИИ.*',
+          )
 
     const itemsFormatted = filteredNotes
       .map((item, idx) => {
-        const titleStr = item.title.trim() || (isEn ? 'Untitled' : 'Без названия')
+        const titleStr = item.title.trim() || t('notes.untitled')
         const dateStr = new Date(item.updatedAt).toLocaleDateString(locale, {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
         })
         const plain = isBlockJson(item.body) ? blocksToPlainText(parseBlocks(item.body)) : item.body
-        const bodyStr = plain.trim() || (isEn ? '(empty body)' : '(текст отсутствует)')
+        const bodyStr = plain.trim() || t('notes.empty-body', '(текст отсутствует)')
 
-        return `### ${idx + 1}. ${titleStr}\n**${isEn ? 'Date' : 'Дата'}:** ${dateStr}\n\n${bodyStr}`
+        return `### ${idx + 1}. ${titleStr}\n**${t('notes.date')}:** ${dateStr}\n\n${bodyStr}`
       })
       .join('\n\n---\n\n')
 

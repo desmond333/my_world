@@ -2,6 +2,9 @@ import type { Dictionary } from './types'
 
 export const subscriptions: Dictionary = {
   ru: {
+    'subscription.dayForm.one': 'день',
+    'subscription.dayForm.few': 'дня',
+    'subscription.dayForm.many': 'дней',
     'subscriptions.kicker': 'дополнительно · подписки',
     'subscriptions.title': 'Подписки',
     'subscriptions.intro': 'Следи за месячными и годовыми платежами, отмечай оплаченное — и месяц закрывается сам.',
@@ -100,6 +103,9 @@ export const subscriptions: Dictionary = {
     'subscription.progress.year': 'Год',
   },
   en: {
+    'subscription.dayForm.one': 'day',
+    'subscription.dayForm.few': 'days',
+    'subscription.dayForm.many': 'days',
     'subscriptions.kicker': 'extra · subscriptions',
     'subscriptions.title': 'Subscriptions',
     'subscriptions.intro': 'Keep track of monthly and yearly payments, mark what is paid — and the month closes on its own.',

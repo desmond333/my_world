@@ -10,15 +10,15 @@ export const MindPage = () => {
   const tabs: SectionTab[] = [
     {
       to: '/extra/mind/dreams',
-      label: t('mind.tab.dreams', 'Дневник снов'),
-      hint: t('mind.tab.dreamsHint', 'хроника сновидений'),
+      label: t('mind.tab.dreams'),
+      hint: t('mind.tab.dreamsHint'),
       icon: Moon,
       end: true,
     },
     {
       to: '/extra/mind/mood',
-      label: t('mind.tab.mood', 'Настроение'),
-      hint: t('mind.tab.moodHint', 'трекер дня'),
+      label: t('mind.tab.mood'),
+      hint: t('mind.tab.moodHint'),
       icon: Heart,
       end: true,
     },
@@ -28,15 +28,13 @@ export const MindPage = () => {
     <>
       <section className="extra-head">
         <p className="eyebrow">
-          <Moon size={15} /> {t('mind.kicker', 'дополнительно · дневник')}
+          <Moon size={15} /> {t('mind.kicker')}
         </p>
-        <h1>{t('mind.title', 'Дневник')}</h1>
-        <p className="intro">
-          {t('mind.intro', 'Дневник снов и трекер настроения. Записывай сюжеты ночных сновидений и следи за эмоциональным состоянием.')}
-        </p>
+        <h1>{t('mind.title')}</h1>
+        <p className="intro">{t('mind.intro')}</p>
       </section>
       <section className="extra-section">
-        <SectionTabs tabs={tabs} label={t('mind.tabsAria', 'Вкладки дневника')} variant="sub" />
+        <SectionTabs tabs={tabs} label={t('mind.tabsAria')} variant="sub" />
         <Outlet />
       </section>
     </>

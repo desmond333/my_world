@@ -1,12 +1,23 @@
-const LAST_DIGIT = (value: number) => Math.abs(value) % 10
-const LAST_TWO = (value: number) => Math.abs(value) % 100
+import type { Lang } from '../i18n/types'
+import { localeOf } from '../i18n/locale'
 
-export const plural = (value: number, forms: [string, string, string]) => {
-  if (value === 1) return forms[0]
-  const last = LAST_TWO(value)
-  if (last >= 11 && last <= 19) return forms[2]
-  if (LAST_DIGIT(value) >= 2 && LAST_DIGIT(value) <= 4) return forms[1]
-  return forms[2]
+export type PluralSuffix = 'one' | 'few' | 'many'
+
+const SUFFIX: Record<Intl.LDMLPluralRule, PluralSuffix> = {
+  one: 'one',
+  few: 'few',
+  many: 'many',
+  two: 'few',
+  zero: 'many',
+  other: 'many',
 }
 
-export const withCount = (value: number, forms: [string, string, string]) => `${value} ${plural(value, forms)}`
+export const pluralForm = (value: number, lang: Lang = 'ru'): PluralSuffix =>
+  SUFFIX[new Intl.PluralRules(localeOf(lang)).select(value)] ?? 'many'
+
+export const plural = (value: number, forms: [string, string, string], lang: Lang = 'ru') => {
+  const form = pluralForm(value, lang)
+  return form === 'one' ? forms[0] : form === 'few' ? forms[1] : forms[2]
+}
+
+export const withCount = (value: number, forms: [string, string, string], lang: Lang = 'ru') => `${value} ${plural(value, forms, lang)}`

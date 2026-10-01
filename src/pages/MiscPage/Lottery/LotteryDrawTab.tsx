@@ -145,7 +145,10 @@ export const LotteryDrawTab = () => {
 
           <p className={`lottery-expect${current.wins > expected ? ' is-lucky' : ''}`}>
             <Gift size={15} />{' '}
-            {t('lottery.expect', undefined, { spins: compact(current.spins), wins: withCount(Math.round(expected * 100) / 100, winForms) })}
+            {t('lottery.expect', undefined, {
+              spins: compact(current.spins),
+              wins: withCount(Math.round(expected * 100) / 100, winForms, lang),
+            })}
           </p>
 
           <div className="lottery-actions">

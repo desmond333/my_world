@@ -76,8 +76,8 @@ export const subscriptionView = (
     daysLeft < 0 ? (stopped ? 'stopped' : 'over') : daysLeft === 0 ? 'today' : daysLeft <= 7 ? 'soon' : 'later'
   const locale = lang === 'en' ? 'en-US' : 'ru-RU'
   const note = stopped
-    ? getTranslation('subscription.note.until', lang, 'Платёг {date} — отменить автоплатёж', { date: formatShortDate(sub.until, locale) })
-    : getTranslation('subscription.note.cancel', lang, 'Следующий платёг {date}', { date: formatShortDate(charge, locale) })
+    ? getTranslation('subscription.note.until', lang, undefined, { date: formatShortDate(sub.until, locale) })
+    : getTranslation('subscription.note.cancel', lang, undefined, { date: formatShortDate(charge, locale) })
   return { sub, status, daysLeft, charge, deadline, monthly, note }
 }
 
@@ -95,20 +95,21 @@ export const subscriptionSummary = (
   return { monthTotal, activeCount: active.length, closest, views }
 }
 
-const DAY_FORMS: [string, string, string] = ['день', 'дня', 'дней']
+const dayForms = (lang: 'ru' | 'en'): [string, string, string] => [
+  getTranslation('subscription.dayForm.one', lang),
+  getTranslation('subscription.dayForm.few', lang),
+  getTranslation('subscription.dayForm.many', lang),
+]
 
 export const leftLabel = (daysLeft: number, lang: 'ru' | 'en' = 'ru') => {
   const count = Math.abs(daysLeft)
-  if (lang === 'en') {
-    return `${count} ${count === 1 ? 'day' : 'days'}`
-  }
-  return withCount(count, DAY_FORMS)
+  return withCount(count, dayForms(lang), lang)
 }
 
 export const leftText = (daysLeft: number, lang: 'ru' | 'en' = 'ru') =>
   daysLeft < 0
-    ? getTranslation('subscription.left.overdue', lang, 'просрочено на {count}', { count: leftLabel(daysLeft, lang) })
-    : getTranslation('subscription.left.in', lang, 'через {count}', { count: leftLabel(daysLeft, lang) })
+    ? getTranslation('subscription.left.overdue', lang, undefined, { count: leftLabel(daysLeft, lang) })
+    : getTranslation('subscription.left.in', lang, undefined, { count: leftLabel(daysLeft, lang) })
 
 const STATUS_FALLBACK: Record<SubscriptionStatus, string> = {
   stopped: 'отменена',

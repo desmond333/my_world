@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react'
 import type { Dictionary, Lang, Translations } from './types'
 import { DEFAULT_LANG } from './types'
 import { useLang } from './LangContext'
+import { localeOf } from './locale'
 import { nav } from './nav'
 import { daily } from './daily'
 import { training } from './training'
@@ -16,7 +17,15 @@ import { settings } from './settings'
 import { friends } from './friends'
 import { together } from './together'
 import { help } from './help'
-import { plural } from '../plural'
+import { auth } from './auth'
+import { admin } from './admin'
+import { shop } from './shop'
+import { notesHelp } from './notesHelp'
+import { lotteryBattle } from './lotteryBattle'
+import { lottery } from './lottery'
+import { season } from './season'
+import { premium } from './premium'
+import { pluralForm } from '../plural'
 
 const DICTIONARIES: Dictionary[] = [
   nav,
@@ -33,9 +42,17 @@ const DICTIONARIES: Dictionary[] = [
   friends,
   together,
   help,
+  premium,
+  auth,
+  admin,
+  shop,
+  notesHelp,
+  lotteryBattle,
+  lottery,
+  season,
 ]
 
-const merge = (lang: Lang): Translations => Object.assign({}, ...DICTIONARIES.map((item) => item[lang]))
+const merge = (lang: Lang): Translations => Object.assign({}, ...DICTIONARIES.map((item) => item[lang] ?? {}))
 
 export const translations: Record<Lang, Translations> = {
   ru: merge('ru'),
@@ -43,8 +60,7 @@ export const translations: Record<Lang, Translations> = {
 }
 
 export { DEFAULT_LANG } from './types'
-
-export const localeOf = (lang: Lang = DEFAULT_LANG) => (lang === 'en' ? 'en-US' : 'ru-RU')
+export { localeOf } from './locale'
 
 export const getTranslation = (
   key: string,
@@ -52,19 +68,17 @@ export const getTranslation = (
   fallback?: string,
   values?: Record<string, string | number>,
 ): string => {
-  const template = translations[lang]?.[key] ?? fallback ?? translations.ru[key] ?? key
+  const template = translations[lang]?.[key] ?? translations.ru[key] ?? fallback ?? key
   return values ? formatText(template, values) : template
 }
 
 export const formatText = (template: string, values: Record<string, string | number>) =>
   template.replace(/\{(\w+)\}/g, (match, name: string) => (name in values ? String(values[name]) : match))
 
-const FORMS: [string, string, string] = ['one', 'few', 'many']
-
-export const pluralKey = (key: string, count: number) => `${key}.${plural(count, FORMS)}`
+export const pluralKey = (key: string, count: number, lang: Lang = DEFAULT_LANG) => `${key}.${pluralForm(count, lang)}`
 
 export const countText = (key: string, count: number, lang: Lang = DEFAULT_LANG) =>
-  `${count} ${getTranslation(pluralKey(key, count), lang)}`
+  `${count} ${getTranslation(pluralKey(key, count, lang), lang)}`
 
 export const useTranslation = () => {
   const { lang, setLang, toggleLang } = useLang()

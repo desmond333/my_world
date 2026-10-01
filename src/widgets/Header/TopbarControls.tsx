@@ -9,7 +9,7 @@ import './TopbarControls.css'
 
 export const TopbarControls = () => {
   const location = useLocation()
-  const { lang, t } = useTranslation()
+  const { t } = useTranslation()
   const coins = useShopStore((state) => state.coins)
   const user = useAuthStore((state) => state.user)
   const openFriendsModal = useFriendsStore((state) => state.openModal)
@@ -20,12 +20,8 @@ export const TopbarControls = () => {
       <LangSwitcher />
       <ThemeSwitcher />
 
-      <Tooltip content={lang === 'en' ? 'Royal Shop & Treasury' : 'Магазин и казна'}>
-        <Link
-          to="/shop"
-          className={`shop-link-btn ${location.pathname === '/shop' ? 'is-active' : ''}`}
-          aria-label={lang === 'en' ? 'Shop' : 'Магазин'}
-        >
+      <Tooltip content={t('topbar.shopTitle')}>
+        <Link to="/shop" className={`shop-link-btn ${location.pathname === '/shop' ? 'is-active' : ''}`} aria-label={t('nav.shop')}>
           <Coins size={14} className="shop-link-icon" />
           <span className="shop-link-coins">{coins.toLocaleString()}</span>
         </Link>
@@ -66,15 +62,7 @@ export const TopbarControls = () => {
         </Link>
       </Tooltip>
 
-      <Tooltip
-        content={
-          user
-            ? `${user.role === 'admin' ? '👑 Admin: ' : '👤 '}${user.email}`
-            : lang === 'en'
-              ? 'Cloud Sync & Sign In'
-              : 'Вход и синхронизация'
-        }
-      >
+      <Tooltip content={user ? `${user.role === 'admin' ? '👑 Admin: ' : '👤 '}${user.email}` : t('topbar.authTitle')}>
         <Link
           to={user?.role === 'admin' ? '/admin' : '/auth'}
           className={`settings-link-btn ${location.pathname === '/auth' || location.pathname === '/admin' ? 'is-active' : ''}`}

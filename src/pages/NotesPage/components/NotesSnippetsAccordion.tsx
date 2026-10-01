@@ -31,25 +31,9 @@ export const NotesSnippetsAccordion = ({ kind, onInsert, isSimple = false }: Not
       <div className="notes-accordion-header">
         <div className="notes-accordion-title">
           <Sparkles size={14} className="notes-accordion-icon" />
-          <span>
-            {kind === 'dream'
-              ? lang === 'en'
-                ? 'Dream Builders & AI Prompts'
-                : 'Конструктор снов & ИИ-шаблоны'
-              : lang === 'en'
-                ? 'Quick Builders & Templates'
-                : 'Быстрые заготовки & шаблоны'}
-          </span>
+          <span>{kind === 'dream' ? t('notes.accordion.dreamTitle') : t('notes.accordion.notesTitle')}</span>
         </div>
-        <span className="notes-accordion-badge">
-          {kind === 'dream'
-            ? lang === 'en'
-              ? 'tap to write fast'
-              : 'в 1 клик для ленивых'
-            : lang === 'en'
-              ? 'instant insert'
-              : 'клик для вставки'}
-        </span>
+        <span className="notes-accordion-badge">{kind === 'dream' ? t('notes.accordion.dreamHint') : t('notes.accordion.notesHint')}</span>
       </div>
 
       <Accordion type="multiple" defaultValue={!isSimple ? ['short'] : []} className="notes-accordion-sections">
@@ -131,11 +115,11 @@ export const NotesSnippetsAccordion = ({ kind, onInsert, isSimple = false }: Not
                           >
                             {isJustInserted ? (
                               <>
-                                <Check size={13} /> {lang === 'en' ? 'Inserted!' : 'Вставлено!'}
+                                <Check size={13} /> {t('notes.accordion.inserted')}
                               </>
                             ) : (
                               <>
-                                <Sparkles size={13} /> {lang === 'en' ? 'Insert template' : 'Вставить шаблон'}
+                                <Sparkles size={13} /> {t('notes.accordion.insert')}
                               </>
                             )}
                           </button>

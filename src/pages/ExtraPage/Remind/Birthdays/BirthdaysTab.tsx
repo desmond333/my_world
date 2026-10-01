@@ -41,8 +41,6 @@ export const BirthdaysTab = () => {
     setFormError('')
   }
 
-  const isEn = lang === 'en'
-
   return (
     <div className={`birthdays-panel ${isSimple ? 'is-simple' : ''}`}>
       <div className="birthdays-head">
@@ -61,13 +59,11 @@ export const BirthdaysTab = () => {
         <div className="birthdays-account-notice-left">
           <Cake size={18} />
           <span>
-            {isEn
-              ? 'Your personal birthday is now configured directly in your Account.'
-              : 'Твой личный день рождения настраивается в твоём Аккаунте.'}
+            {t('birthday.your-personal-birthday-is-now-configured-directl', 'Твой личный день рождения настраивается в твоём Аккаунте.')}
           </span>
         </div>
         <Link to="/auth" className="birthdays-account-link">
-          {isEn ? 'Open Account' : 'Перейти в Аккаунт'}
+          {t('birthday.open-account', 'Перейти в Аккаунт')}
         </Link>
       </div>
 

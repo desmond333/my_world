@@ -653,7 +653,7 @@ export const ProductivityList = ({ kind, empty, fieldLabel, placeholder }: Produ
   const dateChips: { label: string; value: string }[] = [
     { label: t('common.today'), value: today },
     { label: t('common.tomorrow'), value: shiftDate(today, 1) },
-    { label: t('productivity.date.afterTomorrow', 'послезавтра'), value: shiftDate(today, 2) },
+    { label: t('productivity.date.afterTomorrow'), value: shiftDate(today, 2) },
     { label: t('productivity.date.plusWeek'), value: shiftDate(today, 7) },
   ]
 

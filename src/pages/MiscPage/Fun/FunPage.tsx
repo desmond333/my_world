@@ -140,7 +140,6 @@ export const FunPage = () => {
 
   if (!isUnlocked) {
     const canAfford = userCoins >= 250
-    const isEn = t('fun.title') === 'Fun' || t('fun.statham.title').includes('Jason')
 
     return (
       <div className="fun-page fun-locked-page">
@@ -149,20 +148,21 @@ export const FunPage = () => {
             <Lock size={32} />
           </div>
 
-          <h2>{isEn ? 'Jason Statham: Memes & Quotes' : 'Джейсон Стэйтем: Мемы и Цитаты'}</h2>
+          <h2>{t('fun.jason-statham-memes-quotes', 'Джейсон Стэйтем: Мемы и Цитаты')}</h2>
           <p className="lottery-locked-intro">
-            {isEn
-              ? '“He who takes no risks drinks no champagne. And he who unlocks this section for 250 coins is a true wolf.” — Statham.'
-              : '«Кто не рискует — тот не пьёт шампанское. А кто открывает раздел за 250 монет — тот истинный волк.» — Стэйтем.'}
+            {t(
+              'fun.he-who-takes-no-risks-drinks-no-champagne-and-he',
+              '«Кто не рискует — тот не пьёт шампанское. А кто открывает раздел за 250 монет — тот истинный волк.» — Стэйтем.',
+            )}
           </p>
 
           <div className="lottery-locked-pricing">
             <div className="locked-balance-pill">
-              <span>{isEn ? 'Your Treasury:' : 'Твоя казна:'}</span>
+              <span>{t('fun.your-treasury', 'Твоя казна:')}</span>
               <strong>🪙 {userCoins}</strong>
             </div>
             <div className="locked-cost-pill">
-              <span>{isEn ? 'Unlock Price:' : 'Цена открытия:'}</span>
+              <span>{t('fun.unlock-price', 'Цена открытия:')}</span>
               <strong>250 🪙</strong>
             </div>
           </div>
@@ -171,19 +171,20 @@ export const FunPage = () => {
             {canAfford ? (
               <button type="button" className="lottery-unlock-btn" onClick={() => buyPart('statham')}>
                 <Sparkles size={16} />
-                <span>{isEn ? 'Unlock for 250 Coins 🪙' : 'Разблокировать за 250 🪙'}</span>
+                <span>{t('fun.unlock-for-250-coins', 'Разблокировать за 250 🪙')}</span>
               </button>
             ) : (
               <p className="lottery-no-coins">
-                {isEn
-                  ? 'Not enough coins. Complete tasks or earn them in the shop!'
-                  : 'Недостаточно коинов. Выполняй задачи или пополни казну в Магазине!'}
+                {t(
+                  'fun.not-enough-coins-complete-tasks-or-earn-them-in-',
+                  'Недостаточно коинов. Выполняй задачи или пополни казну в Магазине!',
+                )}
               </p>
             )}
 
             <Link to="/shop" className="lottery-shop-link">
               <Coins size={15} />
-              <span>{isEn ? 'Go to Royal Shop' : 'В Королевский магазин'}</span>
+              <span>{t('fun.go-to-royal-shop', 'В Королевский магазин')}</span>
             </Link>
           </div>
         </div>

@@ -74,7 +74,7 @@ const INITIAL_ARMY: ArmyRoster = {
 }
 
 export const LotteryBattleTab = () => {
-  const { lang } = useTranslation()
+  const { lang, t } = useTranslation()
   const { isSimple } = usePageViewMode('lottery')
 
   const credit = useShopStore((state) => state.credit)
@@ -100,28 +100,28 @@ export const LotteryBattleTab = () => {
 
   const balanceStatus = useMemo(() => {
     if (greenPower === 0 && purplePower === 0) {
-      return isEn ? 'No armies recruited ⚔️' : 'Армии не набраны ⚔️'
+      return t('lotteryBattle.no-armies-recruited', 'Армии не набраны ⚔️')
     }
     if (greenRatio >= 0.48 && greenRatio <= 0.52) {
-      return isEn ? 'Forces are perfectly balanced ⚖️' : 'Силы абсолютно равны ⚖️'
+      return t('lotteryBattle.forces-are-perfectly-balanced', 'Силы абсолютно равны ⚖️')
     }
     if (greenRatio > 0.52 && greenRatio <= 0.62) {
-      return isEn ? 'Slight edge for Green Kingdom 🟢' : 'Лёгкий перевес Зелёных 🟢'
+      return t('lotteryBattle.slight-edge-for-green-kingdom', 'Лёгкий перевес Зелёных 🟢')
     }
     if (greenRatio > 0.62 && greenRatio <= 0.74) {
-      return isEn ? 'Clear advantage for Emerald Order 🛡️' : 'Ощутимое преимущество Зелёных 🛡️'
+      return t('lotteryBattle.clear-advantage-for-emerald-order', 'Ощутимое преимущество Зелёных 🛡️')
     }
     if (greenRatio > 0.74) {
-      return isEn ? 'Overwhelming Emerald Dragon might 🐉' : 'Подавляющая мощь Зелёного Королевства 🐉'
+      return t('lotteryBattle.overwhelming-emerald-dragon-might', 'Подавляющая мощь Зелёного Королевства 🐉')
     }
     if (greenRatio >= 0.38 && greenRatio < 0.48) {
-      return isEn ? 'Slight edge for Purple Empire 🟣' : 'Лёгкий перевес Фиолетовых 🟣'
+      return t('lotteryBattle.slight-edge-for-purple-empire', 'Лёгкий перевес Фиолетовых 🟣')
     }
     if (greenRatio >= 0.26 && greenRatio < 0.38) {
-      return isEn ? 'Clear advantage for Amethyst Legion ⚔️' : 'Ощутимое преимущество Фиолетовых ⚔️'
+      return t('lotteryBattle.clear-advantage-for-amethyst-legion', 'Ощутимое преимущество Фиолетовых ⚔️')
     }
-    return isEn ? 'Overwhelming Amethyst Imperial might 👑' : 'Подавляющая мощь Фиолетовой Империи 👑'
-  }, [greenPower, purplePower, greenRatio, isEn])
+    return t('lotteryBattle.overwhelming-amethyst-imperial-might', 'Подавляющая мощь Фиолетовой Империи 👑')
+  }, [greenPower, purplePower, greenRatio, t])
 
   const modifyTroop = (side: 'green' | 'purple', troop: TroopId, delta: number) => {
     const setter = side === 'green' ? setGreenArmy : setPurpleArmy
@@ -201,12 +201,14 @@ export const LotteryBattleTab = () => {
 
       const story =
         winner === 'green'
-          ? isEn
-            ? 'The Emerald Dragon banners surged forward! With precise archer volleys and unbreakable shields, the Green Kingdom shattered the imperial lines and claimed the battlefield!'
-            : 'Изумрудные драконы ринулись вперёд! Слаженная стрельба лучников и несокрушимые щиты Зелёного Королевства сломили ряды противника и принесли славную победу!'
-          : isEn
-            ? 'The Amethyst Raven Legion struck with ruthless fury! Heavy cavalry smashed the flanks while arcane shockwaves dispersed the defenders into retreat!'
-            : 'Легион Аметистового Ворона нанёс сокрушительный удар! Тяжёлая кавалерия смяла фланги, а разрушительные чары обратили оборону в бегство!'
+          ? t(
+              'lotteryBattle.the-emerald-dragon-banners-surged-forward-with-p',
+              'Изумрудные драконы ринулись вперёд! Слаженная стрельба лучников и несокрушимые щиты Зелёного Королевства сломили ряды противника и принесли славную победу!',
+            )
+          : t(
+              'lotteryBattle.the-amethyst-raven-legion-struck-with-ruthless-f',
+              'Легион Аметистового Ворона нанёс сокрушительный удар! Тяжёлая кавалерия смяла фланги, а разрушительные чары обратили оборону в бегство!',
+            )
 
       setLastResult({
         winner,
@@ -233,30 +235,22 @@ export const LotteryBattleTab = () => {
               <Trophy size={18} />
               <span>
                 {lastResult.winner === 'green'
-                  ? isEn
-                    ? 'VICTORY FOR GREEN KINGDOM! 🟢'
-                    : 'ПОБЕДА ЗЕЛЁНОГО КОРОЛЕВСТВА! 🟢'
-                  : isEn
-                    ? 'VICTORY FOR PURPLE EMPIRE! 🟣'
-                    : 'ПОБЕДА ФИОЛЕТОВОЙ ИМПЕРИИ! 🟣'}
+                  ? t('lotteryBattle.victory-for-green-kingdom', 'ПОБЕДА ЗЕЛЁНОГО КОРОЛЕВСТВА! 🟢')
+                  : t('lotteryBattle.victory-for-purple-empire', 'ПОБЕДА ФИОЛЕТОВОЙ ИМПЕРИИ! 🟣')}
               </span>
             </div>
 
             <h2 className="battle-result-title">
               {lastResult.winner === 'green'
-                ? isEn
-                  ? 'Emerald Dragon Triumphs!'
-                  : 'Триумф Изумрудного Дракона!'
-                : isEn
-                  ? 'Amethyst Raven Conquers!'
-                  : 'Триумф Аметистового Ворона!'}
+                ? t('lotteryBattle.emerald-dragon-triumphs', 'Триумф Изумрудного Дракона!')
+                : t('lotteryBattle.amethyst-raven-conquers', 'Триумф Аметистового Ворона!')}
             </h2>
 
             <p className="battle-result-story">{lastResult.story}</p>
 
             <div className="battle-reward-chip">
               <Coins size={16} />
-              <span>{isEn ? `War Plunder: +${lastResult.reward} Coins!` : `Военные трофеи: +${lastResult.reward} 🪙`}</span>
+              <span>{t('lotteryBattle.warPlunder', undefined, { reward: lastResult.reward })}</span>
             </div>
 
             <div className="battle-score-row">
@@ -266,7 +260,7 @@ export const LotteryBattleTab = () => {
             </div>
 
             <button type="button" className="battle-next-btn" onClick={() => setLastResult(null)}>
-              {isEn ? 'Back to Battlements' : 'Вернуться к армиям'}
+              {t('lotteryBattle.back-to-battlements', 'Вернуться к армиям')}
             </button>
           </div>
         </div>
@@ -274,35 +268,35 @@ export const LotteryBattleTab = () => {
 
       <section className="battle-presets-bar">
         <span className="presets-label">
-          <Zap size={14} /> {isEn ? 'Quick presets:' : 'Шаблоны армий:'}
+          <Zap size={14} /> {t('lotteryBattle.quick-presets', 'Шаблоны армий:')}
         </span>
         <div className="presets-btns">
           <button type="button" className="preset-btn" onClick={() => applyPreset('duel')}>
-            🛡️ {isEn ? 'Duel' : 'Дуэль'}
+            🛡️ {t('lotteryBattle.duel')}
           </button>
           <button type="button" className="preset-btn" onClick={() => applyPreset('ambush')}>
-            🏹 {isEn ? 'Ambush' : 'Засада'}
+            🏹 {t('lotteryBattle.ambush')}
           </button>
           <button type="button" className="preset-btn" onClick={() => applyPreset('siege')}>
-            🏰 {isEn ? 'Siege' : 'Осада'}
+            🏰 {t('lotteryBattle.siege')}
           </button>
           <button type="button" className="preset-btn" onClick={() => applyPreset('kings')}>
-            👑 {isEn ? 'Kings Clash' : 'Короли'}
+            👑 {t('lotteryBattle.kings-clash', 'Короли')}
           </button>
           <button type="button" className="preset-btn" onClick={() => applyPreset('random')}>
-            <Shuffle size={12} /> {isEn ? 'Random' : 'Случайно'}
+            <Shuffle size={12} /> {t('lotteryBattle.random')}
           </button>
           <button type="button" className="preset-btn btn-reset" onClick={() => applyPreset('reset')}>
-            <RotateCcw size={12} /> {isEn ? 'Clear' : 'Очистить'}
+            <RotateCcw size={12} /> {t('lotteryBattle.clear')}
           </button>
         </div>
       </section>
 
       <section className="balance-tug-section">
         <div className="balance-status-header">
-          <span className="balance-side-badge green-badge">🟢 {isEn ? 'Emerald Dragon' : 'Изумрудный Дракон'}</span>
+          <span className="balance-side-badge green-badge">🟢 {t('lotteryBattle.emerald-dragon', 'Изумрудный Дракон')}</span>
           <div className="balance-indicator-text">{balanceStatus}</div>
-          <span className="balance-side-badge purple-badge">{isEn ? 'Amethyst Raven' : 'Аметистовый Ворон'} 🟣</span>
+          <span className="balance-side-badge purple-badge">{t('lotteryBattle.amethyst-raven', 'Аметистовый Ворон')} 🟣</span>
         </div>
 
         <div className="tug-of-war-track">
@@ -317,8 +311,8 @@ export const LotteryBattleTab = () => {
           <div className="army-card-header">
             <div className="army-crest">🟢</div>
             <div>
-              <h3 className="army-name">{isEn ? 'Green Kingdom' : 'Зелёное Королевство'}</h3>
-              <span className="army-motto">{isEn ? 'Emerald Order of the Dragon' : 'Орден Изумрудного Дракона'}</span>
+              <h3 className="army-name">{t('lotteryBattle.green-kingdom', 'Зелёное Королевство')}</h3>
+              <span className="army-motto">{t('lotteryBattle.emerald-order-of-the-dragon', 'Орден Изумрудного Дракона')}</span>
             </div>
           </div>
 
@@ -362,12 +356,14 @@ export const LotteryBattleTab = () => {
           >
             <Swords size={22} className="clash-swords-icon" />
             <span>
-              {isFighting ? (isEn ? 'Clashing in Battle! ⚡' : 'Сражение идёт! ⚡') : isEn ? 'Begin Battle! ⚔️' : 'Начать битву! ⚔️'}
+              {isFighting
+                ? t('lotteryBattle.clashing-in-battle', 'Сражение идёт! ⚡')
+                : t('lotteryBattle.begin-battle', 'Начать битву! ⚔️')}
             </span>
           </button>
 
           <div className="battle-score-pill">
-            <span>{isEn ? 'Victories:' : 'Победы:'}</span>
+            <span>{t('lotteryBattle.victories')}</span>
             <strong className="score-badge green-badge">{wins.green}</strong>
             <span>:</span>
             <strong className="score-badge purple-badge">{wins.purple}</strong>
@@ -378,8 +374,8 @@ export const LotteryBattleTab = () => {
           <div className="army-card-header">
             <div className="army-crest">🟣</div>
             <div>
-              <h3 className="army-name">{isEn ? 'Purple Empire' : 'Фиолетовая Империя'}</h3>
-              <span className="army-motto">{isEn ? 'Amethyst Raven Legion' : 'Легион Аметистового Ворона'}</span>
+              <h3 className="army-name">{t('lotteryBattle.purple-empire', 'Фиолетовая Империя')}</h3>
+              <span className="army-motto">{t('lotteryBattle.amethyst-raven-legion', 'Легион Аметистового Ворона')}</span>
             </div>
           </div>
 

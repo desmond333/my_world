@@ -513,11 +513,11 @@ export const FriendsModal = () => {
                       style={{ fontSize: '0.85rem' }}
                       onClick={() => setAssigningToFriend(null)}
                     >
-                      {t('common.cancel', 'Отмена')}
+                      {t('common.cancel')}
                     </button>
                     <button type="submit" className="add-button" disabled={isSubmittingTask || !taskTitle.trim()}>
                       <Send size={13} />
-                      <span>{t('common.send', 'Отправить')}</span>
+                      <span>{t('common.send')}</span>
                     </button>
                   </div>
                 </form>

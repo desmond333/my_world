@@ -2,6 +2,8 @@ import type { Dictionary } from './types'
 
 export const cat: Dictionary = {
   ru: {
+    'cat.brief.pending': '{count} в процессе',
+    'cat.searchPlaceholder': 'Поиск по разделам...',
     'cat.aria': 'Котик-помощник',
     'cat.open': 'Открыть меню котика',
     'cat.close': 'Закрыть меню котика',
@@ -45,6 +47,8 @@ export const cat: Dictionary = {
     'cat.action.relaxStop': 'Завершить релакс',
   },
   en: {
+    'cat.brief.pending': '{count} pending',
+    'cat.searchPlaceholder': 'Search sections...',
     'cat.aria': 'Cat helper',
     'cat.open': 'Open cat menu',
     'cat.close': 'Close cat menu',

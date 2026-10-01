@@ -282,7 +282,7 @@ export const CatPremiumPanel = ({ targets, activePath, currentMode, onToggleMode
                 <strong>{t('cat.brief.tasksLeft')}</strong>
                 <p>
                   {pendingTasksCount > 0 ? (
-                    `${pendingTasksCount} ${lang === 'en' ? 'pending' : 'в процессе'}`
+                    t('cat.brief.pending', undefined, { count: pendingTasksCount })
                   ) : (
                     <span className="cat-done-pill">{t('cat.brief.noTasks')}</span>
                   )}
@@ -335,7 +335,7 @@ export const CatPremiumPanel = ({ targets, activePath, currentMode, onToggleMode
               <input
                 type="text"
                 className="cat-search-input"
-                placeholder={lang === 'en' ? 'Search sections...' : 'Поиск по разделам...'}
+                placeholder={t('cat.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />

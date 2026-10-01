@@ -1,6 +1,13 @@
 import type { KindCounts, MonthPoints, ProductivityItem, ProductivityKind, RepeatInterval } from '../../data'
 import { formatShortDate, sortByNewestKey } from '../date'
-import { plural } from '../plural'
+import { getTranslation } from '../i18n'
+import { withCount } from '../plural'
+
+const dayForms = (lang: 'ru' | 'en'): [string, string, string] => [
+  getTranslation('productivity.dayForm.one', lang),
+  getTranslation('productivity.dayForm.few', lang),
+  getTranslation('productivity.dayForm.many', lang),
+]
 
 export const POINTS: Record<ProductivityKind, number> = { task: 10, goal: 100, dream: 1000 }
 
@@ -60,14 +67,18 @@ export type KanbanColumn = { key: 'today' | 'scheduled' | 'undated'; label: stri
 
 export const kanbanGroups = (items: ProductivityItem[], today: string, lang: 'ru' | 'en' = 'ru'): KanbanColumn[] => {
   const open = orderItems(items.filter((item) => !item.done))
-  const labels =
-    lang === 'en'
-      ? { today: 'Today', scheduled: 'Scheduled', undated: 'No date' }
-      : { today: 'Сегодня', scheduled: 'Запланировано', undated: 'Без даты' }
   return [
-    { key: 'today', label: labels.today, items: open.filter((item) => item.date === today) },
-    { key: 'scheduled', label: labels.scheduled, items: open.filter((item) => item.date && item.date !== today) },
-    { key: 'undated', label: labels.undated, items: open.filter((item) => !item.date) },
+    {
+      key: 'today',
+      label: getTranslation('productivity.kanban.today', lang),
+      items: open.filter((item) => item.date === today),
+    },
+    {
+      key: 'scheduled',
+      label: getTranslation('productivity.kanban.scheduled', lang),
+      items: open.filter((item) => item.date && item.date !== today),
+    },
+    { key: 'undated', label: getTranslation('productivity.kanban.undated', lang), items: open.filter((item) => !item.date) },
   ]
 }
 
@@ -85,25 +96,21 @@ export const dayLabel = (key: string, today: string, lang: 'ru' | 'en' = 'ru') =
   if (!key) return ''
   const gap = Math.round((new Date(`${key}T12:00:00Z`).getTime() - new Date(`${today}T12:00:00Z`).getTime()) / 86400000)
   const locale = lang === 'en' ? 'en-US' : 'ru-RU'
-  if (lang === 'en') {
-    if (gap === 0) return 'today'
-    if (gap === 1) return 'tomorrow'
-    if (gap === -1) return 'yesterday'
-    if (gap < 0 && gap > -30) return `${-gap} days ago`
-    return formatShortDate(key, locale)
-  }
-  if (gap === 0) return 'сегодня'
-  if (gap === 1) return 'завтра'
-  if (gap === -1) return 'вчера'
+  if (gap === 0) return getTranslation('productivity.dayLabel.today', lang)
+  if (gap === 1) return getTranslation('productivity.dayLabel.tomorrow', lang)
+  if (gap === -1) return getTranslation('productivity.dayLabel.yesterday', lang)
   const overdue = -gap
-  if (overdue > 0 && overdue < 30) return `${overdue} ${plural(overdue, DAY_FORMS)} назад`
+  if (overdue > 0 && overdue < 30) {
+    const count = withCount(overdue, dayForms(lang), lang)
+    return getTranslation('productivity.dayLabel.daysAgo', lang, undefined, { count })
+  }
   return formatShortDate(key, locale)
 }
 
 export const UNTITLED_DAY = 'Без даты'
 export const UNTITLED_DAY_EN = 'No date'
 
-export const undatedLabel = (lang: 'ru' | 'en' = 'ru') => (lang === 'en' ? UNTITLED_DAY_EN : UNTITLED_DAY)
+export const undatedLabel = (lang: 'ru' | 'en' = 'ru') => getTranslation('productivity.kanban.undated', lang)
 
 export type DayGroup = {
   key: string
@@ -147,20 +154,8 @@ export const REPEAT_OPTIONS: RepeatOption[] = [
 
 export const getRepeatLabel = (repeat?: RepeatInterval, lang: 'ru' | 'en' = 'ru'): string => {
   if (!repeat || repeat === 'none') return ''
-  if (lang === 'en') {
-    switch (repeat) {
-      case 'daily':
-        return 'every day'
-      case 'weekdays':
-        return 'weekdays'
-      case 'weekly':
-        return 'every week'
-      case 'monthly':
-        return 'every month'
-    }
-  }
   const found = REPEAT_OPTIONS.find((option) => option.id === repeat)
-  return found?.short ?? ''
+  return getTranslation(`productivity.repeatShort.${repeat}`, lang, found?.short ?? '')
 }
 
 export const computeNextRepeatDate = (baseDate: string, repeat: RepeatInterval, referenceToday: string): string => {
