@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter } from 'react-router-dom'
-import { useAnimalsStore, useAuthStore, useDailyStore } from '../store'
+import { useAnimalsStore, useAuthStore, useDailyStore, useFriendsStore } from '../store'
 import { LangProvider } from '../lib/i18n'
 import { NewUserHint, FriendsModal } from '../features'
 import { CatAssistant } from '../widgets'
@@ -18,10 +18,15 @@ const AnimalsLoader = () => {
 
 const AuthLoader = () => {
   const checkAuth = useAuthStore((state) => state.checkAuth)
+  const fetchReferral = useAuthStore((state) => state.fetchReferral)
   useEffect(() => {
     initOfflineSync()
-    void checkAuth()
-  }, [checkAuth])
+    void checkAuth().then((ok) => {
+      if (!ok) return
+      void useFriendsStore.getState().fetchFriends()
+      void fetchReferral()
+    })
+  }, [checkAuth, fetchReferral])
   return null
 }
 

@@ -4,6 +4,7 @@ import { useTranslation } from '../../lib/i18n'
 import { useAuthStore, useFriendsStore, useShopStore } from '../../store'
 import { LangSwitcher } from '../../features/lang-switcher'
 import { ThemeSwitcher } from '../../features/theme-switcher'
+import { NotificationsBell } from '../../features/notifications'
 import { Tooltip } from '../../shared/ui'
 import './TopbarControls.css'
 
@@ -26,6 +27,8 @@ export const TopbarControls = () => {
           <span className="shop-link-coins">{coins.toLocaleString()}</span>
         </Link>
       </Tooltip>
+
+      <NotificationsBell />
 
       <Tooltip content={t('friends.title')}>
         <button

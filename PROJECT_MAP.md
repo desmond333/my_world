@@ -71,22 +71,17 @@ TAU/
     │   ├── birthdays/         # Создание и редактирование дней рождения (BirthdayModal)
     │   ├── friends/           # Управление друзьями и заявками (FriendsModal)
     │   ├── lang-switcher/     # Переключатель языка (LangSwitcher)
+    │   ├── notifications/     # Центр уведомлений: колокольчик, список, детали (NotificationsBell)
     │   ├── onboarding/        # Подсказка нового пользователя (NewUserHint)
     │   └── theme-switcher/    # Переключатель темы оформления (ThemeSwitcher)
     ├── entities/              # Бизнес-сущности (model, api, ui)
-    │   ├── task/              # Задачи, цели, привычки, начисление баллов
-    │   ├── animal/            # Животные, избранное, Wikipedia API
-    │   ├── finance/           # Доходы, расходы, курсы валют
-    │   ├── friend/            # Профиль друга, заявки в друзья
-    │   ├── note/              # Заметки, сны, IndexedDB
-    │   ├── subscription/      # Регулярные подписки и расчёт затрат
-    │   └── user/              # Профиль пользователя, авторизация, токен
+    │   └── note/              # Заметки, сны, IndexedDB
     ├── shared/                # Базовый фундамент без бизнес-логики
     │   └── ui/                # Headless и презентационные компоненты (Radix UI, SVG Charts)
     ├── data/                  # Статические данные, константы, города, пресеты
     ├── lib/                   # Чистая бизнес-логика, утилиты, форматирование, i18n
     ├── services/              # Внешние API и фоновая синхронизация
-    ├── store/                 # Zustand-хранилища (сохранена обратная совместимость; availability/ — окна доступности)
+    ├── store/                 # Zustand-хранилища (auth/shop/productivity/friends/finance/lottery/…; notifications/ — центр уведомлений, premium/ — статус премиума)
     └── hooks/                 # Кастомные React-хуки
 ```
 

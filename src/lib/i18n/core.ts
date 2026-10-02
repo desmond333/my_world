@@ -24,6 +24,7 @@ import { notesHelp } from './notesHelp'
 import { lotteryBattle } from './lotteryBattle'
 import { lottery } from './lottery'
 import { season } from './season'
+import { notifications } from './notifications'
 import { premium } from './premium'
 import { pluralForm } from '../plural'
 
@@ -50,6 +51,7 @@ const DICTIONARIES: Dictionary[] = [
   lotteryBattle,
   lottery,
   season,
+  notifications,
 ]
 
 const merge = (lang: Lang): Translations => Object.assign({}, ...DICTIONARIES.map((item) => item[lang] ?? {}))

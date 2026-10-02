@@ -21,6 +21,7 @@ export const STORAGE_KEYS = {
   georgianFavorites: 'georgian-favorite-phrases',
   notesTreeExpanded: 'animal-notes-tree-expanded',
   onboardingHint: 'tau_onboarding_hint_seen',
+  notificationsSeen: 'tau-notifications-seen',
 } as const
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS]
