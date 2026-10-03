@@ -56,8 +56,8 @@ export const HelpPage = () => {
   const sections = useMemo(() => getHelpContent(lang), [lang])
 
   const [query, setQuery] = useState('')
-  const [activeId, setActiveId] = useState<HelpSectionKey>(sections[0]?.id ?? 'start')
-  const [openIds, setOpenIds] = useState<HelpSectionKey[]>(() => (sections[0] ? [sections[0].id] : []))
+  const [activeId, setActiveId] = useState<HelpSectionKey | null>(null)
+  const [openId, setOpenId] = useState<HelpSectionKey | ''>('')
 
   const normalized = query.trim().toLowerCase()
 
@@ -85,9 +85,7 @@ export const HelpPage = () => {
   const matchesCount = normalized ? shownSections.reduce((sum, section) => sum + section.subsections.length, 0) : sections.length
 
   const highlightedId: HelpSectionKey | null =
-    activeId && shownSections.some((section) => section.id === activeId) ? activeId : (shownSections[0]?.id ?? null)
-
-  const accordionValue = normalized ? shownSections.map((section) => section.id) : openIds
+    openId || (activeId && shownSections.some((section) => section.id === activeId) ? activeId : (shownSections[0]?.id ?? null))
 
   useEffect(() => {
     const elements = shownSections
@@ -121,16 +119,45 @@ export const HelpPage = () => {
     }
   }, [shownSections])
 
-  const scrollTo = (id: HelpSectionKey) => {
-    const el = document.querySelector<HTMLElement>(`[data-section="${id}"]`)
-    if (!el) return
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    setActiveId(id)
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.replace(/^#/, '') as HelpSectionKey
+      if (hash && sections.some((s) => s.id === hash)) {
+        setOpenId(hash)
+        setActiveId(hash)
+      }
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [sections])
+
+  const scrollToSection = (id: HelpSectionKey) => {
+    const el = document.getElementById(id) ?? document.querySelector<HTMLElement>(`[data-section="${id}"]`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
-  const handleAccordionChange = (value: string[]) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: HelpSectionKey) => {
+    e.preventDefault()
+    if (query) setQuery('')
+    setOpenId(id)
+    setActiveId(id)
+    window.history.replaceState(null, '', `#${id}`)
+    requestAnimationFrame(() => scrollToSection(id))
+    setTimeout(() => scrollToSection(id), 120)
+  }
+
+  const handleAccordionChange = (value: string) => {
     if (normalized) return
-    setOpenIds(value as HelpSectionKey[])
+    const next = (value || '') as HelpSectionKey | ''
+    setOpenId(next)
+    if (next) {
+      setActiveId(next)
+      window.history.replaceState(null, '', `#${next}`)
+    } else {
+      window.history.replaceState(null, '', window.location.pathname)
+    }
   }
 
   const renderBlock = (block: HelpBlock, key: string) => {
@@ -186,6 +213,32 @@ export const HelpPage = () => {
     )
   }
 
+  const renderSectionItem = (section: HelpSection) => {
+    const Icon = ICONS[section.icon] ?? HelpCircle
+
+    return (
+      <AccordionItem key={section.id} value={section.id} className="help-section" data-section={section.id} id={section.id}>
+        <AccordionTrigger className="help-section-head">
+          <span className="help-section-icon">
+            <Icon size={18} />
+          </span>
+          <span className="help-section-title">{section.title}</span>
+        </AccordionTrigger>
+
+        <AccordionContent className="help-section-body">
+          <p className="help-intro">{section.intro}</p>
+
+          {section.subsections.map((subsection) => (
+            <article key={subsection.id} className="help-subsection">
+              <h3>{subsection.title}</h3>
+              {subsection.blocks.map((block, index) => renderBlock(block, `${subsection.id}-${index}`))}
+            </article>
+          ))}
+        </AccordionContent>
+      </AccordionItem>
+    )
+  }
+
   return (
     <main className="page-shell">
       <AppTopbar />
@@ -202,15 +255,15 @@ export const HelpPage = () => {
               {shownSections.map((section) => {
                 const Icon = ICONS[section.icon] ?? HelpCircle
                 return (
-                  <button
+                  <a
                     key={section.id}
-                    type="button"
+                    href={`#${section.id}`}
                     className={`help-side-link${highlightedId === section.id ? ' is-active' : ''}`}
-                    onClick={() => scrollTo(section.id)}
+                    onClick={(e) => handleNavClick(e, section.id)}
                   >
                     <Icon size={15} />
                     <span>{section.title}</span>
-                  </button>
+                  </a>
                 )
               })}
             </nav>
@@ -257,39 +310,13 @@ export const HelpPage = () => {
                 <p>{t('help.search.empty')}</p>
                 <span>{t('help.search.hint')}</span>
               </div>
+            ) : normalized ? (
+              <Accordion type="multiple" value={shownSections.map((s) => s.id)} className="help-body">
+                {shownSections.map(renderSectionItem)}
+              </Accordion>
             ) : (
-              <Accordion type="multiple" value={accordionValue} onValueChange={handleAccordionChange} className="help-body">
-                {shownSections.map((section) => {
-                  const Icon = ICONS[section.icon] ?? HelpCircle
-
-                  return (
-                    <AccordionItem
-                      key={section.id}
-                      value={section.id}
-                      className="help-section"
-                      data-section={section.id}
-                      id={`help-${section.id}`}
-                    >
-                      <AccordionTrigger className="help-section-head">
-                        <span className="help-section-icon">
-                          <Icon size={18} />
-                        </span>
-                        <span className="help-section-title">{section.title}</span>
-                      </AccordionTrigger>
-
-                      <AccordionContent className="help-section-body">
-                        <p className="help-intro">{section.intro}</p>
-
-                        {section.subsections.map((subsection) => (
-                          <article key={subsection.id} className="help-subsection">
-                            <h3>{subsection.title}</h3>
-                            {subsection.blocks.map((block, index) => renderBlock(block, `${subsection.id}-${index}`))}
-                          </article>
-                        ))}
-                      </AccordionContent>
-                    </AccordionItem>
-                  )
-                })}
+              <Accordion type="single" collapsible value={openId} onValueChange={handleAccordionChange} className="help-body">
+                {shownSections.map(renderSectionItem)}
               </Accordion>
             )}
           </div>

@@ -20,6 +20,61 @@ const getAudioCtx = (): AudioContext | null => {
   }
 }
 
+const createNoiseBuffer = (ctx: AudioContext, seconds: number, pink: boolean) => {
+  const size = Math.floor(ctx.sampleRate * seconds)
+  const buffer = ctx.createBuffer(1, size, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  if (pink) {
+    let b0 = 0
+    let b1 = 0
+    let b2 = 0
+    for (let i = 0; i < size; i += 1) {
+      const white = Math.random() * 2 - 1
+      b0 = 0.99 * b0 + white * 0.05
+      b1 = 0.96 * b1 + white * 0.11
+      b2 = 0.86 * b2 + white * 0.25
+      data[i] = (b0 + b1 + b2) * 0.22
+    }
+  } else {
+    for (let i = 0; i < size; i += 1) {
+      data[i] = Math.random() * 2 - 1
+    }
+  }
+  return buffer
+}
+
+const createCrackleBuffer = (ctx: AudioContext, seconds: number) => {
+  const size = Math.floor(ctx.sampleRate * seconds)
+  const buffer = ctx.createBuffer(1, size, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  let i = 0
+  while (i < size) {
+    if (Math.random() < 0.0016) {
+      const burst = Math.floor(ctx.sampleRate * 0.004)
+      const amp = 0.5 + Math.random() * 0.5
+      for (let j = 0; j < burst && i + j < size; j += 1) {
+        data[i + j] += (Math.random() * 2 - 1) * amp * (1 - j / burst)
+      }
+      i += burst + Math.floor(ctx.sampleRate * 0.05)
+    } else {
+      i += 1
+    }
+  }
+  return buffer
+}
+
+const fadeStop = (ctx: AudioContext, master: GainNode, stopNodes: () => void) => {
+  try {
+    const now = ctx.currentTime
+    master.gain.cancelScheduledValues(now)
+    master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), now)
+    master.gain.exponentialRampToValueAtTime(0.0001, now + 0.8)
+  } catch (e) {
+    void e
+  }
+  setTimeout(stopNodes, 900)
+}
+
 export const stopAmbientSound = () => {
   if (currentNodes) {
     try {
@@ -41,139 +96,142 @@ export const playAmbientSound = (track: AmbientTrack): boolean => {
   stopAmbientSound()
 
   try {
+    const master = ctx.createGain()
+    master.gain.setValueAtTime(0.0001, ctx.currentTime)
+    master.gain.exponentialRampToValueAtTime(0.9, ctx.currentTime + 1.4)
+    master.connect(ctx.destination)
+
+    const sources: AudioBufferSourceNode[] = []
+    const oscillators: OscillatorNode[] = []
+
+    const loopNoise = (buffer: AudioBuffer) => {
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      source.loop = true
+      source.start()
+      sources.push(source)
+      return source
+    }
+
     if (track === 'rain') {
-      const bufferSize = ctx.sampleRate * 2
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
-      const output = noiseBuffer.getChannelData(0)
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1
-      }
+      const body = loopNoise(createNoiseBuffer(ctx, 3, false))
+      const bodyFilter = ctx.createBiquadFilter()
+      bodyFilter.type = 'lowpass'
+      bodyFilter.frequency.setValueAtTime(1400, ctx.currentTime)
 
-      const whiteNoise = ctx.createBufferSource()
-      whiteNoise.buffer = noiseBuffer
-      whiteNoise.loop = true
+      const bodyGain = ctx.createGain()
+      bodyGain.gain.setValueAtTime(0.3, ctx.currentTime)
 
+      const hiss = loopNoise(createNoiseBuffer(ctx, 3, false))
+      const hissFilter = ctx.createBiquadFilter()
+      hissFilter.type = 'bandpass'
+      hissFilter.frequency.setValueAtTime(5200, ctx.currentTime)
+      hissFilter.Q.setValueAtTime(0.7, ctx.currentTime)
+      const hissGain = ctx.createGain()
+      hissGain.gain.setValueAtTime(0.05, ctx.currentTime)
+
+      const lfo = ctx.createOscillator()
+      lfo.frequency.setValueAtTime(0.08, ctx.currentTime)
+      const lfoGain = ctx.createGain()
+      lfoGain.gain.setValueAtTime(320, ctx.currentTime)
+      lfo.connect(lfoGain)
+      lfoGain.connect(bodyFilter.frequency)
+      lfo.start()
+      oscillators.push(lfo)
+
+      body.connect(bodyFilter)
+      bodyFilter.connect(bodyGain)
+      bodyGain.connect(master)
+      hiss.connect(hissFilter)
+      hissFilter.connect(hissGain)
+      hissGain.connect(master)
+    } else if (track === 'fire') {
+      const rumble = loopNoise(createNoiseBuffer(ctx, 3, true))
+      const rumbleFilter = ctx.createBiquadFilter()
+      rumbleFilter.type = 'bandpass'
+      rumbleFilter.frequency.setValueAtTime(420, ctx.currentTime)
+      rumbleFilter.Q.setValueAtTime(0.9, ctx.currentTime)
+      const rumbleGain = ctx.createGain()
+      rumbleGain.gain.setValueAtTime(0.42, ctx.currentTime)
+
+      const crackle = loopNoise(createCrackleBuffer(ctx, 4))
+      const crackleFilter = ctx.createBiquadFilter()
+      crackleFilter.type = 'highpass'
+      crackleFilter.frequency.setValueAtTime(1600, ctx.currentTime)
+      const crackleGain = ctx.createGain()
+      crackleGain.gain.setValueAtTime(0.5, ctx.currentTime)
+
+      const lfo = ctx.createOscillator()
+      lfo.frequency.setValueAtTime(0.18, ctx.currentTime)
+      const lfoGain = ctx.createGain()
+      lfoGain.gain.setValueAtTime(0.12, ctx.currentTime)
+      lfo.connect(lfoGain)
+      lfoGain.connect(rumbleGain.gain)
+      lfo.start()
+      oscillators.push(lfo)
+
+      rumble.connect(rumbleFilter)
+      rumbleFilter.connect(rumbleGain)
+      rumbleGain.connect(master)
+      crackle.connect(crackleFilter)
+      crackleFilter.connect(crackleGain)
+      crackleGain.connect(master)
+    } else {
       const filter = ctx.createBiquadFilter()
       filter.type = 'lowpass'
-      filter.frequency.setValueAtTime(800, ctx.currentTime)
+      filter.frequency.setValueAtTime(700, ctx.currentTime)
 
-      const gain = ctx.createGain()
-      gain.gain.setValueAtTime(0.001, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 1.2)
+      const chordGain = ctx.createGain()
+      chordGain.gain.setValueAtTime(0.16, ctx.currentTime)
+      filter.connect(chordGain)
+      chordGain.connect(master)
 
-      whiteNoise.connect(filter)
-      filter.connect(gain)
-      gain.connect(ctx.destination)
-      whiteNoise.start()
+      const freqs = [82.41, 110, 164.81]
+      const types: OscillatorType[] = ['sine', 'sine', 'triangle']
+      freqs.forEach((freq, index) => {
+        const osc = ctx.createOscillator()
+        osc.type = types[index]
+        osc.frequency.setValueAtTime(freq, ctx.currentTime)
+        osc.detune.setValueAtTime((index - 1) * 6, ctx.currentTime)
+        osc.connect(filter)
+        osc.start()
+        oscillators.push(osc)
+      })
 
-      currentNodes = {
-        stop: () => {
-          gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.8)
-          setTimeout(() => {
+      const swell = ctx.createOscillator()
+      swell.frequency.setValueAtTime(0.06, ctx.currentTime)
+      const swellGain = ctx.createGain()
+      swellGain.gain.setValueAtTime(0.05, ctx.currentTime)
+      swell.connect(swellGain)
+      swellGain.connect(chordGain.gain)
+      swell.start()
+      oscillators.push(swell)
+    }
+
+    currentNodes = {
+      stop: () =>
+        fadeStop(ctx, master, () => {
+          sources.forEach((source) => {
             try {
-              whiteNoise.stop()
-              whiteNoise.disconnect()
+              source.stop()
+              source.disconnect()
             } catch (e) {
               void e
             }
-          }, 850)
-        },
-      }
-      currentTrack = 'rain'
-      return true
-    }
-
-    if (track === 'fire') {
-      const bufferSize = ctx.sampleRate * 2
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
-      const output = noiseBuffer.getChannelData(0)
-      let b0 = 0,
-        b1 = 0,
-        b2 = 0
-      for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1
-        b0 = 0.99 * b0 + white * 0.05
-        b1 = 0.96 * b1 + white * 0.11
-        b2 = 0.86 * b2 + white * 0.25
-        output[i] = (b0 + b1 + b2) * 0.2
-      }
-
-      const pinkNoise = ctx.createBufferSource()
-      pinkNoise.buffer = noiseBuffer
-      pinkNoise.loop = true
-
-      const filter = ctx.createBiquadFilter()
-      filter.type = 'bandpass'
-      filter.frequency.setValueAtTime(450, ctx.currentTime)
-      filter.Q.setValueAtTime(1.5, ctx.currentTime)
-
-      const gain = ctx.createGain()
-      gain.gain.setValueAtTime(0.001, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 1.2)
-
-      pinkNoise.connect(filter)
-      filter.connect(gain)
-      gain.connect(ctx.destination)
-      pinkNoise.start()
-
-      currentNodes = {
-        stop: () => {
-          gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.8)
-          setTimeout(() => {
+          })
+          oscillators.forEach((osc) => {
             try {
-              pinkNoise.stop()
-              pinkNoise.disconnect()
+              osc.stop()
+              osc.disconnect()
             } catch (e) {
               void e
             }
-          }, 850)
-        },
-      }
-      currentTrack = 'fire'
-      return true
+          })
+          master.disconnect()
+        }),
     }
-
-    if (track === 'drone') {
-      const osc1 = ctx.createOscillator()
-      const osc2 = ctx.createOscillator()
-      const gain = ctx.createGain()
-
-      osc1.type = 'sine'
-      osc1.frequency.setValueAtTime(110, ctx.currentTime)
-
-      osc2.type = 'triangle'
-      osc2.frequency.setValueAtTime(164.81, ctx.currentTime)
-
-      gain.gain.setValueAtTime(0.001, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.09, ctx.currentTime + 1.5)
-
-      osc1.connect(gain)
-      osc2.connect(gain)
-      gain.connect(ctx.destination)
-
-      osc1.start()
-      osc2.start()
-
-      currentNodes = {
-        stop: () => {
-          gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.9)
-          setTimeout(() => {
-            try {
-              osc1.stop()
-              osc2.stop()
-              osc1.disconnect()
-              osc2.disconnect()
-            } catch (e) {
-              void e
-            }
-          }, 950)
-        },
-      }
-      currentTrack = 'drone'
-      return true
-    }
-
-    return false
+    currentTrack = track
+    return true
   } catch (err) {
     void err
     return false

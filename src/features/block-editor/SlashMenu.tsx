@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { SLASH_ITEMS } from './slashCommands'
 import type { BlockType, SlashItem } from './types'
+import { useTranslation } from '../../lib/i18n'
 
 export type SlashMenuProps = {
   query: string
@@ -10,6 +11,7 @@ export type SlashMenuProps = {
 }
 
 export const SlashMenu = ({ query, onSelect, onClose, position }: SlashMenuProps) => {
+  const { t } = useTranslation()
   const menuRef = useRef<HTMLDivElement>(null)
 
   const filtered = useMemo(() => {
@@ -17,11 +19,11 @@ export const SlashMenu = ({ query, onSelect, onClose, position }: SlashMenuProps
     if (!q) return SLASH_ITEMS
     return SLASH_ITEMS.filter(
       (item) =>
-        item.title.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q) ||
+        t(item.title).toLowerCase().includes(q) ||
+        t(item.description).toLowerCase().includes(q) ||
         item.keywords.some((k) => k.toLowerCase().includes(q)),
     )
-  }, [query])
+  }, [query, t])
 
   const [prevQuery, setPrevQuery] = useState(query)
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -98,8 +100,8 @@ export const SlashMenu = ({ query, onSelect, onClose, position }: SlashMenuProps
           <Icon size={16} />
         </span>
         <span className="slash-item-content">
-          <strong className="slash-item-title">{item.title}</strong>
-          <span className="slash-item-desc">{item.description}</span>
+          <strong className="slash-item-title">{t(item.title)}</strong>
+          <span className="slash-item-desc">{t(item.description)}</span>
         </span>
       </button>
     )
@@ -108,23 +110,23 @@ export const SlashMenu = ({ query, onSelect, onClose, position }: SlashMenuProps
   return (
     <div ref={menuRef} className="slash-menu" style={position ? { top: `${position.top}px`, left: `${position.left}px` } : undefined}>
       <div className="slash-menu-header">
-        <span>Блоки Notion</span>
+        <span>{t('blocks.slash.header')}</span>
       </div>
 
       <div className="slash-menu-list">
         {filtered.length === 0 ? (
-          <div className="slash-menu-empty">Ничего не найдено</div>
+          <div className="slash-menu-empty">{t('blocks.slash.empty')}</div>
         ) : (
           <>
             {basicItems.length > 0 && (
               <div className="slash-group">
-                <span className="slash-group-label">Базовые блоки</span>
+                <span className="slash-group-label">{t('blocks.slash.group.basic')}</span>
                 {basicItems.map(renderItem)}
               </div>
             )}
             {advancedItems.length > 0 && (
               <div className="slash-group">
-                <span className="slash-group-label">Специальные блоки</span>
+                <span className="slash-group-label">{t('blocks.slash.group.advanced')}</span>
                 {advancedItems.map(renderItem)}
               </div>
             )}

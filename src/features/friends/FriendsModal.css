@@ -8,7 +8,7 @@
   overflow: hidden;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius);
 }
 
 .friends-modal-header {
@@ -33,6 +33,45 @@
   color: var(--fg);
 }
 
+.friends-mode-toggle,
+.friends-ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.friends-mode-toggle:hover,
+.friends-ghost-btn:hover {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+
+.friends-close-btn {
+  border-radius: var(--radius);
+}
+
+.friends-search-bar .add-button,
+.friends-card-actions .add-button,
+.friends-assign-box .add-button {
+  width: auto;
+  min-height: 38px;
+  flex-shrink: 0;
+}
+
 .friends-badge {
   display: inline-flex;
   align-items: center;
@@ -44,48 +83,15 @@
   min-width: 18px;
   height: 18px;
   padding: 0 6px;
-  border-radius: 9px;
+  border-radius: var(--radius);
 }
 
 .friends-badge--coral {
   background: var(--coral);
 }
 
-.friends-tabs {
-  display: flex;
-  gap: 4px;
-  padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.03);
-  border-bottom: 1px solid var(--line);
-  overflow-x: auto;
-}
-
-.friends-tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-
-.friends-tab-btn:not(.is-active):hover {
-  color: var(--fg);
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.friends-tab-btn.is-active {
-  color: var(--fg);
-  background: var(--bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  font-weight: 600;
+.friends-tabs-bar {
+  padding: 12px 20px 0;
 }
 
 .friends-modal-body {
@@ -106,7 +112,7 @@
   flex: 1;
   padding: 8px 12px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--bg);
   color: var(--fg);
   font-size: 0.9rem;
@@ -133,7 +139,7 @@
   padding: 10px 14px;
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius);
   gap: 12px;
 }
 
@@ -181,6 +187,8 @@
 .friends-card-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 6px;
   flex-shrink: 0;
 }
@@ -205,7 +213,7 @@
 .friends-assign-box {
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 16px;
   margin-top: 14px;
   display: flex;
@@ -229,7 +237,7 @@
   flex: 1;
   padding: 8px 12px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--panel);
   color: var(--fg);
   font-size: 0.9rem;
@@ -247,7 +255,7 @@
   padding: 10px 14px;
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius);
   gap: 12px;
 }
 
@@ -282,7 +290,7 @@
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   font-size: 0.72rem;
   font-weight: 600;
 }
@@ -311,8 +319,8 @@
     max-height: 100vh;
     border-radius: 0;
   }
-  .friends-tabs {
-    padding: 6px 12px;
+  .friends-tabs-bar {
+    padding: 8px 12px 0;
   }
   .friends-card {
     flex-direction: column;

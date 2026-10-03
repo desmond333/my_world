@@ -3,7 +3,7 @@ import type { Dictionary } from './types'
 export const finance: Dictionary = {
   ru: {
     'finance.title': 'Финансы',
-    'finance.kicker': 'дополнительно · финансы',
+    'finance.kicker': 'полезное · финансы',
     'finance.intro': 'Поступления по месяцам в рублях, долларах и лари. Считается в рублях по умолчанию, курсы можно менять.',
 
     'finance.balance.title': 'Сейчас у меня',
@@ -147,8 +147,15 @@ export const finance: Dictionary = {
     'finance.loans.repaidProgress': 'Прогресс погашения',
     'finance.loans.nextDate': 'Следующий платёж',
     'finance.loans.fullyPaid': 'Полностью выплачен',
+    'finance.loans.paymentDayValue': '{day}-е число',
+    'finance.loans.daysShort': '{days} дн.',
 
     'finance.overview.title': 'Общий итог',
+    'finance.risk.title': 'Профиль риска',
+    'finance.risk.hint': 'Влияет на сценарий прогноза баланса.',
+    'finance.risk.cautious': 'Осторожный',
+    'finance.risk.balanced': 'Сбалансированный',
+    'finance.risk.bold': 'Смелый',
     'finance.overview.savings': 'Накопления',
     'finance.overview.income': 'Доход в месяц',
     'finance.overview.expenses': 'Расход в месяц',
@@ -173,6 +180,20 @@ export const finance: Dictionary = {
     'finance.advice.persona.curious': 'Любопытный',
     'finance.advice.persona.careful': 'Осторожный',
     'finance.advice.persona.brave': 'Смелый',
+    'finance.advice.tab.all': 'Все уроки',
+    'finance.advice.tab.careful': 'Осторожный',
+    'finance.advice.tab.curious': 'Любопытный',
+    'finance.advice.tab.brave': 'Смелый',
+    'finance.advice.tabsAria': 'Темы уроков Тимки',
+    'finance.advice.kittenStory': 'Опыт Тимки',
+    'finance.advice.speech.all':
+      'Мяу! Я только начинаю понимать, как устроен человеческий мир денег. Учусь на кошачьих ошибках и делюсь выводами, чтобы твоя копилка всегда была в безопасности!',
+    'finance.advice.speech.careful':
+      'Когти начеку! В мире полно хитрых мышеловок: кредиты на ерунду, забытые подписки и спонтанные покупки. Сначала собираем неприкосновенный запас!',
+    'finance.advice.speech.curious':
+      'Давай разберёмся, как считать монетки без скуки! Мои правила простого бюджета 50/30/20, чётких целей и аккуратного учёта каждой потраченной рыбки.',
+    'finance.advice.speech.brave':
+      'Пора выходить на большую охоту! Учимся уверенно говорить о росте дохода, не бояться просить своё, диверсифицировать запасы и инвестировать в знания.',
     'finance.advice.bad': 'Плохая идея',
     'finance.advice.good': 'Хорошая идея',
     'finance.advice.why': 'Почему так',
@@ -184,7 +205,7 @@ export const finance: Dictionary = {
   },
   en: {
     'finance.title': 'Finance',
-    'finance.kicker': 'extra · finance',
+    'finance.kicker': 'useful · finance',
     'finance.intro': 'Income per month in roubles, dollars and lari. Roubles are the default currency, and you can change the rates.',
 
     'finance.tabsAria': 'Finance sections',
@@ -271,8 +292,15 @@ export const finance: Dictionary = {
     'finance.loans.repaidProgress': 'Repayment progress',
     'finance.loans.nextDate': 'Next payment date',
     'finance.loans.fullyPaid': 'Fully paid',
+    'finance.loans.paymentDayValue': 'day {day}',
+    'finance.loans.daysShort': '{days} d',
 
     'finance.overview.title': 'Overall total',
+    'finance.risk.title': 'Risk profile',
+    'finance.risk.hint': 'Affects the balance forecast scenario.',
+    'finance.risk.cautious': 'Cautious',
+    'finance.risk.balanced': 'Balanced',
+    'finance.risk.bold': 'Bold',
     'finance.overview.savings': 'Savings',
     'finance.overview.income': 'Monthly income',
     'finance.overview.expenses': 'Monthly expenses',
@@ -297,6 +325,20 @@ export const finance: Dictionary = {
     'finance.advice.persona.curious': 'Curious',
     'finance.advice.persona.careful': 'Careful',
     'finance.advice.persona.brave': 'Brave',
+    'finance.advice.tab.all': 'All lessons',
+    'finance.advice.tab.careful': 'Careful',
+    'finance.advice.tab.curious': 'Curious',
+    'finance.advice.tab.brave': 'Brave',
+    'finance.advice.tabsAria': 'Timka lesson topics',
+    'finance.advice.kittenStory': "Timka's experience",
+    'finance.advice.speech.all':
+      'Meow! I am just starting to understand the human world of money. I learn from feline mistakes and share findings so your piggy bank stays safe!',
+    'finance.advice.speech.careful':
+      'Claws ready! The world is full of sneaky mousetraps: loans for silly fads, forgotten subs and impulse buys. Safety reserve first!',
+    'finance.advice.speech.curious':
+      'Let us learn to count coins without boredom! My rules for the simple 50/30/20 budget, clear targets, and tracking every spent fish.',
+    'finance.advice.speech.brave':
+      'Time to go on a big hunt! Let us learn to speak up for income growth, diversify our stash, and invest in real knowledge.',
     'finance.advice.bad': 'Bad idea',
     'finance.advice.good': 'Good idea',
     'finance.advice.why': 'Why it matters',

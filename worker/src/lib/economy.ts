@@ -3,9 +3,20 @@ export const SHOP_PART_PRICES = {
   statham: 250,
   cat_wizard: 200,
   cat_cyber: 200,
+  theme_spring: 150,
+  theme_summer: 150,
+  theme_autumn: 150,
+  theme_winter: 150,
   theme_cyberpunk: 150,
   theme_midnight_gold: 150,
+  theme_violet: 180,
+  theme_anime: 200,
   sound_lofi: 200,
+  lang_advanced: 800,
+  notes_advanced: 600,
+  view_normal: 400,
+  finance_advice: 700,
+  motion_pro: 500,
 } as const
 
 export type ShopPartKey = keyof typeof SHOP_PART_PRICES
@@ -20,9 +31,6 @@ export const EARN_RULES: Record<string, EarnRule> = {
   dream: { min: 1000, max: 1000, dailyCap: 5000 },
   greeting: { min: 100, max: 100, dailyCap: 200 },
   battle: { min: 35, max: 65, dailyCap: 1000 },
-  'pack-500': { min: 500, max: 500, dailyCap: 100000 },
-  'pack-2500': { min: 2500, max: 2500, dailyCap: 100000 },
-  'pack-10000': { min: 10000, max: 10000, dailyCap: 100000 },
 }
 
 export const isValidEarn = (reason: string, amount: number): boolean => {

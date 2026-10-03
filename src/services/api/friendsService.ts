@@ -1,4 +1,4 @@
-import { apiFetch } from './apiClient'
+import { rpc, rpcError } from './rpcClient'
 import type { FriendsData, ProductivityItem, SentFriendTask, TaskPriority } from '../../data'
 
 export type SearchUserResult = {
@@ -9,37 +9,40 @@ export type SearchUserResult = {
 }
 
 export const fetchFriendsApi = async (): Promise<FriendsData> => {
-  return apiFetch<FriendsData>('/api/friends')
+  const res = await rpc.api.friends.$get()
+  if (!res.ok) return rpcError(res, 'Failed to fetch friends')
+  return res.json()
 }
 
 export const searchUsersApi = async (query: string): Promise<SearchUserResult[]> => {
-  const res = await apiFetch<{ results: SearchUserResult[] }>(`/api/friends/search?q=${encodeURIComponent(query)}`)
-  return res.results
+  const res = await rpc.api.friends.search.$get({ query: { q: query } })
+  if (!res.ok) return rpcError(res, 'Failed to search users')
+  const data = await res.json()
+  return data.results
 }
 
 export const sendFriendRequestApi = async (target: string): Promise<{ success: boolean; status?: string; friendshipId?: string }> => {
-  return apiFetch<{ success: boolean; status?: string; friendshipId?: string }>('/api/friends/request', {
-    method: 'POST',
-    body: JSON.stringify({ email: target }),
-  })
+  const res = await rpc.api.friends.request.$post({ json: { email: target } })
+  if (!res.ok) return rpcError(res, 'Failed to send friend request')
+  return res.json()
 }
 
 export const acceptFriendRequestApi = async (id: string): Promise<{ success: boolean }> => {
-  return apiFetch<{ success: boolean }>(`/api/friends/accept/${id}`, {
-    method: 'POST',
-  })
+  const res = await rpc.api.friends.accept[':id'].$post({ param: { id } })
+  if (!res.ok) return rpcError(res, 'Failed to accept friend request')
+  return res.json()
 }
 
 export const declineFriendRequestApi = async (id: string): Promise<{ success: boolean }> => {
-  return apiFetch<{ success: boolean }>(`/api/friends/decline/${id}`, {
-    method: 'POST',
-  })
+  const res = await rpc.api.friends.decline[':id'].$post({ param: { id } })
+  if (!res.ok) return rpcError(res, 'Failed to decline friend request')
+  return res.json()
 }
 
 export const removeFriendApi = async (friendId: string): Promise<{ success: boolean }> => {
-  return apiFetch<{ success: boolean }>(`/api/friends/${friendId}`, {
-    method: 'DELETE',
-  })
+  const res = await rpc.api.friends[':friendId'].$delete({ param: { friendId } })
+  if (!res.ok) return rpcError(res, 'Failed to remove friend')
+  return res.json()
 }
 
 export const assignFriendTaskApi = async (params: {
@@ -49,13 +52,14 @@ export const assignFriendTaskApi = async (params: {
   priority?: TaskPriority
   note?: string
 }): Promise<{ success: boolean; task?: ProductivityItem }> => {
-  return apiFetch<{ success: boolean; task?: ProductivityItem }>('/api/friends/tasks', {
-    method: 'POST',
-    body: JSON.stringify(params),
-  })
+  const res = await rpc.api.friends.tasks.$post({ json: params })
+  if (!res.ok) return rpcError(res, 'Failed to assign task')
+  return res.json()
 }
 
 export const fetchSentFriendTasksApi = async (): Promise<SentFriendTask[]> => {
-  const res = await apiFetch<{ tasks: SentFriendTask[] }>('/api/friends/tasks/sent')
-  return res.tasks
+  const res = await rpc.api.friends.tasks.sent.$get()
+  if (!res.ok) return rpcError(res, 'Failed to fetch sent tasks')
+  const data = await res.json()
+  return data.tasks
 }

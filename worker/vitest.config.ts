@@ -7,6 +7,10 @@ export default defineConfig({
       wrangler: { configPath: './wrangler.toml' },
       miniflare: {
         d1Databases: ['DB'],
+        bindings: {
+          ADMIN_EMAIL: 'your@email.com',
+          ENVIRONMENT: 'test',
+        },
       },
     }),
   ],

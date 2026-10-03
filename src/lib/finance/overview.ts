@@ -3,6 +3,14 @@ import { CURRENCIES, convert } from './finance'
 import { calculateDepositsSummary } from './deposits'
 import { calculateLoansSummary } from './loans'
 
+export type RiskProfile = 'cautious' | 'balanced' | 'bold'
+
+export const RISK_FACTORS: Record<RiskProfile, number> = {
+  cautious: 0.85,
+  balanced: 1,
+  bold: 1.15,
+}
+
 export type FinanceOverviewInput = {
   entries: FinanceEntry[]
   balance: CurrencyRates
@@ -12,6 +20,7 @@ export type FinanceOverviewInput = {
   currency: Currency
   rates: CurrencyRates
   today: string
+  riskProfile?: RiskProfile
 }
 
 export type FinanceForecastMonth = {
@@ -51,7 +60,7 @@ const averageMonthlySalary = (entries: FinanceEntry[], currency: Currency, rates
 }
 
 export const calculateFinanceOverview = (input: FinanceOverviewInput): FinanceOverview => {
-  const { entries, balance, deposits, loans, subscriptionMonthly, currency, rates, today } = input
+  const { entries, balance, deposits, loans, subscriptionMonthly, currency, rates, today, riskProfile = 'balanced' } = input
 
   const savings = CURRENCIES.reduce((sum, item) => sum + convert(balance[item] ?? 0, item, currency, rates), 0)
 
@@ -71,8 +80,9 @@ export const calculateFinanceOverview = (input: FinanceOverviewInput): FinanceOv
 
   const forecast: FinanceForecastMonth[] = []
   let projected = savings
+  const forecastNet = monthlyNet * RISK_FACTORS[riskProfile]
   for (let month = 1; month <= FORECAST_MONTHS; month++) {
-    projected += monthlyNet
+    projected += forecastNet
     forecast.push({ month, balance: projected })
   }
 

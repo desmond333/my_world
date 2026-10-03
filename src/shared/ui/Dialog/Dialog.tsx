@@ -1,6 +1,7 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ElementRef, type ReactNode } from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
+import { useTranslation } from '../../../lib/i18n'
 import './Dialog.css'
 
 export const Dialog = DialogPrimitive.Root
@@ -22,25 +23,29 @@ export type DialogContentProps = ComponentPropsWithoutRef<typeof DialogPrimitive
 }
 
 export const DialogContent = forwardRef<ElementRef<typeof DialogPrimitive.Content>, DialogContentProps>(
-  ({ className, children, variant = 'default', showCloseButton = true, ...props }, ref) => (
-    <DialogPortal>
-      <DialogOverlay />
-      <div className="ui-dialog-positioner">
-        <DialogPrimitive.Content
-          ref={ref}
-          className={`ui-dialog-content ${variant === 'accent' ? 'ui-dialog-content--accent' : ''} ${className ?? ''}`.trim()}
-          {...props}
-        >
-          {children}
-          {showCloseButton && (
-            <DialogPrimitive.Close className="ui-dialog-close ui-dialog-close--corner" aria-label="Close">
-              <X size={18} />
-            </DialogPrimitive.Close>
-          )}
-        </DialogPrimitive.Content>
-      </div>
-    </DialogPortal>
-  ),
+  ({ className, children, variant = 'default', showCloseButton = true, ...props }, ref) => {
+    const { t } = useTranslation()
+
+    return (
+      <DialogPortal>
+        <DialogOverlay />
+        <div className="ui-dialog-positioner">
+          <DialogPrimitive.Content
+            ref={ref}
+            className={`ui-dialog-content ${variant === 'accent' ? 'ui-dialog-content--accent' : ''} ${className ?? ''}`.trim()}
+            {...props}
+          >
+            {children}
+            {showCloseButton && (
+              <DialogPrimitive.Close className="ui-dialog-close ui-dialog-close--corner" aria-label={t('common.close')}>
+                <X size={18} />
+              </DialogPrimitive.Close>
+            )}
+          </DialogPrimitive.Content>
+        </div>
+      </DialogPortal>
+    )
+  },
 )
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
@@ -95,6 +100,8 @@ export const Modal = ({
   className,
   showCloseButton = true,
 }: ModalProps) => {
+  const { t } = useTranslation()
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogPortal>
@@ -111,7 +118,7 @@ export const Modal = ({
                   {description && (typeof description === 'string' ? <DialogDescription>{description}</DialogDescription> : description)}
                 </div>
                 {showCloseButton && (
-                  <DialogPrimitive.Close className="ui-dialog-close" aria-label="Close" onClick={onClose}>
+                  <DialogPrimitive.Close className="ui-dialog-close" aria-label={t('common.close')} onClick={onClose}>
                     <X size={18} />
                   </DialogPrimitive.Close>
                 )}

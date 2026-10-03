@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ExternalLink, Sparkles, Star } from 'lucide-react'
 import { useTranslation } from '../../../lib/i18n'
 import type { HeroSectionProps } from '../types'
+import { Badge, Parallax } from '../../../shared/ui'
 
 export const HeroSection = ({ animal, isFavorite, onToggleFavorite }: HeroSectionProps) => {
   const { t } = useTranslation()
@@ -34,8 +35,12 @@ export const HeroSection = ({ animal, isFavorite, onToggleFavorite }: HeroSectio
       </div>
       <div className="hero-visual">
         <div className="image-frame">
-          <img src={animal.image} alt={animal.alt} />
-          <span className="photo-tag">{t('animal.photoTag')}</span>
+          <Parallax className="hero-parallax" speed={0.12}>
+            <img src={animal.image} alt={animal.alt} />
+          </Parallax>
+          <Badge variant="default" size="sm" className="photo-tag">
+            {t('animal.photoTag')}
+          </Badge>
         </div>
         <div className="animal-label">
           <span>{animal.species}</span>

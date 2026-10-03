@@ -1,13 +1,3 @@
-.new-user-hint-overlay {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
-  max-width: 420px;
-  width: calc(100vw - 32px);
-  animation: hintSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 @keyframes hintSlideUp {
   from {
     transform: translateY(30px);
@@ -19,7 +9,24 @@
   }
 }
 
-.new-user-hint-card {
+.ui-dialog-overlay:has(+ .ui-dialog-positioner .new-user-hint-card) {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+}
+
+.ui-dialog-positioner:has(.new-user-hint-card) {
+  align-items: end;
+  justify-items: end;
+  padding: 24px;
+}
+
+.ui-dialog-content.new-user-hint-card {
+  width: calc(100vw - 48px);
+  max-width: 420px;
+  max-height: none;
+  overflow: visible;
   background: var(--panel);
   border: 2px solid var(--accent);
   box-shadow:
@@ -30,7 +37,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border-radius: 8px;
+  border-radius: var(--radius);
+  animation: hintSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hint-header {
@@ -67,7 +75,7 @@
   padding: 4px;
   display: grid;
   place-items: center;
-  border-radius: 4px;
+  border-radius: var(--radius);
   transition: color 0.15s ease;
 }
 
@@ -138,10 +146,11 @@
 }
 
 @media (max-width: 600px) {
-  .new-user-hint-overlay {
-    bottom: 16px;
-    right: 16px;
-    left: 16px;
-    width: auto;
+  .ui-dialog-positioner:has(.new-user-hint-card) {
+    padding: 16px;
+  }
+
+  .ui-dialog-content.new-user-hint-card {
+    width: 100%;
   }
 }

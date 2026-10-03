@@ -131,7 +131,7 @@
   gap: 5px;
   padding: 3px 8px;
   border: 1px solid rgba(244, 184, 73, 0.4);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: rgba(244, 184, 73, 0.1);
   color: var(--accent);
   font:
@@ -152,7 +152,7 @@
   overflow-y: auto;
   padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--panel);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
   animation: cat-panel-in 0.18s ease;
@@ -198,7 +198,7 @@
   width: 100%;
   padding: 7px 9px;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: transparent;
   text-align: left;
   cursor: pointer;
@@ -353,13 +353,22 @@
   }
 }
 
+.cat-popover-content.ui-popover-content {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  max-width: none;
+}
+
 .cat-premium-panel {
   width: min(340px, calc(100vw - 28px));
   max-height: min(72vh, 520px);
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(244, 184, 73, 0.35);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--panel);
   backdrop-filter: blur(16px);
   box-shadow:
@@ -406,7 +415,7 @@
   gap: 5px;
   padding: 3px 8px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
   font:
@@ -462,7 +471,7 @@
   gap: 5px;
   padding: 4px 10px;
   border: 1px solid rgba(246, 135, 179, 0.4);
-  border-radius: 14px;
+  border-radius: var(--radius);
   background: rgba(246, 135, 179, 0.12);
   color: #fbb6ce;
   font:
@@ -483,37 +492,26 @@
   color: #34d399;
 }
 
-.cat-premium-tabs {
+.cat-premium-tabs-root {
   display: flex;
-  border-bottom: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.cat-tab-btn {
+  flex-direction: column;
   flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 4px;
-  border: none;
-  background: transparent;
-  color: var(--muted);
+  min-height: 0;
+}
+
+.cat-premium-tabs-bar {
+  padding: 10px 14px 0;
+}
+
+.cat-premium-tabs.ui-tabs-list {
+  display: flex;
+  width: 100%;
+}
+
+.cat-premium-tabs .ui-tabs-trigger {
+  flex: 1;
   font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.15s ease;
-}
-
-.cat-tab-btn:not(.is-active):hover {
-  color: var(--fg);
-}
-
-.cat-tab-btn.is-active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-  background: rgba(244, 184, 73, 0.05);
+  padding: 5px 8px;
 }
 
 .cat-premium-content {
@@ -522,6 +520,10 @@
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
+}
+
+.cat-premium-content .ui-tabs-content {
+  margin-top: 0;
 }
 
 .cat-actions-view {
@@ -533,7 +535,7 @@
 .cat-action-card {
   padding: 10px;
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.02);
   display: flex;
   flex-direction: column;
@@ -565,7 +567,7 @@
   flex: 1;
   padding: 6px 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--bg);
   color: var(--fg);
   font-size: 12px;
@@ -582,7 +584,7 @@
   width: 28px;
   height: 28px;
   border: 1px solid var(--accent);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: rgba(244, 184, 73, 0.15);
   color: var(--accent);
   cursor: pointer;
@@ -621,7 +623,7 @@
 .cat-pill-action {
   padding: 3px 8px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.05);
   color: var(--accent);
   font:
@@ -643,7 +645,7 @@
   color: var(--fg);
   background: var(--bg);
   padding: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   border-left: 2px solid var(--accent);
   animation: cat-fade-in 0.25s ease;
 }
@@ -697,7 +699,7 @@
   gap: 10px;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -763,7 +765,7 @@
   gap: 6px;
   padding: 6px 8px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--bg);
 }
 

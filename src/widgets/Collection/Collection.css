@@ -269,18 +269,7 @@
   color: var(--on-accent);
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  padding: 28px 20px;
-  background: rgba(5, 5, 7, 0.78);
-  backdrop-filter: blur(6px);
-  animation: modal-fade 0.22s ease;
-}
-.details-modal {
+.ui-dialog-content.details-modal {
   position: relative;
   width: min(760px, 100%);
   max-height: min(86vh, 900px);
@@ -430,46 +419,29 @@
   }
 }
 
-.list-switch {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.collection-tabs {
   margin-bottom: 20px;
 }
-.list-tab {
+
+.list-count {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  min-height: 42px;
-  padding: 0 16px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease;
-}
-.list-tab:not(.is-on):hover {
-  color: var(--fg);
-}
-.list-tab.is-on {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-.list-count {
-  display: grid;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
   padding: 0 6px;
+  border-radius: var(--radius);
+  background: var(--line);
+  color: var(--muted);
+  font:
+    700 11px 'DM Mono',
+    monospace;
+  transition: all var(--motion-fast) ease;
+}
+
+.ui-tabs-trigger[data-state='active'] .list-count {
   background: var(--accent);
   color: var(--on-accent);
-  font:
-    10px 'DM Mono',
-    monospace;
 }
 
 .collection-filters {
@@ -593,7 +565,7 @@
   min-width: 0;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--radius);
   background: rgba(0, 0, 0, 0.25);
   color: var(--fg);
   font:
@@ -611,7 +583,7 @@
 .review-date-clear {
   padding: 7px 11px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--radius);
   background: transparent;
   color: var(--muted);
   cursor: pointer;
@@ -699,39 +671,11 @@
   font-size: 13px;
   font-weight: 600;
 }
-.review-rating-selector {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
+.review-slider.ui-slider-root {
   padding: 2px 0;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
 }
-.review-rating-selector::-webkit-scrollbar {
-  display: none;
-}
-.score-btn {
-  flex: 1;
-  min-width: 30px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  background: var(--bg);
-  color: var(--fg);
-  font-family: 'DM Mono', monospace;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.score-btn:hover {
-  border-color: var(--accent);
-}
-.score-btn.is-selected {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent, #000);
+.review-slider .ui-slider-track {
+  background: var(--line);
 }
 .review-text-row {
   display: flex;
@@ -853,24 +797,6 @@
   display: flex;
   gap: 6px;
 }
-.icon-button {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease;
-}
-.icon-button:hover {
-  color: var(--coral);
-  border-color: var(--coral);
-}
 
 .list-empty {
   display: flex;
@@ -936,11 +862,7 @@
     padding: 0 9px;
     min-height: 36px;
   }
-  .modal-backdrop {
-    padding: 0;
-    align-items: flex-end;
-  }
-  .details-modal {
+  .ui-dialog-content.details-modal {
     width: 100%;
     max-height: 92vh;
     padding: 26px 20px 28px;
@@ -965,8 +887,7 @@
   .result-poster img,
   .poster-overlay,
   .section-tab,
-  .modal-backdrop,
-  .details-modal {
+  .ui-dialog-content.details-modal {
     animation: none;
     transition: none;
   }
@@ -979,10 +900,7 @@
 }
 
 @media (max-width: 760px) {
-  .modal-backdrop {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .details-modal {
+  .ui-dialog-content.details-modal {
     max-height: 94vh;
     border-bottom: none;
   }
@@ -994,9 +912,7 @@
   .row-actions a {
     min-height: 40px;
   }
-  .list-tab {
-    min-height: 40px;
-  }
+
   .filter-field input,
   .filter-field select {
     min-height: 44px;

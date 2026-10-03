@@ -1,17 +1,13 @@
 import { useEffect } from 'react'
-import { findCity } from '../../../data'
-import { MINUTE_MS, useNow } from '../../../hooks'
-import { getSeason } from '../../../lib'
-import { useDailyStore, useShopStore } from '../../../store'
+import { isBasePalette } from '../../../lib'
+import { useDailyStore, useShopStore, useViewModeStore } from '../../../store'
 
 export const ThemeSync = () => {
-  const cityId = useDailyStore((state) => state.cityId)
   const themeMode = useDailyStore((state) => state.themeMode)
-  const themePalette = useDailyStore((state) => state.themePalette)
+  const storedPalette = useDailyStore((state) => state.themePalette)
   const activeThemeSkin = useShopStore((state) => state.activeThemeSkin)
-  const now = useNow(MINUTE_MS)
-  const autoSeason = getSeason(now, findCity(cityId).timezone)
-  const season = themePalette && themePalette !== 'auto' ? themePalette : autoSeason
+  const cornerStyle = useViewModeStore((state) => state.cornerStyle ?? 'middle')
+  const themePalette = isBasePalette(storedPalette) ? storedPalette : 'graphite'
 
   useEffect(() => {
     const getSystemTheme = (): 'light' | 'dark' => {
@@ -22,7 +18,7 @@ export const ThemeSync = () => {
     const applyTheme = () => {
       const mode = themeMode ?? 'system'
       const effective = mode === 'system' ? getSystemTheme() : mode
-      document.documentElement.dataset.theme = `${season}-${effective}`
+      document.documentElement.dataset.theme = `${themePalette}-${effective}`
       document.documentElement.dataset.themeMode = effective
 
       if (activeThemeSkin && activeThemeSkin !== 'default') {
@@ -40,7 +36,11 @@ export const ThemeSync = () => {
       media.addEventListener('change', listener)
       return () => media.removeEventListener('change', listener)
     }
-  }, [season, themeMode, activeThemeSkin])
+  }, [themePalette, themeMode, activeThemeSkin])
+
+  useEffect(() => {
+    document.documentElement.dataset.corner = cornerStyle
+  }, [cornerStyle])
 
   return null
 }

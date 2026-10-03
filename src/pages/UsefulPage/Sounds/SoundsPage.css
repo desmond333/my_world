@@ -1,0 +1,138 @@
+.sounds-grid.ui-toggle-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.ui-toggle-group-item.sound-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+.ui-toggle-group-item.sound-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+}
+
+.ui-toggle-group-item.sound-card[data-state='on'] {
+  border-color: var(--accent);
+  box-shadow: 0 10px 30px -18px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.sound-card-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.ui-toggle-group-item.sound-card[data-state='on'] .sound-card-icon {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.sound-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sound-card-body strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.sound-card-body small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sound-card-play {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  color: var(--fg);
+  flex-shrink: 0;
+}
+
+.ui-toggle-group-item.sound-card[data-state='on'] .sound-card-play {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.sound-eq {
+  position: absolute;
+  left: 18px;
+  bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
+}
+
+.sound-eq span {
+  width: 3px;
+  height: 100%;
+  border-radius: var(--radius);
+  background: var(--accent);
+  transform-origin: bottom;
+  animation: sound-eq 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes sound-eq {
+  from {
+    transform: scaleY(0.25);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.sound-stop {
+  margin-top: 16px;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--fg);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sound-stop:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sound-eq span {
+    animation: none;
+  }
+}

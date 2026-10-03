@@ -1,4 +1,5 @@
-import { apiFetch, getAuthToken } from './apiClient'
+import { getAuthToken } from './apiClient'
+import { rpc } from './rpcClient'
 import { registerSyncTrigger, scheduleDebouncedSync } from './syncDebounce'
 import { offlineStorage } from '../../lib/storage'
 import { validateSyncSnapshot } from '../../lib/validation'
@@ -91,6 +92,7 @@ export const collectLocalSnapshot = (): SyncSnapshot => {
       globalMode: viewMode.globalMode,
       pageModes: viewMode.pageModes,
       avatarMode: viewMode.avatarMode,
+      cornerStyle: viewMode.cornerStyle,
     },
     availability: {
       windows: availability.windows,
@@ -208,6 +210,7 @@ export const applyRemoteSnapshot = (snapshot: SyncSnapshot): void => {
       globalMode: snapshot.viewModes.globalMode || 'simple',
       pageModes: snapshot.viewModes.pageModes || {},
       avatarMode: snapshot.viewModes.avatarMode || 'simple',
+      cornerStyle: snapshot.viewModes.cornerStyle || 'middle',
     })
   }
 
@@ -234,10 +237,8 @@ export const pushSync = async (): Promise<void> => {
   await useShopStore.getState().flushOps()
   const snapshot = collectLocalSnapshot()
   try {
-    await apiFetch('/api/sync', {
-      method: 'POST',
-      body: JSON.stringify(snapshot),
-    })
+    const res = await rpc.api.sync.$post({ json: snapshot })
+    if (!res.ok) throw new Error(`sync push failed: ${res.status}`)
     await offlineStorage.remove('pending_offline_sync')
     await offlineStorage.remove('pending_sync_snapshot')
   } catch (err) {
@@ -253,7 +254,9 @@ export { scheduleDebouncedSync }
 
 export const pullSync = async (): Promise<SyncSnapshot> => {
   await useShopStore.getState().flushOps()
-  const raw = await apiFetch<unknown>('/api/sync')
+  const res = await rpc.api.sync.$get()
+  if (!res.ok) throw new Error(`sync pull failed: ${res.status}`)
+  const raw = await res.json()
   const snapshot = validateSyncSnapshot(raw)
   if (!snapshot) {
     throw new Error('Invalid sync snapshot from server')

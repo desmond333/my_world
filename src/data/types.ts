@@ -18,6 +18,7 @@ export type Animal = {
 export type City = {
   id: string
   name: string
+  country: 'ru' | 'world'
   timezone: string
   latitude: number
   longitude: number
@@ -26,7 +27,7 @@ export type City = {
 
 export type AnimalSeed = Omit<Animal, 'wikiUrl'> & { wikipedia: string }
 
-export type AnimalFacts = Pick<Animal, 'image' | 'description' | 'wikiUrl'>
+export type AnimalFacts = Pick<Animal, 'description' | 'wikiUrl'>
 
 export type BlockKey = 'animal' | 'today' | 'weather' | 'wish' | 'occasion' | 'training'
 export type Blocks = Record<BlockKey, boolean>
@@ -34,8 +35,8 @@ export type Blocks = Record<BlockKey, boolean>
 export type AnimalScope = 'all' | 'home'
 export type ThemeMode = 'system' | 'dark' | 'light'
 export type SeasonalThemeId = 'spring' | 'summer' | 'autumn' | 'winter'
-export type NamedThemeId = 'nord' | 'solarized'
-export type ThemePaletteId = 'auto' | SeasonalThemeId | NamedThemeId
+export type NamedThemeId = 'nord' | 'solarized' | 'graphite'
+export type ThemePaletteId = NamedThemeId
 
 export type TrainingSport = {
   id: string
@@ -252,12 +253,13 @@ export type MoodEntry = { level: number; note?: string }
 
 export type LotteryStats = Record<string, { spins: number; wins: number; earned: number }>
 
-export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | 'theme_cyberpunk' | 'theme_midnight_gold' | 'sound_lofi'
+import type { CatSkinId, ShopItemKey, ThemeSkinId } from '../lib/shop/catalog'
 
-export type CatSkinId = 'classic' | 'wizard' | 'cyber'
-export type ThemeSkinId = 'default' | 'cyberpunk' | 'midnight_gold'
+export type { CatSkinId, ShopItemKey, ThemeSkinId }
 
 export type ViewMode = 'simple' | 'normal'
+
+export type CornerStyle = 'round' | 'middle' | 'square'
 
 export type ViewPageId =
   'today' | 'productivity' | 'finance' | 'training' | 'media' | 'mind' | 'languages' | 'favorites' | 'notes' | 'tasks' | 'goals' | 'dreams'
@@ -319,6 +321,7 @@ export type SyncSnapshot = {
     globalMode: ViewMode
     pageModes: Partial<Record<ViewPageId, ViewMode>>
     avatarMode: ViewMode
+    cornerStyle: CornerStyle
   }
   availability: {
     windows: AvailabilityWindow[]

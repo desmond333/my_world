@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { Calendar, Check, ChevronRight, Compass, Crown, Feather, Heart, NotebookPen, Plus, Search, Sparkles, Wind, Zap } from 'lucide-react'
 import { useTranslation } from '../../lib/i18n'
 import { storage } from '../../lib'
-import { useDailyStore, useNotesStore, useProductivityStore, type ViewMode } from '../../store'
+import { findCity } from '../../data'
+import { getDateForTimezone, useDailyStore, useNotesStore, useProductivityStore, type ViewMode } from '../../store'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../shared/ui'
 import { playCatMeow, playCatPurr } from './catAudio'
 
 const PET_COUNT_KEY = 'tau_cat_pet_count'
@@ -94,7 +96,7 @@ export const CatPremiumPanel = ({ targets, activePath, currentMode, onToggleMode
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault()
     if (!taskInput.trim()) return
-    const todayStr = new Date().toISOString().slice(0, 10)
+    const todayStr = getDateForTimezone(findCity(cityId).timezone)
     addTask('task', taskInput.trim(), todayStr)
     setTaskInput('')
     setTaskSuccess(true)
@@ -141,7 +143,7 @@ export const CatPremiumPanel = ({ targets, activePath, currentMode, onToggleMode
   const dailyWisdom = (lang === 'en' ? CAT_WISDOM.en : CAT_WISDOM.ru)[wisdomIndex]
 
   return (
-    <div className="cat-premium-panel" role="dialog" aria-label={t('cat.aria')}>
+    <div className="cat-premium-panel">
       <div className="cat-premium-header">
         <div className="cat-premium-meta">
           <div className="cat-premium-badge">
@@ -179,193 +181,193 @@ export const CatPremiumPanel = ({ targets, activePath, currentMode, onToggleMode
         </div>
       </div>
 
-      <nav className="cat-premium-tabs">
-        <button
-          type="button"
-          className={`cat-tab-btn ${activeTab === 'actions' ? 'is-active' : ''}`}
-          onClick={() => setActiveTab('actions')}
-        >
-          <Zap size={13} />
-          <span>{t('cat.tab.actions')}</span>
-        </button>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="cat-premium-tabs-root">
+        <div className="cat-premium-tabs-bar">
+          <TabsList className="cat-premium-tabs" aria-label={t('cat.tab.actions')}>
+            <TabsTrigger value="actions">
+              <Zap size={13} />
+              <span>{t('cat.tab.actions')}</span>
+            </TabsTrigger>
 
-        <button type="button" className={`cat-tab-btn ${activeTab === 'brief' ? 'is-active' : ''}`} onClick={() => setActiveTab('brief')}>
-          <Calendar size={13} />
-          <span>{t('cat.tab.brief')}</span>
-        </button>
+            <TabsTrigger value="brief">
+              <Calendar size={13} />
+              <span>{t('cat.tab.brief')}</span>
+            </TabsTrigger>
 
-        <button type="button" className={`cat-tab-btn ${activeTab === 'nav' ? 'is-active' : ''}`} onClick={() => setActiveTab('nav')}>
-          <Compass size={13} />
-          <span>{t('cat.tab.nav')}</span>
-        </button>
-      </nav>
+            <TabsTrigger value="nav">
+              <Compass size={13} />
+              <span>{t('cat.tab.nav')}</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-      <div className="cat-premium-content">
-        {activeTab === 'actions' && (
-          <div className="cat-actions-view">
-            <div className="cat-action-card">
-              <label htmlFor="cat-quick-task" className="cat-action-label">
-                <Check size={13} /> {t('cat.action.quickTask')}
-              </label>
-              <form onSubmit={handleAddTask} className="cat-input-row">
-                <input
-                  id="cat-quick-task"
-                  type="text"
-                  className="cat-quick-input"
-                  placeholder={t('cat.action.quickTaskPlaceholder')}
-                  value={taskInput}
-                  onChange={(e) => setTaskInput(e.target.value)}
-                />
-                <button type="submit" className="cat-submit-btn" disabled={!taskInput.trim()}>
-                  <Plus size={14} />
-                </button>
-              </form>
-              {taskSuccess && <p className="cat-success-msg">{t('cat.action.taskAdded')}</p>}
-            </div>
-
-            <div className="cat-action-card">
-              <label htmlFor="cat-quick-note" className="cat-action-label">
-                <NotebookPen size={13} /> {t('cat.action.quickNote')}
-              </label>
-              <form onSubmit={handleAddNote} className="cat-input-row">
-                <input
-                  id="cat-quick-note"
-                  type="text"
-                  className="cat-quick-input"
-                  placeholder={t('cat.action.quickNotePlaceholder')}
-                  value={noteInput}
-                  onChange={(e) => setNoteInput(e.target.value)}
-                />
-                <button type="submit" className="cat-submit-btn" disabled={!noteInput.trim()}>
-                  <Plus size={14} />
-                </button>
-              </form>
-              {noteSuccess && <p className="cat-success-msg">{t('cat.action.noteAdded')}</p>}
-            </div>
-
-            <div className="cat-action-card cat-oracle-card">
-              <div className="cat-card-head">
-                <span className="cat-action-label">
-                  <Sparkles size={13} /> {t('cat.action.oracle')}
-                </span>
-                <button type="button" className="cat-pill-action" onClick={handleAskOracle}>
-                  {t('cat.action.oracleAsk')}
-                </button>
+        <div className="cat-premium-content">
+          <TabsContent value="actions">
+            <div className="cat-actions-view">
+              <div className="cat-action-card">
+                <label htmlFor="cat-quick-task" className="cat-action-label">
+                  <Check size={13} /> {t('cat.action.quickTask')}
+                </label>
+                <form onSubmit={handleAddTask} className="cat-input-row">
+                  <input
+                    id="cat-quick-task"
+                    type="text"
+                    className="cat-quick-input"
+                    placeholder={t('cat.action.quickTaskPlaceholder')}
+                    value={taskInput}
+                    onChange={(e) => setTaskInput(e.target.value)}
+                  />
+                  <button type="submit" className="cat-submit-btn" disabled={!taskInput.trim()}>
+                    <Plus size={14} />
+                  </button>
+                </form>
+                {taskSuccess && <p className="cat-success-msg">{t('cat.action.taskAdded')}</p>}
               </div>
-              {oracleText && <p className="cat-oracle-text">«{oracleText}»</p>}
-            </div>
 
-            <div className={`cat-action-card cat-relax-card ${isRelaxing ? 'is-active' : ''}`}>
-              <div className="cat-card-head">
-                <span className="cat-action-label">
-                  <Wind size={13} /> {t('cat.action.relax')}
-                </span>
-                <button type="button" className="cat-pill-action" onClick={toggleRelax}>
-                  {isRelaxing ? t('cat.action.relaxStop') : 'Старт'}
-                </button>
+              <div className="cat-action-card">
+                <label htmlFor="cat-quick-note" className="cat-action-label">
+                  <NotebookPen size={13} /> {t('cat.action.quickNote')}
+                </label>
+                <form onSubmit={handleAddNote} className="cat-input-row">
+                  <input
+                    id="cat-quick-note"
+                    type="text"
+                    className="cat-quick-input"
+                    placeholder={t('cat.action.quickNotePlaceholder')}
+                    value={noteInput}
+                    onChange={(e) => setNoteInput(e.target.value)}
+                  />
+                  <button type="submit" className="cat-submit-btn" disabled={!noteInput.trim()}>
+                    <Plus size={14} />
+                  </button>
+                </form>
+                {noteSuccess && <p className="cat-success-msg">{t('cat.action.noteAdded')}</p>}
               </div>
-              {isRelaxing && (
-                <div className="cat-relax-animation">
-                  <div className="cat-relax-circle" />
-                  <p className="cat-relax-text">{t('cat.action.relaxing')}</p>
+
+              <div className="cat-action-card cat-oracle-card">
+                <div className="cat-card-head">
+                  <span className="cat-action-label">
+                    <Sparkles size={13} /> {t('cat.action.oracle')}
+                  </span>
+                  <button type="button" className="cat-pill-action" onClick={handleAskOracle}>
+                    {t('cat.action.oracleAsk')}
+                  </button>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'brief' && (
-          <div className="cat-brief-view">
-            <div className="cat-brief-item">
-              <div className="cat-brief-icon">⚡</div>
-              <div className="cat-brief-info">
-                <strong>{t('cat.brief.tasksLeft')}</strong>
-                <p>
-                  {pendingTasksCount > 0 ? (
-                    t('cat.brief.pending', undefined, { count: pendingTasksCount })
-                  ) : (
-                    <span className="cat-done-pill">{t('cat.brief.noTasks')}</span>
-                  )}
-                </p>
+                {oracleText && <p className="cat-oracle-text">«{oracleText}»</p>}
               </div>
-              <button
-                type="button"
-                className="cat-brief-link"
-                onClick={() => {
-                  onClose()
-                  navigate('/extra/productivity/task')
-                }}
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
 
-            <div className="cat-brief-item">
-              <div className="cat-brief-icon">🌍</div>
-              <div className="cat-brief-info">
-                <strong>{t('cat.brief.today')}</strong>
-                <p className="cat-brief-city">{cityId}</p>
-              </div>
-              <button
-                type="button"
-                className="cat-brief-link"
-                onClick={() => {
-                  onClose()
-                  navigate('/today')
-                }}
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
-
-            <div className="cat-brief-item cat-wisdom-item">
-              <div className="cat-brief-icon">🐾</div>
-              <div className="cat-brief-info">
-                <strong>{t('cat.brief.quoteTitle')}</strong>
-                <p className="cat-wisdom-text">{dailyWisdom}</p>
+              <div className={`cat-action-card cat-relax-card ${isRelaxing ? 'is-active' : ''}`}>
+                <div className="cat-card-head">
+                  <span className="cat-action-label">
+                    <Wind size={13} /> {t('cat.action.relax')}
+                  </span>
+                  <button type="button" className="cat-pill-action" onClick={toggleRelax}>
+                    {isRelaxing ? t('cat.action.relaxStop') : t('cat.action.relaxStart')}
+                  </button>
+                </div>
+                {isRelaxing && (
+                  <div className="cat-relax-animation">
+                    <div className="cat-relax-circle" />
+                    <p className="cat-relax-text">{t('cat.action.relaxing')}</p>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        )}
+          </TabsContent>
 
-        {activeTab === 'nav' && (
-          <div className="cat-nav-view">
-            <div className="cat-search-box">
-              <Search size={13} className="cat-search-icon" />
-              <input
-                type="text"
-                className="cat-search-input"
-                placeholder={t('cat.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <TabsContent value="brief">
+            <div className="cat-brief-view">
+              <div className="cat-brief-item">
+                <div className="cat-brief-icon">⚡</div>
+                <div className="cat-brief-info">
+                  <strong>{t('cat.brief.tasksLeft')}</strong>
+                  <p>
+                    {pendingTasksCount > 0 ? (
+                      t('cat.brief.pending', undefined, { count: pendingTasksCount })
+                    ) : (
+                      <span className="cat-done-pill">{t('cat.brief.noTasks')}</span>
+                    )}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="cat-brief-link"
+                  onClick={() => {
+                    onClose()
+                    navigate('/useful/productivity/task')
+                  }}
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              <div className="cat-brief-item">
+                <div className="cat-brief-icon">🌍</div>
+                <div className="cat-brief-info">
+                  <strong>{t('cat.brief.today')}</strong>
+                  <p className="cat-brief-city">{cityId}</p>
+                </div>
+                <button
+                  type="button"
+                  className="cat-brief-link"
+                  onClick={() => {
+                    onClose()
+                    navigate('/today')
+                  }}
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              <div className="cat-brief-item cat-wisdom-item">
+                <div className="cat-brief-icon">🐾</div>
+                <div className="cat-brief-info">
+                  <strong>{t('cat.brief.quoteTitle')}</strong>
+                  <p className="cat-wisdom-text">{dailyWisdom}</p>
+                </div>
+              </div>
             </div>
+          </TabsContent>
 
-            <ul className="cat-nav-list">
-              {filteredTargets.map((target) => {
-                const active = target.path === activePath
-                return (
-                  <li key={target.path}>
-                    <button
-                      type="button"
-                      className={`cat-panel__item ${active ? 'is-active' : ''}`}
-                      onClick={() => {
-                        onClose()
-                        navigate(target.path)
-                      }}
-                      aria-current={active ? 'page' : undefined}
-                    >
-                      <span className="cat-panel__label">{t(target.key)}</span>
-                      <span className="cat-panel__hint">{t(target.hint)}</span>
-                      <ChevronRight size={13} className="cat-panel__arrow" />
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )}
-      </div>
+          <TabsContent value="nav">
+            <div className="cat-nav-view">
+              <div className="cat-search-box">
+                <Search size={13} className="cat-search-icon" />
+                <input
+                  type="text"
+                  className="cat-search-input"
+                  placeholder={t('cat.searchPlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <ul className="cat-nav-list">
+                {filteredTargets.map((target) => {
+                  const active = target.path === activePath
+                  return (
+                    <li key={target.path}>
+                      <button
+                        type="button"
+                        className={`cat-panel__item ${active ? 'is-active' : ''}`}
+                        onClick={() => {
+                          onClose()
+                          navigate(target.path)
+                        }}
+                        aria-current={active ? 'page' : undefined}
+                      >
+                        <span className="cat-panel__label">{t(target.key)}</span>
+                        <span className="cat-panel__hint">{t(target.hint)}</span>
+                        <ChevronRight size={13} className="cat-panel__arrow" />
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   )
 }

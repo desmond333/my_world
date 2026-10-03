@@ -1,0 +1,230 @@
+.finance-overview {
+  margin: 0 0 18px;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius, 12px);
+  background: var(--panel);
+}
+
+.finance-overview-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+  color: var(--accent);
+}
+
+.finance-overview-head h3 {
+  margin: 0;
+  font:
+    700 12px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg);
+}
+
+.finance-overview-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.finance-risk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.finance-risk-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.finance-risk-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.finance-risk-hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.finance-risk-options {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+.finance-risk-options.ui-toggle-group {
+  gap: 4px;
+  padding: 4px;
+  background: var(--panel);
+}
+
+.finance-risk-btn {
+  all: unset;
+  padding: 6px 12px;
+  border-radius: max(0px, calc(var(--radius) - 4px));
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.finance-risk-btn:hover {
+  color: var(--fg);
+}
+
+.finance-risk-btn[data-state='on'] {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.fin-stat-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+
+.fin-stat-icon {
+  color: var(--muted);
+}
+
+.fin-stat-icon.is-warning {
+  color: #f59e0b;
+}
+
+.fin-stat-value.is-positive {
+  color: #10b981;
+}
+
+.fin-stat-card.is-negative {
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.finance-runway-alert,
+.finance-runway-safe {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 14px;
+  padding: 11px 13px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.finance-runway-alert {
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--fg);
+}
+
+.finance-runway-alert svg {
+  flex-shrink: 0;
+  color: #f59e0b;
+  margin-top: 1px;
+}
+
+.finance-runway-safe {
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--fg);
+}
+
+.finance-runway-safe svg {
+  flex-shrink: 0;
+  color: #10b981;
+  margin-top: 1px;
+}
+
+.finance-forecast {
+  margin-top: 16px;
+}
+
+.finance-forecast-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.finance-forecast-bars {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+
+.finance-forecast-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.finance-forecast-track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 84px;
+  border-bottom: 1px solid var(--line);
+}
+
+.finance-forecast-fill {
+  width: 60%;
+  max-width: 26px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--accent);
+  min-height: 3px;
+}
+
+.finance-forecast-fill.is-negative {
+  background: var(--coral);
+}
+
+.finance-forecast-month {
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.finance-forecast-value {
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  color: var(--fg);
+}
+
+.finance-forecast-value.is-negative {
+  color: var(--coral);
+}
+
+@media (max-width: 640px) {
+  .finance-forecast-bars {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

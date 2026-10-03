@@ -12,7 +12,8 @@ describe('Worker App Endpoints', () => {
         'CREATE TABLE IF NOT EXISTS refresh_tokens (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT NOT NULL, expires_at TEXT NOT NULL);' +
         'CREATE TABLE IF NOT EXISTS shop_state (user_id TEXT PRIMARY KEY, coins INTEGER NOT NULL DEFAULT 1000, unlocked_parts_json TEXT NOT NULL DEFAULT "{}", active_cat_skin TEXT NOT NULL DEFAULT "classic", active_theme_skin TEXT NOT NULL DEFAULT "default", greeting_sent INTEGER NOT NULL DEFAULT 0, greeting_friend_name TEXT NOT NULL DEFAULT "", greeting_timestamp INTEGER, greeting_reward_claimed INTEGER NOT NULL DEFAULT 0, has_pending_greeting_reply INTEGER NOT NULL DEFAULT 0);' +
         'CREATE TABLE IF NOT EXISTS referrals (id TEXT PRIMARY KEY, referrer_id TEXT NOT NULL, referee_id TEXT NOT NULL UNIQUE, code TEXT NOT NULL, referrer_reward INTEGER NOT NULL DEFAULT 0, referee_reward INTEGER NOT NULL DEFAULT 0, reward_type TEXT, claimed INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);' +
-        'CREATE TABLE IF NOT EXISTS shop_coin_ops (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, reason TEXT NOT NULL, amount INTEGER NOT NULL, created_at TEXT NOT NULL);',
+        'CREATE TABLE IF NOT EXISTS shop_coin_ops (id TEXT NOT NULL, user_id TEXT NOT NULL, reason TEXT NOT NULL, amount INTEGER NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY (user_id, id));' +
+        'CREATE TABLE IF NOT EXISTS contact_messages (id TEXT PRIMARY KEY, user_id TEXT, email TEXT NOT NULL DEFAULT "", topic TEXT NOT NULL DEFAULT "support", body TEXT NOT NULL, status TEXT NOT NULL DEFAULT "new", created_at TEXT NOT NULL);',
     )
   })
 
@@ -314,5 +315,65 @@ describe('Worker App Endpoints', () => {
 
     const meRes = await app.request('/auth/me', { headers: { authorization: `Bearer ${admin.accessToken}` } }, testEnv)
     expect(((await meRes.json()) as { premium: boolean }).premium).toBe(true)
+  })
+
+  it('accepts a contact message and exposes it to admins', async () => {
+    const headers = { 'content-type': 'application/json' }
+    const email = `contact-${Date.now()}@example.com`
+
+    const reg = await app.request(
+      '/auth/register',
+      { method: 'POST', headers, body: JSON.stringify({ email, password: 'secret123' }) },
+      testEnv,
+    )
+    expect(reg.status).toBe(201)
+    const user = (await reg.json()) as { user: { id: string }; accessToken: string }
+
+    const tooShort = await app.request(
+      '/api/contact',
+      { method: 'POST', headers: { ...headers, authorization: `Bearer ${user.accessToken}` }, body: JSON.stringify({ body: 'hi' }) },
+      testEnv,
+    )
+    expect(tooShort.status).toBe(400)
+
+    const sent = await app.request(
+      '/api/contact',
+      {
+        method: 'POST',
+        headers: { ...headers, authorization: `Bearer ${user.accessToken}` },
+        body: JSON.stringify({ topic: 'idea', body: 'Привет, создатель! Добавь тёмную тему.' }),
+      },
+      testEnv,
+    )
+    expect(sent.status).toBe(200)
+    expect(((await sent.json()) as { ok: boolean }).ok).toBe(true)
+
+    await testEnv.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind('admin', user.user.id).run()
+    const login = await app.request(
+      '/auth/login',
+      { method: 'POST', headers, body: JSON.stringify({ email, password: 'secret123' }) },
+      testEnv,
+    )
+    const adminToken = ((await login.json()) as { accessToken: string }).accessToken
+
+    const list = await app.request('/admin/messages', { headers: { authorization: `Bearer ${adminToken}` } }, testEnv)
+    expect(list.status).toBe(200)
+    const messages = (await list.json()) as { id: string; topic: string; status: string }[]
+    expect(messages.some((m) => m.topic === 'idea')).toBe(true)
+
+    const target = messages[0]
+    const read = await app.request(
+      `/admin/messages/${target.id}/status`,
+      { method: 'POST', headers: { ...headers, authorization: `Bearer ${adminToken}` }, body: JSON.stringify({ status: 'read' }) },
+      testEnv,
+    )
+    expect(read.status).toBe(200)
+
+    const removed = await app.request(
+      `/admin/messages/${target.id}`,
+      { method: 'DELETE', headers: { authorization: `Bearer ${adminToken}` } },
+      testEnv,
+    )
+    expect(removed.status).toBe(200)
   })
 })

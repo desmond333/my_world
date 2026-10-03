@@ -26,7 +26,7 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: var(--radius);
   background: rgba(244, 184, 73, 0.15);
   border: 1px solid rgba(244, 184, 73, 0.35);
   color: var(--accent);
@@ -61,7 +61,7 @@
   padding: 8px 14px;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--fg);
   font-size: 13px;
   font-weight: 600;
@@ -83,7 +83,7 @@
 .admin-metric-card {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -94,7 +94,7 @@
 .admin-metric-icon {
   width: 44px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--line);
   display: grid;
@@ -125,7 +125,7 @@
 .admin-users-panel {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -162,7 +162,7 @@
   padding: 9px 12px 9px 36px;
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--fg);
   font-size: 13px;
   outline: none;
@@ -178,14 +178,14 @@
   align-items: center;
   background: var(--bg);
   padding: 3px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   gap: 2px;
 }
 
 .admin-filter-btn {
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   border: none;
   background: transparent;
   color: var(--muted);
@@ -202,7 +202,7 @@
 
 .admin-table-container {
   overflow-x: auto;
-  border-radius: 10px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
 }
 
@@ -272,7 +272,7 @@
 
 .admin-inspect-btn {
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--bg);
   border: 1px solid var(--line);
   color: var(--fg);
@@ -292,7 +292,7 @@
 
 .admin-delete-btn {
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: transparent;
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #ef4444;
@@ -319,7 +319,7 @@
 .admin-user-card {
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -347,7 +347,7 @@
   margin: 60px auto;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius);
   padding: 36px 28px;
   text-align: center;
   display: flex;
@@ -381,27 +381,20 @@
   line-height: 1.5;
 }
 
-.admin-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  display: grid;
-  place-items: center;
-  z-index: 1000;
-  padding: 20px;
-}
-
 .admin-modal {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius);
   width: min(700px, 100%);
   max-height: 85vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   overflow: hidden;
+}
+
+.ui-dialog-content.admin-modal {
+  width: min(700px, 100%);
 }
 
 .admin-modal-head {
@@ -426,7 +419,7 @@
   display: grid;
   place-items: center;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: var(--radius);
 }
 
 .admin-modal-close:hover {
@@ -451,7 +444,7 @@
 .snapshot-stat-box {
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 12px;
   text-align: center;
 }
@@ -472,7 +465,7 @@
 .snapshot-json-preview {
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 12px;
   font-family: 'DM Mono', monospace;
   font-size: 11px;
@@ -489,7 +482,7 @@
   gap: 6px;
   padding: 6px 10px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: transparent;
   color: var(--muted);
   font-size: 0.8rem;
@@ -510,4 +503,95 @@
   background: var(--accent);
   color: var(--on-accent);
   font-weight: 700;
+}
+
+.admin-messages-panel {
+  margin-top: 18px;
+  padding: 18px;
+}
+
+.admin-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-panel-head h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.admin-panel-count {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-message {
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.admin-message.is-new {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+}
+
+.admin-message-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.admin-message-topic {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.admin-message-email {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.admin-message-date {
+  margin-left: auto;
+  font-family: 'DM Mono', monospace;
+}
+
+.admin-message-body {
+  margin: 8px 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.admin-message-actions {
+  display: flex;
+  gap: 8px;
 }

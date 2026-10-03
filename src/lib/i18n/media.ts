@@ -2,7 +2,7 @@ import type { Dictionary } from './types'
 
 export const media: Dictionary = {
   ru: {
-    'media.kicker': 'дополнительно · медиа',
+    'media.kicker': 'полезное · медиа',
     'media.tabsAria': 'Разделы медиа',
     'media.tab.movies': 'Фильмы',
     'media.tab.moviesHint': 'поиск и списки',
@@ -34,6 +34,7 @@ export const media: Dictionary = {
     'collection.search.detailsFailed': 'Не удалось загрузить детали.',
 
     'collection.details.aria': 'Подробнее: {title}',
+    'collection.details.label': 'Подробнее',
     'collection.details.loading': 'Собираем детали…',
     'collection.details.noPoster': 'нет',
 
@@ -68,7 +69,7 @@ export const media: Dictionary = {
     'collection.heat.2': 'Не понравилось совсем',
     'collection.heat.1': 'Зря потратил время',
 
-    'movies.kicker': 'дополнительно',
+    'movies.kicker': 'полезное',
     'movies.title': 'Фильмы',
     'movies.intro': 'Ищи по названию, раскладывай в два списка и меняй порядок перетаскиванием. Всё хранится только на этом устройстве.',
     'movies.list.wishlist': 'Хочу посмотреть',
@@ -84,7 +85,7 @@ export const media: Dictionary = {
     'movies.search.details': 'Подробнее',
     'movies.search.online': 'Смотреть онлайн',
 
-    'books.kicker': 'дополнительно',
+    'books.kicker': 'полезное',
     'books.title': 'Книги',
     'books.intro':
       'Ищи книги по названию или автору на русском языке, раскладывай в два списка и меняй порядок перетаскиванием. Всё хранится только на этом устройстве.',
@@ -99,7 +100,7 @@ export const media: Dictionary = {
     'books.search.details': 'Подробнее',
     'books.search.online': 'Читать онлайн',
 
-    'games.kicker': 'дополнительно',
+    'games.kicker': 'полезное',
     'games.title': 'Игры',
     'games.intro':
       'Ищи игры по названию на английском языке (например: Witcher, Cyberpunk, Elden Ring), раскладывай в два списка и меняй порядок перетаскиванием.',
@@ -139,7 +140,7 @@ export const media: Dictionary = {
   },
 
   en: {
-    'media.kicker': 'extra · media',
+    'media.kicker': 'useful · media',
     'media.tabsAria': 'Media sections',
     'media.tab.movies': 'Movies',
     'media.tab.moviesHint': 'search and lists',
@@ -171,6 +172,7 @@ export const media: Dictionary = {
     'collection.search.detailsFailed': 'Failed to load details.',
 
     'collection.details.aria': 'Details: {title}',
+    'collection.details.label': 'Details',
     'collection.details.loading': 'Collecting details…',
     'collection.details.noPoster': 'none',
 
@@ -205,7 +207,7 @@ export const media: Dictionary = {
     'collection.heat.2': "Didn't like it at all",
     'collection.heat.1': 'Wasted my time',
 
-    'movies.kicker': 'extra',
+    'movies.kicker': 'useful',
     'movies.title': 'Movies',
     'movies.intro': 'Search by title, split them into two lists and reorder by dragging. Everything is stored only on this device.',
     'movies.list.wishlist': 'Want to watch',
@@ -221,7 +223,7 @@ export const media: Dictionary = {
     'movies.search.details': 'Details',
     'movies.search.online': 'Watch online',
 
-    'books.kicker': 'extra',
+    'books.kicker': 'useful',
     'books.title': 'Books',
     'books.intro':
       'Search books by title or author in Russian, organize into two lists, and reorder by dragging. Everything is stored on this device.',
@@ -236,7 +238,7 @@ export const media: Dictionary = {
     'books.search.details': 'Details',
     'books.search.online': 'Read online',
 
-    'games.kicker': 'extra',
+    'games.kicker': 'useful',
     'games.title': 'Games',
     'games.intro':
       'Search games by English title (e.g., Witcher, Cyberpunk, Elden Ring), organize into two lists, and reorder by dragging.',

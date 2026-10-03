@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Coins, Heart, Mail, Send, Sparkles, X } from 'lucide-react'
 import { useTranslation } from '../../../lib/i18n'
+import { Dialog, DialogContent, DialogTitle } from '../../../shared/ui'
 import { useShopStore } from '../../../store'
 import { playCatMeow, playCatPurr } from '../../../widgets/CatAssistant'
 import './DreamFriendGreeting.css'
@@ -44,16 +45,25 @@ export const DreamFriendGreeting = ({ onShowToast }: DreamFriendGreetingProps) =
 
   return (
     <>
-      {hasPendingReply && !claimedNotice && (
-        <div className="dream-reply-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="dream-reply-card">
+      <Dialog open={hasPendingReply && !claimedNotice} onOpenChange={() => {}}>
+        {hasPendingReply && !claimedNotice && (
+          <DialogContent
+            className="dream-reply-card"
+            showCloseButton={false}
+            aria-describedby={undefined}
+            onEscapeKeyDown={(event) => event.preventDefault()}
+            onPointerDownOutside={(event) => event.preventDefault()}
+            onInteractOutside={(event) => event.preventDefault()}
+          >
             <div className="dream-reply-stars">✨ 🌙 ✨</div>
             <div className="dream-reply-icon">
               <Mail size={28} className="dream-mail-icon" />
               <Heart size={16} className="dream-heart-badge" />
             </div>
 
-            <h3 className="dream-reply-title">{t('notesDream.dream-letter-received', 'Ответ из мира снов получен!')}</h3>
+            <DialogTitle asChild>
+              <h3 className="dream-reply-title">{t('notesDream.dream-letter-received', 'Ответ из мира снов получен!')}</h3>
+            </DialogTitle>
 
             <p className="dream-reply-text">
               {t('notesDream.replyText', undefined, { name: friendName || t('notesDream.kindredSpirit') })}
@@ -68,9 +78,9 @@ export const DreamFriendGreeting = ({ onShowToast }: DreamFriendGreetingProps) =
               <Sparkles size={15} />
               <span>{t('notesDream.claim-100-coins', 'Забрать 100 коинов 🪙')}</span>
             </button>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
 
       <div className="dream-greeting-bar">
         {!formOpen ? (

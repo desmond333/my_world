@@ -52,7 +52,6 @@ export const AnimalPage = () => {
           </p>
           <h1>{animal.name}</h1>
           <p className="animal-breed-line">{animal.breed}</p>
-          <p className="animal-facts">{animal.facts}</p>
           <blockquote>«{animal.phrase}»</blockquote>
           <div className="animal-actions">
             <button

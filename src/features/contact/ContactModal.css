@@ -1,0 +1,81 @@
+.contact-modal {
+  width: min(520px, 92vw);
+}
+
+.contact-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ui-toggle-group.contact-topics {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
+.ui-toggle-group-item.contact-topic-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+}
+
+.ui-toggle-group-item.contact-topic-btn:hover {
+  color: var(--fg);
+}
+
+.ui-toggle-group-item.contact-topic-btn[data-state='on'] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  box-shadow: none;
+}
+
+.contact-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 120px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.contact-textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.contact-status {
+  margin: 0;
+  font-size: 13px;
+}
+
+.contact-status.is-sent {
+  color: var(--accent);
+}
+
+.contact-status.is-short,
+.contact-status.is-error {
+  color: var(--coral);
+}

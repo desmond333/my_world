@@ -3,8 +3,8 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ArrowLeftRight, CalendarDays, Check, Flame, GripVertical, Heart, ImageOff, MessageSquare, Star, Trash2, Tv, X } from 'lucide-react'
 import { otherCollectionList, yearLabel } from '../../lib'
-import { useTranslation } from '../../lib/i18n'
-import { Tooltip } from '../../shared/ui'
+import { countText, useTranslation } from '../../lib/i18n'
+import { Slider, Tooltip } from '../../shared/ui'
 import type { SortableItemRowProps } from './types'
 
 const todayIso = () => {
@@ -25,19 +25,6 @@ const ENJOYMENT_EMOJI: Record<number, string> = {
   1: '💩',
 }
 
-const ENJOYMENT_FALLBACK: Record<number, string> = {
-  10: 'Чистый кайф! Шедевр',
-  9: 'Восторг, на одном дыхании',
-  8: 'Очень понравилось, рекомендую',
-  7: 'Хорошо, добротно',
-  6: 'Нормально, вечер скоротать',
-  5: 'Средне, без эмоций',
-  4: 'На любителя, затянуто',
-  3: 'Скучно, не зацепило',
-  2: 'Не понравилось совсем',
-  1: 'Зря потратил время',
-}
-
 const formatFinished = (iso: string, locale: string) => {
   const parsed = new Date(`${iso}T00:00:00`)
   if (Number.isNaN(parsed.getTime())) return iso
@@ -45,7 +32,7 @@ const formatFinished = (iso: string, locale: string) => {
 }
 
 export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUpdateItem, online }: SortableItemRowProps) => {
-  const { t, locale } = useTranslation()
+  const { t, lang, locale } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
   const target = otherCollectionList(list)
   const targetLabel = lists.find((option) => option.key === target)?.label ?? target
@@ -75,7 +62,7 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
 
   const currentDesc = {
     emoji: ENJOYMENT_EMOJI[rating] ?? '⭐',
-    label: t(`collection.heat.${rating}`, ENJOYMENT_FALLBACK[rating] ?? ''),
+    label: t(`collection.heat.${rating}`),
   }
 
   return (
@@ -113,8 +100,7 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
               )}
               {item.enjoyment && (
                 <span className="enjoyment-pill">
-                  {ENJOYMENT_EMOJI[item.enjoyment] ?? '⭐'} {item.enjoyment}/10{' '}
-                  {t('collection.row.heat', undefined, { count: item.enjoyment })}
+                  {ENJOYMENT_EMOJI[item.enjoyment] ?? '⭐'} {item.enjoyment}/10 {countText('collection.row.heat', item.enjoyment, lang)}
                 </span>
               )}
               {item.review && <span className="review-quote">«{item.review}»</span>}
@@ -183,19 +169,16 @@ export const SortableItemRow = memo(({ item, list, lists, onRemove, onMove, onUp
                 {currentDesc.emoji} {rating} / 10 — {currentDesc.label}
               </strong>
             </label>
-            <div className="review-rating-selector">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
-                <button
-                  key={score}
-                  type="button"
-                  className={`score-btn${rating === score ? ' is-selected' : ''}`}
-                  onClick={() => setRating(score)}
-                  title={t(`collection.heat.${score}`, ENJOYMENT_FALLBACK[score])}
-                >
-                  {score}
-                </button>
-              ))}
-            </div>
+            <Slider
+              className="review-slider"
+              value={[rating]}
+              min={1}
+              max={10}
+              step={1}
+              onValueChange={(values) => setRating(values[0] ?? 1)}
+              ariaLabel={t('collection.row.reviewLiked')}
+              id={`enjoyment-slider-${item.id}`}
+            />
           </div>
 
           <div className="review-date-row">

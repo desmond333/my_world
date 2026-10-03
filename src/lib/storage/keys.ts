@@ -15,7 +15,6 @@ export const STORAGE_KEYS = {
   games: 'animal-games',
   shop: 'tau-shop-economy',
   viewModes: 'app-view-modes',
-  premium: 'tau-premium',
   catHidden: 'tau_cat_hidden',
   stathamTrophies: 'statham-lottery-trophies',
   georgianFavorites: 'georgian-favorite-phrases',

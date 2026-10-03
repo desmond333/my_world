@@ -1,12 +1,12 @@
 import { lazy, Suspense } from 'react'
-import { Link, Navigate, Route, Routes } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useTranslation } from '../../lib/i18n'
 import { useDailyStore } from '../../store'
+import { PageTransition } from '../../shared/ui'
 import { DailyPage } from '../../pages/DailyPage/DailyPage'
 
 const AnimalPage = lazy(() => import('../../pages/AnimalPage/AnimalPage').then((m) => ({ default: m.AnimalPage })))
-const ExtraPage = lazy(() => import('../../pages/ExtraPage/ExtraPage').then((m) => ({ default: m.ExtraPage })))
-const MiscPage = lazy(() => import('../../pages/MiscPage/MiscPage').then((m) => ({ default: m.MiscPage })))
+const UsefulPage = lazy(() => import('../../pages/UsefulPage/UsefulPage').then((m) => ({ default: m.UsefulPage })))
 const CreatorPage = lazy(() => import('../../pages/CreatorPage/CreatorPage').then((m) => ({ default: m.CreatorPage })))
 const FavoritesPage = lazy(() => import('../../pages/FavoritesPage/FavoritesPage').then((m) => ({ default: m.FavoritesPage })))
 const SettingsPage = lazy(() => import('../../pages/SettingsPage/SettingsPage').then((m) => ({ default: m.SettingsPage })))
@@ -15,45 +15,50 @@ const AuthPage = lazy(() => import('../../pages/AuthPage/AuthPage').then((m) => 
 const AdminPage = lazy(() => import('../../pages/AdminPage/AdminPage').then((m) => ({ default: m.AdminPage })))
 
 const TrainingPage = lazy(() => import('../../pages/TrainingPage/TrainingPage').then((m) => ({ default: m.TrainingPage })))
-const FinancePage = lazy(() => import('../../pages/ExtraPage/Finance/FinancePage').then((m) => ({ default: m.FinancePage })))
+const FinancePage = lazy(() => import('../../pages/UsefulPage/Finance/FinancePage').then((m) => ({ default: m.FinancePage })))
 const FinanceOperationsTab = lazy(() =>
-  import('../../pages/ExtraPage/Finance/tabs/FinanceOperationsTab').then((m) => ({ default: m.FinanceOperationsTab })),
+  import('../../pages/UsefulPage/Finance/tabs/FinanceOperationsTab').then((m) => ({ default: m.FinanceOperationsTab })),
 )
 const FinanceDepositsTab = lazy(() =>
-  import('../../pages/ExtraPage/Finance/tabs/FinanceDepositsTab').then((m) => ({ default: m.FinanceDepositsTab })),
+  import('../../pages/UsefulPage/Finance/tabs/FinanceDepositsTab').then((m) => ({ default: m.FinanceDepositsTab })),
 )
 const FinanceLoansTab = lazy(() =>
-  import('../../pages/ExtraPage/Finance/tabs/FinanceLoansTab').then((m) => ({ default: m.FinanceLoansTab })),
+  import('../../pages/UsefulPage/Finance/tabs/FinanceLoansTab').then((m) => ({ default: m.FinanceLoansTab })),
 )
 const FinanceSubscriptionsTab = lazy(() =>
-  import('../../pages/ExtraPage/Finance/tabs/FinanceSubscriptionsTab').then((m) => ({ default: m.FinanceSubscriptionsTab })),
+  import('../../pages/UsefulPage/Finance/tabs/FinanceSubscriptionsTab').then((m) => ({ default: m.FinanceSubscriptionsTab })),
 )
 const FinanceAdviceTab = lazy(() =>
-  import('../../pages/ExtraPage/Finance/tabs/FinanceAdviceTab').then((m) => ({ default: m.FinanceAdviceTab })),
+  import('../../pages/UsefulPage/Finance/tabs/FinanceAdviceTab').then((m) => ({ default: m.FinanceAdviceTab })),
 )
 const ProductivityPage = lazy(() =>
-  import('../../pages/ExtraPage/Productivity/ProductivityPage').then((m) => ({ default: m.ProductivityPage })),
+  import('../../pages/UsefulPage/Productivity/ProductivityPage').then((m) => ({ default: m.ProductivityPage })),
 )
-const TasksPage = lazy(() => import('../../pages/ExtraPage/Productivity/Tasks/TasksPage').then((m) => ({ default: m.TasksPage })))
-const GoalsPage = lazy(() => import('../../pages/ExtraPage/Productivity/Goals/GoalsPage').then((m) => ({ default: m.GoalsPage })))
-const DreamsPage = lazy(() => import('../../pages/ExtraPage/Productivity/Dreams/DreamsPage').then((m) => ({ default: m.DreamsPage })))
-const StatusPage = lazy(() => import('../../pages/ExtraPage/Productivity/Status/StatusPage').then((m) => ({ default: m.StatusPage })))
-const NotesTab = lazy(() => import('../../pages/ExtraPage/Productivity/Notes/NotesTab').then((m) => ({ default: m.NotesTab })))
-const MindPage = lazy(() => import('../../pages/ExtraPage/Mind/MindPage').then((m) => ({ default: m.MindPage })))
-const DreamsDiaryTab = lazy(() => import('../../pages/ExtraPage/Mind/Dreams/DreamsDiaryTab').then((m) => ({ default: m.DreamsDiaryTab })))
-const MoodPage = lazy(() => import('../../pages/ExtraPage/Productivity/Mood/MoodPage').then((m) => ({ default: m.MoodPage })))
-const RemindPage = lazy(() => import('../../pages/ExtraPage/Remind/RemindPage').then((m) => ({ default: m.RemindPage })))
-const BirthdaysTab = lazy(() => import('../../pages/ExtraPage/Remind/Birthdays/BirthdaysTab').then((m) => ({ default: m.BirthdaysTab })))
-const MediaPage = lazy(() => import('../../pages/ExtraPage/Media/MediaPage').then((m) => ({ default: m.MediaPage })))
-const MoviesPage = lazy(() => import('../../pages/ExtraPage/Media/Movies/MoviesPage').then((m) => ({ default: m.MoviesPage })))
-const BooksPage = lazy(() => import('../../pages/ExtraPage/Media/Books/BooksPage').then((m) => ({ default: m.BooksPage })))
-const GamesPage = lazy(() => import('../../pages/ExtraPage/Media/Games/GamesPage').then((m) => ({ default: m.GamesPage })))
+const TasksPage = lazy(() => import('../../pages/UsefulPage/Productivity/Tasks/TasksPage').then((m) => ({ default: m.TasksPage })))
+const GoalsPage = lazy(() => import('../../pages/UsefulPage/Productivity/Goals/GoalsPage').then((m) => ({ default: m.GoalsPage })))
+const DreamsPage = lazy(() => import('../../pages/UsefulPage/Productivity/Dreams/DreamsPage').then((m) => ({ default: m.DreamsPage })))
+const StatusPage = lazy(() => import('../../pages/UsefulPage/Productivity/Status/StatusPage').then((m) => ({ default: m.StatusPage })))
+const NotesTab = lazy(() => import('../../pages/UsefulPage/Productivity/Notes/NotesTab').then((m) => ({ default: m.NotesTab })))
+const MindPage = lazy(() => import('../../pages/UsefulPage/Mind/MindPage').then((m) => ({ default: m.MindPage })))
+const DreamsDiaryTab = lazy(() => import('../../pages/UsefulPage/Mind/Dreams/DreamsDiaryTab').then((m) => ({ default: m.DreamsDiaryTab })))
+const MoodPage = lazy(() => import('../../pages/UsefulPage/Productivity/Mood/MoodPage').then((m) => ({ default: m.MoodPage })))
+const RemindPage = lazy(() => import('../../pages/UsefulPage/Remind/RemindPage').then((m) => ({ default: m.RemindPage })))
+const BirthdaysTab = lazy(() => import('../../pages/UsefulPage/Remind/Birthdays/BirthdaysTab').then((m) => ({ default: m.BirthdaysTab })))
+const MediaPage = lazy(() => import('../../pages/UsefulPage/Media/MediaPage').then((m) => ({ default: m.MediaPage })))
+const MoviesPage = lazy(() => import('../../pages/UsefulPage/Media/Movies/MoviesPage').then((m) => ({ default: m.MoviesPage })))
+const BooksPage = lazy(() => import('../../pages/UsefulPage/Media/Books/BooksPage').then((m) => ({ default: m.BooksPage })))
+const GamesPage = lazy(() => import('../../pages/UsefulPage/Media/Games/GamesPage').then((m) => ({ default: m.GamesPage })))
 
-const LanguagesPage = lazy(() => import('../../pages/MiscPage/Languages/LanguagesPage').then((m) => ({ default: m.LanguagesPage })))
-const FunPage = lazy(() => import('../../pages/MiscPage/Fun/FunPage').then((m) => ({ default: m.FunPage })))
-const LotteryPage = lazy(() => import('../../pages/MiscPage/Lottery/LotteryPage').then((m) => ({ default: m.LotteryPage })))
-const TogetherPage = lazy(() => import('../../pages/MiscPage/Together/TogetherPage').then((m) => ({ default: m.TogetherPage })))
+const LanguagesPage = lazy(() => import('../../pages/MorePage/Languages/LanguagesPage').then((m) => ({ default: m.LanguagesPage })))
+const FunPage = lazy(() => import('../../pages/MorePage/Fun/FunPage').then((m) => ({ default: m.FunPage })))
+const LotteryPage = lazy(() => import('../../pages/MorePage/Lottery/LotteryPage').then((m) => ({ default: m.LotteryPage })))
+const TogetherPage = lazy(() => import('../../pages/MorePage/Together/TogetherPage').then((m) => ({ default: m.TogetherPage })))
+const SoundsPage = lazy(() => import('../../pages/UsefulPage/Sounds/SoundsPage').then((m) => ({ default: m.SoundsPage })))
 const HelpPage = lazy(() => import('../../pages/HelpPage/HelpPage').then((m) => ({ default: m.HelpPage })))
+const MotionDevPage = lazy(() => import('../../pages/MotionDevPage/MotionDevPage').then((m) => ({ default: m.MotionDevPage })))
+const DevComponentsPage = lazy(() =>
+  import('../../pages/DevComponentsPage/DevComponentsPage').then((m) => ({ default: m.DevComponentsPage })),
+)
 
 const PageLoader = () => {
   const { t } = useTranslation()
@@ -92,86 +97,85 @@ const StartRedirect = () => {
   return <Navigate to={target} replace />
 }
 
-export const AppRouter = () => (
-  <Suspense fallback={<PageLoader />}>
-    <Routes>
-      <Route path="/" element={<StartRedirect />} />
-      <Route path="/today" element={<DailyPage />} />
-      <Route path="/favorites" element={<FavoritesPage />} />
-      <Route path="/settings" element={<SettingsPage />} />
-      <Route path="/shop" element={<ShopPage />} />
-      <Route path="/notes" element={<Navigate to="/extra/productivity/notes" replace />} />
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="/admin" element={<AdminPage />} />
-      <Route path="/training" element={<Navigate to="/extra/training" replace />} />
-      <Route path="/clowns" element={<Navigate to="/misc/fun" replace />} />
-      <Route path="/fun" element={<Navigate to="/misc/fun" replace />} />
-      <Route path="/subscriptions" element={<Navigate to="/extra/finance/subscriptions" replace />} />
-      <Route path="/languages" element={<Navigate to="/misc/languages" replace />} />
-      <Route path="/basic-english" element={<Navigate to="/misc/languages?tab=basicEnglish" replace />} />
-      <Route path="/georgian" element={<Navigate to="/misc/languages?tab=georgian" replace />} />
-      <Route path="/english" element={<Navigate to="/misc/languages?tab=english" replace />} />
-      <Route path="/lottery" element={<Navigate to="/misc/lottery" replace />} />
-      <Route path="/together" element={<Navigate to="/misc/together" replace />} />
-      <Route path="/creator" element={<CreatorPage />} />
-      <Route path="/help" element={<HelpPage />} />
-      <Route path="/extra" element={<ExtraPage />}>
-        <Route index element={<Navigate to="/extra/training" replace />} />
-        <Route path="training" element={<TrainingPage />} />
-        <Route path="finance" element={<FinancePage />}>
-          <Route index element={<Navigate to="/extra/finance/operations" replace />} />
-          <Route path="operations" element={<FinanceOperationsTab />} />
-          <Route path="deposits" element={<FinanceDepositsTab />} />
-          <Route path="loans" element={<FinanceLoansTab />} />
-          <Route path="subscriptions" element={<FinanceSubscriptionsTab />} />
-          <Route path="advice" element={<FinanceAdviceTab />} />
-        </Route>
-        <Route path="subscriptions" element={<Navigate to="/extra/finance/subscriptions" replace />} />
-        <Route path="languages" element={<Navigate to="/misc/languages" replace />} />
-        <Route path="georgian" element={<Navigate to="/misc/languages?tab=georgian" replace />} />
-        <Route path="english" element={<Navigate to="/misc/languages?tab=english" replace />} />
-        <Route path="lottery" element={<Navigate to="/misc/lottery" replace />} />
-        <Route path="clowns" element={<Navigate to="/misc/fun" replace />} />
-        <Route path="fun" element={<Navigate to="/misc/fun" replace />} />
-        <Route path="productivity" element={<ProductivityPage />}>
-          <Route index element={<Navigate to="/extra/productivity/task" replace />} />
-          <Route path="task" element={<TasksPage />} />
-          <Route path="goal" element={<GoalsPage />} />
-          <Route path="dream" element={<DreamsPage />} />
-          <Route path="notes" element={<NotesTab />} />
-          <Route path="mood" element={<Navigate to="/extra/mind/mood" replace />} />
-          <Route path="status" element={<StatusPage />} />
-        </Route>
-        <Route path="mind" element={<MindPage />}>
-          <Route index element={<Navigate to="/extra/mind/dreams" replace />} />
-          <Route path="dreams" element={<DreamsDiaryTab />} />
-          <Route path="mood" element={<MoodPage />} />
-        </Route>
-        <Route path="remind" element={<RemindPage />}>
-          <Route index element={<Navigate to="/extra/remind/birthdays" replace />} />
-          <Route path="birthdays" element={<BirthdaysTab />} />
-        </Route>
-        <Route path="media" element={<MediaPage />}>
-          <Route index element={<Navigate to="/extra/media/movies" replace />} />
-          <Route path="movies" element={<MoviesPage />} />
-          <Route path="books" element={<BooksPage />} />
-          <Route path="games" element={<GamesPage />} />
-        </Route>
-      </Route>
-      <Route path="/misc" element={<MiscPage />}>
-        <Route index element={<Navigate to="/misc/languages" replace />} />
-        <Route path="subscriptions" element={<Navigate to="/extra/finance/subscriptions" replace />} />
-        <Route path="basic-english" element={<Navigate to="/misc/languages?tab=basicEnglish" replace />} />
-        <Route path="languages" element={<LanguagesPage />} />
-        <Route path="georgian" element={<Navigate to="/misc/languages?tab=georgian" replace />} />
-        <Route path="english" element={<Navigate to="/misc/languages?tab=english" replace />} />
-        <Route path="fun" element={<FunPage />} />
-        <Route path="clowns" element={<FunPage />} />
-        <Route path="lottery" element={<LotteryPage />} />
-        <Route path="together" element={<TogetherPage />} />
-      </Route>
-      <Route path="/animal/:id" element={<AnimalPage />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  </Suspense>
-)
+export const AppRouter = () => {
+  const location = useLocation()
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <PageTransition key={location.pathname}>
+        <Routes location={location}>
+          <Route path="/" element={<StartRedirect />} />
+          <Route path="/today" element={<DailyPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/notes" element={<Navigate to="/useful/productivity/notes" replace />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/training" element={<Navigate to="/useful/training" replace />} />
+          <Route path="/clowns" element={<Navigate to="/useful/fun" replace />} />
+          <Route path="/fun" element={<Navigate to="/useful/fun" replace />} />
+          <Route path="/subscriptions" element={<Navigate to="/useful/finance/subscriptions" replace />} />
+          <Route path="/languages" element={<Navigate to="/useful/languages" replace />} />
+          <Route path="/basic-english" element={<Navigate to="/useful/languages?tab=basicEnglish" replace />} />
+          <Route path="/georgian" element={<Navigate to="/useful/languages?tab=georgian" replace />} />
+          <Route path="/english" element={<Navigate to="/useful/languages?tab=english" replace />} />
+          <Route path="/lottery" element={<Navigate to="/useful/lottery" replace />} />
+          <Route path="/together" element={<Navigate to="/useful/together" replace />} />
+          <Route path="/creator" element={<CreatorPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          {import.meta.env.DEV && <Route path="/dev/motion" element={<MotionDevPage />} />}
+          {import.meta.env.DEV && <Route path="/dev/components" element={<DevComponentsPage />} />}
+          <Route path="/useful" element={<UsefulPage />}>
+            <Route index element={<Navigate to="/useful/training" replace />} />
+            <Route path="training" element={<TrainingPage />} />
+            <Route path="finance" element={<FinancePage />}>
+              <Route index element={<Navigate to="/useful/finance/operations" replace />} />
+              <Route path="operations" element={<FinanceOperationsTab />} />
+              <Route path="deposits" element={<FinanceDepositsTab />} />
+              <Route path="loans" element={<FinanceLoansTab />} />
+              <Route path="subscriptions" element={<FinanceSubscriptionsTab />} />
+              <Route path="advice" element={<FinanceAdviceTab />} />
+            </Route>
+            <Route path="subscriptions" element={<Navigate to="/useful/finance/subscriptions" replace />} />
+            <Route path="languages" element={<LanguagesPage />} />
+            <Route path="basic-english" element={<Navigate to="/useful/languages?tab=basicEnglish" replace />} />
+            <Route path="georgian" element={<Navigate to="/useful/languages?tab=georgian" replace />} />
+            <Route path="english" element={<Navigate to="/useful/languages?tab=english" replace />} />
+            <Route path="sounds" element={<SoundsPage />} />
+            <Route path="clowns" element={<Navigate to="/useful/fun" replace />} />
+            <Route path="fun" element={<FunPage />} />
+            <Route path="lottery" element={<LotteryPage />} />
+            <Route path="together" element={<TogetherPage />} />
+            <Route path="productivity" element={<ProductivityPage />}>
+              <Route index element={<Navigate to="/useful/productivity/task" replace />} />
+              <Route path="task" element={<TasksPage />} />
+              <Route path="goal" element={<GoalsPage />} />
+              <Route path="dream" element={<DreamsPage />} />
+              <Route path="notes" element={<NotesTab />} />
+              <Route path="mood" element={<Navigate to="/useful/mind/mood" replace />} />
+              <Route path="status" element={<StatusPage />} />
+            </Route>
+            <Route path="mind" element={<MindPage />}>
+              <Route index element={<Navigate to="/useful/mind/dreams" replace />} />
+              <Route path="dreams" element={<DreamsDiaryTab />} />
+              <Route path="mood" element={<MoodPage />} />
+            </Route>
+            <Route path="remind" element={<RemindPage />}>
+              <Route index element={<Navigate to="/useful/remind/birthdays" replace />} />
+              <Route path="birthdays" element={<BirthdaysTab />} />
+            </Route>
+            <Route path="media" element={<MediaPage />}>
+              <Route index element={<Navigate to="/useful/media/movies" replace />} />
+              <Route path="movies" element={<MoviesPage />} />
+              <Route path="books" element={<BooksPage />} />
+              <Route path="games" element={<GamesPage />} />
+            </Route>
+          </Route>
+          <Route path="/animal/:id" element={<AnimalPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </PageTransition>
+    </Suspense>
+  )
+}

@@ -55,20 +55,20 @@ export const idbGet = async (key: string): Promise<string | null> => {
   })
 }
 
-export const idbSet = async (key: string, value: string): Promise<void> => {
+export const idbSet = async (key: string, value: string): Promise<boolean> => {
   const db = await getIDB()
-  if (!db) return
+  if (!db) return false
 
   return new Promise((resolve) => {
     try {
       const tx = db.transaction(STORE_NAME, 'readwrite')
       const store = tx.objectStore(STORE_NAME)
       store.put(value, key)
-      tx.oncomplete = () => resolve()
-      tx.onerror = () => resolve()
-      tx.onabort = () => resolve()
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+      tx.onabort = () => resolve(false)
     } catch {
-      resolve()
+      resolve(false)
     }
   })
 }
@@ -164,18 +164,22 @@ export const hybridStorage: StateStorage = {
   setItem: (name: string, value: string): void => {
     if (typeof window === 'undefined') return
 
+    let localOk = true
     try {
       window.localStorage.setItem(name, value)
     } catch (err) {
       void err
+      localOk = false
+    }
+
+    void idbSet(name, value).then((stored) => {
+      if (localOk || !stored) return
       try {
         window.localStorage.removeItem(name)
       } catch {
         void 0
       }
-    }
-
-    void idbSet(name, value)
+    })
   },
 
   removeItem: (name: string): void => {

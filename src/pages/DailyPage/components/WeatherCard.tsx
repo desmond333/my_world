@@ -1,5 +1,5 @@
 import { ChevronDown, MapPin, RefreshCw, Wind } from 'lucide-react'
-import { WeatherIcon } from '../../../shared/ui'
+import { Collapsible, CollapsibleTrigger, WeatherIcon } from '../../../shared/ui'
 import { dayName, getDaySpecialEvent, getTemperatureColor, isRainyDay, weatherLabel } from '../../../lib'
 import { useTranslation } from '../../../lib/i18n'
 import { useBirthdayStore } from '../../../store'
@@ -71,9 +71,11 @@ export const WeatherCard = ({ cityName, weather, forecast, failed, open, onToggl
               )
             })}
           </div>
-          <button className="forecast-toggle" onClick={onToggle} aria-expanded={open} aria-controls="forecast-strip">
-            {open ? t('weather.collapse') : t('weather.showWeek')} <ChevronDown size={15} className={open ? 'chevron-up' : ''} />
-          </button>
+          <Collapsible open={open} onOpenChange={onToggle} asChild>
+            <CollapsibleTrigger className="forecast-toggle" aria-controls="forecast-strip">
+              {open ? t('weather.collapse') : t('weather.showWeek')} <ChevronDown size={15} className={open ? 'chevron-up' : ''} />
+            </CollapsibleTrigger>
+          </Collapsible>
         </>
       ) : (
         <div className="weather-loading">

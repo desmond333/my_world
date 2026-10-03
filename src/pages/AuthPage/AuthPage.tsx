@@ -18,6 +18,7 @@ import {
   UserPlus,
 } from 'lucide-react'
 import { AppTopbar } from '../../widgets'
+import { Badge, Tabs, TabsList, TabsTrigger } from '../../shared/ui'
 import { displayBirthday } from '../../lib'
 import { useCopyFeedback } from '../../hooks'
 import { useTranslation } from '../../lib/i18n'
@@ -136,10 +137,13 @@ export const AuthPage = () => {
 
                 <div className="account-info-item">
                   <span className="account-info-label">{t('auth.field.role')}</span>
-                  <div className={`role-pill ${user.role}`}>
-                    {user.role === 'admin' ? <Crown size={13} /> : <User size={13} />}
-                    <span>{user.role.toUpperCase()}</span>
-                  </div>
+                  <Badge
+                    variant={user.role === 'admin' ? 'vip' : 'outline'}
+                    size="sm"
+                    icon={user.role === 'admin' ? <Crown size={13} /> : <User size={13} />}
+                  >
+                    {user.role.toUpperCase()}
+                  </Badge>
                 </div>
 
                 <div className="account-info-item">
@@ -179,9 +183,9 @@ export const AuthPage = () => {
                   <div className="auth-referral-head">
                     <Gift size={16} />
                     <strong>{t('premium.referral.title')}</strong>
-                    <span className={`auth-premium-badge${user?.premium ? ' is-on' : ''}`}>
-                      <Crown size={12} /> {premiumLabel}
-                    </span>
+                    <Badge variant={user?.premium ? 'vip' : 'muted'} size="sm" icon={<Crown size={12} />}>
+                      {premiumLabel}
+                    </Badge>
                   </div>
                   <p className="auth-referral-desc">{t('premium.referral.desc', undefined, { coins: 1000, months: 2 })}</p>
 
@@ -265,28 +269,18 @@ export const AuthPage = () => {
             </div>
           ) : (
             <>
-              <div className="auth-tabs">
-                <button
-                  type="button"
-                  className={`auth-tab-btn ${tab === 'login' ? 'active' : ''}`}
-                  onClick={() => {
-                    setTab('login')
-                    clearError()
-                  }}
-                >
-                  {t('auth.tab.login')}
-                </button>
-                <button
-                  type="button"
-                  className={`auth-tab-btn ${tab === 'register' ? 'active' : ''}`}
-                  onClick={() => {
-                    setTab('register')
-                    clearError()
-                  }}
-                >
-                  {t('auth.tab.register')}
-                </button>
-              </div>
+              <Tabs
+                value={tab}
+                onValueChange={(value) => {
+                  setTab(value as 'login' | 'register')
+                  clearError()
+                }}
+              >
+                <TabsList className="auth-tabs">
+                  <TabsTrigger value="login">{t('auth.tab.login')}</TabsTrigger>
+                  <TabsTrigger value="register">{t('auth.tab.register')}</TabsTrigger>
+                </TabsList>
+              </Tabs>
 
               {error && <div className="auth-error-box">{error}</div>}
 

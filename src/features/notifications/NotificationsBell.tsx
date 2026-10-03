@@ -44,7 +44,7 @@ export const NotificationsBell = () => {
       return
     }
     if (item.type === 'friendTask') {
-      navigate('/extra/productivity/task')
+      navigate('/useful/productivity/task')
       setSelected(null)
       return
     }

@@ -1,8 +1,19 @@
 import { X } from 'lucide-react'
 import { blockOptions, cities, findCity, startPageOptions } from '../../../data'
 import { useTranslation } from '../../../lib/i18n'
-import { extraSections } from '../../ExtraPage/sections'
-import { RadioGroup, RadioGroupItem, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch } from '../../../shared/ui'
+import { usefulSections } from '../../../lib/usefulSections'
+import {
+  RadioGroup,
+  RadioGroupItem,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+} from '../../../shared/ui'
 import { useDailyStore } from '../../../store'
 import type { SettingsPanelProps } from '../types'
 
@@ -43,11 +54,26 @@ export const SettingsPanel = ({
               <SelectValue placeholder={city.name} />
             </SelectTrigger>
             <SelectContent>
-              {cities.map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  {item.name}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                <SelectLabel>{t('settings.cityRu', 'Россия')}</SelectLabel>
+                {cities
+                  .filter((item) => item.country === 'ru')
+                  .map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.name}
+                    </SelectItem>
+                  ))}
+              </SelectGroup>
+              <SelectGroup>
+                <SelectLabel>{t('settings.cityWorld', 'Мир')}</SelectLabel>
+                {cities
+                  .filter((item) => item.country === 'world')
+                  .map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.name}
+                    </SelectItem>
+                  ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
@@ -93,7 +119,7 @@ export const SettingsPanel = ({
       <fieldset className="setting-field blocks-field">
         <legend>{t('settings.sectionsVisibility.title')}</legend>
         <div className="block-toggles">
-          {extraSections.map((section) => {
+          {usefulSections.map((section) => {
             const isVisible = !hiddenSections.includes(section.key)
             return (
               <Switch

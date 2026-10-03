@@ -21,7 +21,7 @@ import type { Note, NoteKind, NotePatch } from '../../store'
 import { useNotesStore, usePageViewMode } from '../../store'
 import { BlockEditor, blocksToPlainText, isBlockJson, parseBlocks, serializeBlocks } from '../../features'
 import { getBreadcrumbs, getChildNotes } from '../../entities/note'
-import { Tabs, TabsList, TabsTrigger, ToggleGroup, ToggleGroupItem, Tooltip } from '../../shared/ui'
+import { Badge, Tabs, TabsList, TabsTrigger, ToggleGroup, ToggleGroupItem, Tooltip } from '../../shared/ui'
 import { NotesSnippetsAccordion } from './components/NotesSnippetsAccordion'
 import { DreamFriendGreeting } from './components/DreamFriendGreeting'
 import { NotesSidebarTree } from './components/NotesSidebarTree'
@@ -65,6 +65,10 @@ const NoteEditor = ({
   const [moveModalOpen, setMoveModalOpen] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const latestRef = useRef({ title, body, id: note.id, onChange })
+  useEffect(() => {
+    latestRef.current = { title, body, id: note.id, onChange }
+  })
 
   const breadcrumbs = useMemo(() => getBreadcrumbs(allNotes, note.id), [allNotes, note.id])
   const subpages = useMemo(() => getChildNotes(allNotes, note.id), [allNotes, note.id])
@@ -79,6 +83,16 @@ const NoteEditor = ({
       if (timer.current) clearTimeout(timer.current)
     }
   }, [title, body, note.id, onChange])
+
+  useEffect(
+    () => () => {
+      if (!timer.current) return
+      clearTimeout(timer.current)
+      const latest = latestRef.current
+      latest.onChange(latest.id, { title: latest.title, body: latest.body })
+    },
+    [],
+  )
 
   const markDirty = () => {
     if (saved) setSaved(false)
@@ -185,26 +199,26 @@ const NoteEditor = ({
               }
             }}
             className="notes-mode-toggle"
-            aria-label="Режим редактора"
+            aria-label={t('blocks.notes.modeAria')}
           >
-            <Tooltip content="Блочный редактор">
+            <Tooltip content={t('blocks.notes.blockEditor')}>
               <ToggleGroupItem
                 value="blocks"
                 className={`notes-mode-btn ${editorMode === 'blocks' ? 'is-active' : ''}`}
-                aria-label="Блочный редактор"
+                aria-label={t('blocks.notes.blockEditor')}
               >
                 <LayoutGrid size={13} />
-                <span>Блоки</span>
+                <span>{t('blocks.notes.blocks')}</span>
               </ToggleGroupItem>
             </Tooltip>
-            <Tooltip content="Текстовый режим">
+            <Tooltip content={t('blocks.notes.textMode')}>
               <ToggleGroupItem
                 value="text"
                 className={`notes-mode-btn ${editorMode === 'text' ? 'is-active' : ''}`}
-                aria-label="Текстовый режим"
+                aria-label={t('blocks.notes.textMode')}
               >
                 <FileText size={13} />
-                <span>Текст</span>
+                <span>{t('blocks.notes.text')}</span>
               </ToggleGroupItem>
             </Tooltip>
           </ToggleGroup>
@@ -251,7 +265,7 @@ const NoteEditor = ({
 
       {!isDream && (
         <div className="notes-breadcrumbs-bar">
-          <nav className="notes-breadcrumbs" aria-label="Путь к странице">
+          <nav className="notes-breadcrumbs" aria-label={t('blocks.notes.breadcrumbs')}>
             <button
               type="button"
               className="notes-crumb-btn notes-crumb-root-label"
@@ -343,7 +357,11 @@ const NoteEditor = ({
             <span className="notes-subpages-title">
               <FolderTree size={14} />
               <span>{t('notes.tree.subpages')}</span>
-              {subpages.length > 0 && <span className="notes-subpages-badge">{subpages.length}</span>}
+              {subpages.length > 0 && (
+                <Badge variant="count" size="sm">
+                  {subpages.length}
+                </Badge>
+              )}
             </span>
             <button type="button" className="notes-add-subpage-btn" onClick={() => onAddSubpage(note.id)}>
               <Plus size={12} />
@@ -511,17 +529,21 @@ export const NotesPage = ({ fixedKind, hideTopbar = false }: NotesPageProps = {}
             <div className="notes-head-controls">
               {!fixedKind && (
                 <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as NoteKind)}>
-                  <TabsList className="notes-tabs" aria-label={t('notes.tab.notes')}>
-                    <TabsTrigger value="note" className={`notes-tab-btn ${activeTab === 'note' ? 'is-active' : ''}`}>
+                  <TabsList aria-label={t('notes.tab.notes')}>
+                    <TabsTrigger value="note">
                       <PenTool size={14} />
                       <span>{t('notes.tab.notes')}</span>
-                      <span className="notes-tab-badge">{notesCount}</span>
+                      <Badge variant="count" size="sm">
+                        {notesCount}
+                      </Badge>
                     </TabsTrigger>
 
-                    <TabsTrigger value="dream" className={`notes-tab-btn ${activeTab === 'dream' ? 'is-active' : ''}`}>
+                    <TabsTrigger value="dream">
                       <Moon size={14} />
                       <span>{t('notes.tab.dreams')}</span>
-                      <span className="notes-tab-badge">{dreamsCount}</span>
+                      <Badge variant="count" size="sm">
+                        {dreamsCount}
+                      </Badge>
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>

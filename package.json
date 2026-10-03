@@ -52,6 +52,7 @@
     "@vitejs/plugin-react": "latest",
     "hono": "^4.13.12",
     "lucide-react": "latest",
+    "motion": "^13.5.0",
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "^7.18.4",

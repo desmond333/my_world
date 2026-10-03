@@ -13,16 +13,18 @@
   - **Drizzle ORM (`drizzle-orm/d1`)**: легковесная строго типизированная ORM без рантайм-оверхеда для работы с D1.
   - **Drizzle Kit (`drizzle-kit`)**: автоматическая генерация и управление миграциями на основе декларативной схемы (`worker/src/db/schema.ts`).
 - **Валидация входных данных**:
-  - `@hono/valibot-validator`: валидация тел запросов и параметров на уровне Hono middleware.
-  - `Valibot`: легковесные схемы валидации данных (`loginSchema`, `registerSchema`, `createNoteSchema`, `updateNoteSchema`, `createProductivityItemSchema`, `updateProductivityItemSchema`, `friendRequestSchema`, `assignFriendTaskSchema`).
+  - `@hono/valibot-validator`: валидация тел запросов и параметров на уровне Hono middleware. Валидатор `json` одновременно типизирует вход соответствующего маршрута для Hono RPC (`hc<AppType>`); где тело запроса есть, оно обязательно пропускается через `vValidator('json', …)`, иначе RPC-вызов теряет типизацию `json`.
+  - `Valibot`: легковесные схемы валидации данных (`loginSchema`, `registerSchema`, `createNoteSchema`, `updateNoteSchema`, `createProductivityItemSchema`, `updateProductivityItemSchema`, `friendRequestSchema`, `assignFriendTaskSchema`, `createAvailabilityWindowSchema`, `updateAvailabilityWindowSchema`; локальные `premiumUpdateSchema`, `messageStatusSchema` в `routes/admin.ts`; `SyncSnapshotSchema` в `lib/snapshotSchema.ts` для `POST /api/sync`).
 - **Real-Time коммуникация**:
   - Cloudflare WebSockets (`worker/src/routes/realtime.ts`): двустороннее соединение для отправки live-событий клиентам.
   - Durable Objects архитектура (Roadmap): единая точка координации в Cloudflare для комнат совместной работы, синхронизации курсоров и мгновенного вещания изменений.
 - **Аутентификация**:
   - Access Token: JWT (Web Crypto API `HMAC SHA-256`), срок жизни 15 минут, передаётся в заголовке `Authorization: Bearer <token>`.
-  - Refresh Token: криптографический случайный токен, хэш которого хранится в таблице `refresh_tokens`, срок жизни 30 дней, передаётся в `httpOnly`, `Secure`, `SameSite=Lax` куке `refresh_token`.
+  - Refresh Token: криптографический случайный токен, хэш которого хранится в таблице `refresh_tokens`, срок жизни 30 дней, передаётся в `httpOnly`, `Secure`, `SameSite=Lax` куке `refresh_token`. При `/auth/refresh` токен **ротируется** (старый hash удаляется, выдаётся новый) и попутно чистятся просроченные записи пользователя.
+  - Секрет JWT резолвится единым хелпером `resolveJwtSecret` (`lib/jwt.ts`): при заданном `JWT_SECRET` — он, иначе в production авторизация fail-closed (`500 SERVER_MISCONFIGURED`), а dev-fallback используется только вне production. Тот же хелпер применяют `routes/auth.ts` и `middleware/auth.ts`.
+  - Роль `admin` выдаётся при регистрации/входе по совпадению email с `ADMIN_EMAIL`; в репозитории переменная оставлена пустой, задаётся секретом перед деплоем.
   - Хеширование паролей: PBKDF2 (`Web Crypto API`, 100 000 итераций, соль 16 байт, SHA-256).
-- **Деплой и миграции**: Wrangler CLI (`wrangler.toml`, `migrations/0001_init.sql`, `migrations/0002_friends_and_tasks.sql`, `migrations/0003_notes_parent_id.sql`, `migrations/0004_availability_windows.sql`, `migrations/0005_referrals.sql`, `migrations/0006_coin_ops.sql`, `migrations/0007_premium.sql`, `migrations/0008_premium_referrals.sql`).
+- **Деплой и миграции**: Wrangler CLI (`wrangler.toml`, `migrations/0001_init.sql`, `migrations/0002_friends_and_tasks.sql`, `migrations/0003_notes_parent_id.sql`, `migrations/0004_availability_windows.sql`, `migrations/0005_referrals.sql`, `migrations/0006_coin_ops.sql`, `migrations/0007_premium.sql`, `migrations/0008_premium_referrals.sql`, `migrations/0009_contact_messages.sql`, `migrations/0010_view_modes_corner_style.sql`, `migrations/0011_coin_ops_user_pk.sql`).
 - **Безопасность**:
   - `secureHeaders` middleware (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy).
   - Rate Limiting middleware (`src/middleware/rateLimit.ts`): скользящее окно запросов для `/auth/login` и `/auth/register` для защиты от перебора паролей (brute force) со стандартными заголовками `X-RateLimit-*` и `Retry-After: <seconds>`.
@@ -49,7 +51,10 @@ worker/
 │   ├── 0005_referrals.sql     # Реферальные коды и таблица referrals
 │   ├── 0006_coin_ops.sql      # Журнал серверных начислений (идемпотентность)
 │   ├── 0007_premium.sql       # Флаг пожизненного премиума у users
-│   └── 0008_premium_referrals.sql # premium_until + reward_type/claimed у referrals
+│   ├── 0008_premium_referrals.sql # premium_until + reward_type/claimed у referrals
+│   ├── 0009_contact_messages.sql # Таблица contact_messages (сообщения создателю)
+│   ├── 0010_view_modes_corner_style.sql # Колонка corner_style в view_modes (скругления интерфейса)
+│   └── 0011_coin_ops_user_pk.sql # Составной ключ (user_id, id) в shop_coin_ops
 ├── vitest.config.ts           # Настройка @cloudflare/vitest-pool-workers
 ├── src/
 │   ├── index.ts               # Точка входа Hono, цепочка роутов, AppType для Hono RPC
@@ -101,7 +106,7 @@ worker/
 │       ├── sync.ts            # Комплексный батч-снимок (full state push/pull)
 │       ├── tmdb.ts            # Проксирование поиска и карточек TMDB
 │       ├── training.ts        # Тренировочные дни и виды спорта
-│       └── viewModes.ts       # Режимы отображения страниц и аватара (simple/normal)
+│       └── viewModes.ts       # Режимы страниц/аватара (simple/normal) и скругления интерфейса
 ├── package.json
 ├── tsconfig.json
 └── wrangler.toml              # Конфигурация Cloudflare Worker и привязка D1
@@ -118,7 +123,7 @@ worker/
 | `users`                | Учётные записи пользователей                  | `id`, `email`, `password_hash`, `role` (`user` \| `admin`), `referral_code`, `is_premium` (пожизненный), `premium_until` (до даты), `created_at`           |
 | `refresh_tokens`       | Сессии и refresh-токены                       | `id`, `user_id`, `token_hash`, `expires_at`                                                                                                                |
 | `settings`             | Глобальные настройки интерфейса               | `user_id`, `lang`, `theme_mode`, `city_id`, `scope`, `extra_tab`, `start_page`, `blocks_json`, `allow_friend_tasks`                                        |
-| `training_days`        | Отметки тренировок по дням                    | `id`, `user_id`, `date`, `sports_json`                                                                                                                     |
+| `training_days`        | Отметки тренировок по дням                    | `id`, `user_id`, `date`, `sports_json`; UNIQUE (`user_id`, `date`)                                                                                         |
 | `training_sports`      | Пользовательские виды спорта                  | `id`, `user_id`, `label`, `color`, `enabled`, `custom`, `sort_order`                                                                                       |
 | `finance_entries`      | Транзакции (доходы/расходы)                   | `id`, `user_id`, `month`, `kind`, `amount`, `currency`, `note`, `created_at`                                                                               |
 | `finance_balance`      | Текущие остатки по валютам                    | `user_id`, `rub`, `usd`, `gel`                                                                                                                             |
@@ -134,11 +139,12 @@ worker/
 | `lottery_stats`        | Статистика колеса лотереи                     | `user_id`, `sector_id`, `spins`, `wins`, `earned`                                                                                                          |
 | `notes`                | Заметки и дневник снов (иерархическое дерево) | `id`, `user_id`, `kind` (`note` \| `dream`), `title`, `body`, `parent_id`, `icon`, `created_at`, `updated_at`                                              |
 | `shop_state`           | Казна, скины, покупки, приветствия            | `user_id`, `coins`, `unlocked_parts_json`, `active_cat_skin`, `active_theme_skin`, `greeting_*`                                                            |
-| `view_modes`           | Состояние режимов simple/normal               | `user_id`, `global_mode`, `page_modes_json`, `avatar_mode`                                                                                                 |
-| `friendships`          | Связи друзей и заявки                         | `id`, `user_id`, `friend_id`, `status` (`pending` \| `accepted`), `created_at`, `updated_at`                                                               |
+| `view_modes`           | Состояние режимов simple/normal и скруглений  | `user_id`, `global_mode`, `page_modes_json`, `avatar_mode`, `corner_style`                                                                                 |
+| `friendships`          | Связи друзей и заявки                         | `id`, `user_id`, `friend_id`, `status` (`pending` \| `accepted`), `created_at`, `updated_at`; UNIQUE (`user_id`, `friend_id`)                              |
 | `availability_windows` | Окна доступности пользователя                 | `id`, `user_id`, `scope` (`weekly` \| `date`), `day_of_week`, `date`, `start_min`, `end_min`, `note`, `created_at`, `updated_at`                           |
 | `referrals`            | Рефералы: отложенная награда пригласившему    | `id`, `referrer_id`, `referee_id` (UNIQUE), `code`, `referrer_reward`, `referee_reward`, `reward_type` (`coins`\|`premium`\|NULL), `claimed`, `created_at` |
-| `shop_coin_ops`        | Журнал серверных начислений монет             | `id` (PRIMARY KEY, идемпотентность), `user_id`, `reason`, `amount`, `created_at`                                                                           |
+| `shop_coin_ops`        | Журнал серверных начислений монет             | `id`, `user_id`, `reason`, `amount`, `created_at`; PRIMARY KEY (`user_id`, `id`) — идемпотентность                                                         |
+| `contact_messages`     | Сообщения создателю / техподдержке            | `id`, `user_id` (NULL для анонимов), `email`, `topic` (`support`\|`idea`\|`bug`), `body`, `status` (`new`\|`read`), `created_at`                           |
 
 ---
 
@@ -162,6 +168,8 @@ worker/
 | :----- | :---------- | :----- | :----------------------------------------------------- | :------------------------------ |
 | `GET`  | `/api/sync` | Bearer | Получить полный снимок облачных данных пользователя    | `{ ...SyncSnapshot }`           |
 | `POST` | `/api/sync` | Bearer | Передать полный снимок локальных данных для перезаписи | `{ success: true, updated_at }` |
+
+Снимок на `POST` валидируется Valibot-схемой `SyncSnapshotSchema` (`worker/src/lib/snapshotSchema.ts`); обязательные поля вложенных сущностей (тип, название, суммы, даты и т.п.) помечены required, чтобы битый payload отсекался до записи — несоответствие даёт `400 INVALID_DATA`. `viewModes` санитизируются через `sanitizeViewMode`/`sanitizeCornerStyle`/`sanitizePageModes`. Запись снимка выполняется одним `db.batch()` (транзакция D1), чтобы не оставлять частично применённые данные. Upsert задач в `productivity_items` ограничен владельцем (`WHERE productivity_items.user_id = excluded.user_id`), что исключает перезапись чужой строки по клиентскому `id`.
 
 ### 4.3. Настройки (`/api/settings`)
 
@@ -270,14 +278,14 @@ worker/
 | `POST` | `/api/shop/earn` | Bearer | Серверное начисление монет: `{ ops: [{ id, reason, amount }] }`, идемпотентно по `id`, с лимитами по причинам |
 | `POST` | `/api/shop/buy`  | Bearer | Серверная покупка: `{ key }`, проверяет цену и баланс, списывает и открывает часть                            |
 
-Монеты и купленные части — серверные: `POST /api/sync` (push) их не перезаписывает из клиента; начисление идёт через `/earn` (журнал `shop_coin_ops`) и `/buy`.
+Монеты и купленные части — серверные: `POST /api/sync` (push) их не перезаписывает из клиента; начисление идёт через `/earn` (журнал `shop_coin_ops`) и `/buy`. Допустимые причины начисления и суточные лимиты задаёт `EARN_RULES` (`lib/economy.ts`): `task`, `goal`, `dream`, `greeting`, `battle`. Суточный cap проверяется атомарно в самом `INSERT ... SELECT` (без гонки), цены покупок — `SHOP_PART_PRICES`.
 
 ### 4.14. Режимы отображения (`/api/view-modes`)
 
-| Метод | URL               | Доступ | Назначение                                   |
-| :---- | :---------------- | :----- | :------------------------------------------- |
-| `GET` | `/api/view-modes` | Bearer | Глобальный режим, режимы страниц, режим кота |
-| `PUT` | `/api/view-modes` | Bearer | Сохранить режимы (`simple` / `normal`)       |
+| Метод | URL               | Доступ | Назначение                                                                          |
+| :---- | :---------------- | :----- | :---------------------------------------------------------------------------------- |
+| `GET` | `/api/view-modes` | Bearer | Глобальный режим, режимы страниц, режим кота, скругления                            |
+| `PUT` | `/api/view-modes` | Bearer | Сохранить режимы (`simple` / `normal`) и скругления (`round` / `middle` / `square`) |
 
 ### 4.15. Друзья и совместные задачи (`/api/friends`)
 
@@ -310,12 +318,16 @@ worker/
 
 ### 4.18. Панель администратора (`/admin`)
 
-| Метод    | URL                        | Доступ | Назначение                                                          |
-| :------- | :------------------------- | :----- | :------------------------------------------------------------------ |
-| `GET`    | `/admin/users`             | Admin  | Список всех зарегистрированных пользователей                        |
-| `POST`   | `/admin/users/:id/premium` | Admin  | Выдать/снять пожизненный премиум: `{ premium: boolean }`            |
-| `GET`    | `/admin/users/:id/data`    | Admin  | Полный слепок базы данных Cloudflare D1 для выбранного пользователя |
-| `DELETE` | `/admin/users/:id`         | Admin  | Безвозвратное удаление учётной записи и связанных данных            |
+| Метод    | URL                            | Доступ | Назначение                                                                       |
+| :------- | :----------------------------- | :----- | :------------------------------------------------------------------------------- |
+| `GET`    | `/admin/users`                 | Admin  | Список всех зарегистрированных пользователей                                     |
+| `GET`    | `/admin/users/:userId`         | Admin  | Профиль выбранного пользователя                                                  |
+| `POST`   | `/admin/users/:userId/premium` | Admin  | Выдать/снять пожизненный премиум (`premiumUpdateSchema`): `{ premium: boolean }` |
+| `GET`    | `/admin/users/:userId/sync`    | Admin  | Полный слепок данных пользователя (D1) для выбранного пользователя               |
+| `DELETE` | `/admin/users/:userId`         | Admin  | Безвозвратное удаление учётной записи и связанных данных                         |
+| `GET`    | `/admin/messages`              | Admin  | Список сообщений создателю (новые сверху)                                        |
+| `POST`   | `/admin/messages/:id/status`   | Admin  | Сменить статус сообщения (`messageStatusSchema`): `{ status: 'new' \| 'read' }`  |
+| `DELETE` | `/admin/messages/:id`          | Admin  | Удалить сообщение                                                                |
 
 ### 4.19. TMDB Прокси (`/tmdb` и корневые алиасы)
 
@@ -325,6 +337,12 @@ worker/
 | `GET` | `/genre/movie/list`          | Public | Список официальных жанров кино                    |
 | `GET` | `/movie/:id`                 | Public | Детальная карточка фильма                         |
 | `*`   | `/tmdb/*`                    | Public | Универсальное проксирование любого TMDB эндпоинта |
+
+### 4.20. Обратная связь (`/api/contact`)
+
+| Метод  | URL            | Доступ | Назначение                                                                                        |
+| :----- | :------------- | :----- | :------------------------------------------------------------------------------------------------ |
+| `POST` | `/api/contact` | Auth   | Отправить сообщение создателю: `{ topic, body }` (body 5–4000 символов). Ответ `{ ok: true, id }` |
 
 ---
 
@@ -354,13 +372,10 @@ worker/
 
 ## 6. Стратегия взаимодействия фронтенда с бэкендом
 
-1. **Сквозная типизация API (Hono RPC)**:
-   - Фронтенд импортирует тип `AppType` из бэкенда через `src/services/api/rpcClient.ts`:
-     ```ts
-     import { createRpcClient } from '@/services/api/rpcClient'
-     export const rpc = createRpcClient()
-     ```
-   - Доступен полный автокомплит путей, параметров запроса и типов возвращаемых данных.
+1. **Типизированный клиент (Hono RPC)**:
+   - Весь обмен с бэкендом идёт через типобезопасный Hono RPC клиент `src/services/api/rpcClient.ts` (`hc<AppType>`); низкоуровневый `fetch`-обёртка `apiClient.ts` оставлена только для авто-refresh токена (`authorizedFetch`) и хелпера ошибок `rpcError`. `apiFetch`/`domainApi` удалены.
+   - **Важно для типизации RPC**: все роутеры определяются через цепочку (`new Hono().use(...).get(...).post(...)`), иначе их тип не содержит маршруты и `hc<AppType>` вырождается в `unknown`. Тела запросов проходят через `vValidator('json', …)`, чтобы вход маршрута типизировался на клиенте. `friendsService`, `availabilityService`, `authStore`, `shopStore`, `syncService`, `AdminPage`, `ContactModal` вызываются как `rpc.<сегмент>.<метод>.$get/$post/$put/$delete`.
+   - Ответы валидируются схемами Valibot до попадания в сторы.
 2. **Офлайн-first приоритет**:
    - Приложение на клиенте сохраняет все состояния локально (IndexedDB с мгновенным чтением через синхронный кэш localStorage).
    - При наличии интернета и авторизации изменения автоматически отправляются на бэкенд в фоне с debounce.

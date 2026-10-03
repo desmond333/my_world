@@ -21,7 +21,7 @@
   border: none;
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--text);
+  color: var(--fg);
   cursor: pointer;
   text-align: left;
   user-select: none;
@@ -35,26 +35,37 @@
 }
 
 .ui-accordion-icon {
-  transition: transform 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+  transition: transform var(--motion-base) var(--motion-pop);
   color: var(--muted);
 }
 
 .ui-accordion-trigger[data-state='open'] .ui-accordion-icon {
   transform: rotate(180deg);
+  color: var(--accent);
 }
 
 .ui-accordion-content {
   overflow: hidden;
   font-size: 0.9rem;
-  animation: ui-accordion-slide-up 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+  animation: ui-accordion-slide-up var(--motion-base) var(--motion-ease);
 }
 
 .ui-accordion-content[data-state='open'] {
-  animation: ui-accordion-slide-down 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+  animation: ui-accordion-slide-down var(--motion-base) var(--motion-ease);
 }
 
 .ui-accordion-content-inner {
   padding: 8px 14px 14px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.3s ease,
+    transform var(--motion-base) var(--motion-ease);
+}
+
+.ui-accordion-content[data-state='open'] .ui-accordion-content-inner {
+  opacity: 1;
+  transform: none;
 }
 
 @keyframes ui-accordion-slide-down {
@@ -72,5 +83,18 @@
   }
   to {
     height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-accordion-content,
+  .ui-accordion-content[data-state='open'] {
+    animation-duration: 0.01s;
+  }
+
+  .ui-accordion-content-inner {
+    transition: none;
+    opacity: 1;
+    transform: none;
   }
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { defaultBlocks, findCity, type BlockKey } from '../../data'
 import { MINUTE_MS, useAsyncResource, useCopyFeedback, useNow } from '../../hooks'
-import { getSeason, getThemedOccasion, getWish, hasTraining, seasonName, STRENGTH_ID, trainingReport } from '../../lib'
+import { getSeason, getTheme, getThemedOccasion, getWish, hasTraining, STRENGTH_ID, trainingReport } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
 import { fetchHoliday } from '../../services/holidays'
 import { fetchWeather } from '../../services/weather'
@@ -29,6 +29,7 @@ export const DailyPage = () => {
   const cityId = useDailyStore((state) => state.cityId)
   const scope = useDailyStore((state) => state.scope)
   const themeMode = useDailyStore((state) => state.themeMode)
+  const themePalette = useDailyStore((state) => state.themePalette)
   const storedBlocks = useDailyStore((state) => state.blocks)
   const chooseForToday = useDailyStore((state) => state.chooseForToday)
   const setCity = useDailyStore((state) => state.setCity)
@@ -39,6 +40,7 @@ export const DailyPage = () => {
   const setStartPage = useDailyStore((state) => state.setStartPage)
 
   const animals = useAnimalsStore((state) => state.animals)
+  const refreshAnimal = useAnimalsStore((state) => state.refresh)
   const favorites = useFavoritesStore((state) => state.favorites)
   const addFavorite = useFavoritesStore((state) => state.addFavorite)
   const trainingDays = useTrainingStore((state) => state.days)
@@ -66,7 +68,8 @@ export const DailyPage = () => {
   const wish = getWish(currentDate)
   const occasion = getThemedOccasion(currentDate)
   const currentSeason = getSeason(now, city.timezone)
-  const season = seasonName(currentSeason, lang)
+  const paletteEntry = getTheme(themePalette)
+  const season = paletteEntry ? t(paletteEntry.nameKey, paletteEntry.fallback) : themePalette
   const trainedToday = hasTraining(trainingDays, currentDate)
   const forecast = weather.data?.forecast ?? []
   const infoCards = [isNormal && show('animal'), show('today'), show('weather')].filter(Boolean).length
@@ -74,6 +77,12 @@ export const DailyPage = () => {
   useEffect(() => {
     chooseForToday(currentDate, scope)
   }, [chooseForToday, currentDate, scope])
+
+  const animalId = animal?.id
+
+  useEffect(() => {
+    if (animalId) void refreshAnimal(animalId)
+  }, [animalId, refreshAnimal])
 
   const toggleFavorite = () => {
     if (!animal) return

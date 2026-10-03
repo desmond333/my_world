@@ -1,5 +1,5 @@
 export { BreedCard } from './BreedCard'
-export { DailyFooter, DesktopHint } from './DailyFooter'
+export { DesktopHint } from './DailyFooter'
 export { ForecastStrip } from './ForecastStrip'
 export { HeroSection } from './HeroSection'
 export { OccasionCard } from './OccasionCard'

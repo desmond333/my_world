@@ -19,6 +19,7 @@ import { useTranslation } from '../../../lib/i18n'
 import type { Note } from '../../../store'
 import { buildNoteTree, getBreadcrumbs, searchTree, type NoteTreeNode } from '../../../entities/note'
 import {
+  ConfirmDialog,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -78,6 +79,7 @@ export const NotesSidebarTree = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => loadExpandedIds())
   const [movingNoteId, setMovingNoteId] = useState<string | null>(null)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
   const dreamList = useMemo(() => {
     if (!isDream) return []
@@ -155,8 +157,8 @@ export const NotesSidebarTree = ({
   const handleDeleteWithPrompt = (node: NoteTreeNode, e: React.MouseEvent) => {
     e.stopPropagation()
     if (node.children.length > 0) {
-      const ok = window.confirm(t('notes.tree.deleteConfirm'))
-      if (!ok) return
+      setPendingDeleteId(node.id)
+      return
     }
     onDelete(node.id)
   }
@@ -378,6 +380,19 @@ export const NotesSidebarTree = ({
           onMove={onMove}
         />
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        title={t('notes.tree.deleteConfirm')}
+        confirmLabel={t('notes.delete')}
+        cancelLabel={t('common.cancel')}
+        danger
+        onConfirm={() => {
+          if (pendingDeleteId) onDelete(pendingDeleteId)
+          setPendingDeleteId(null)
+        }}
+        onCancel={() => setPendingDeleteId(null)}
+      />
     </div>
   )
 }

@@ -45,10 +45,14 @@ export const languages: Dictionary = {
     'lang.search.clear': 'Очистить',
 
     'lang.en.heroTitle': 'Английский для YouTube и американской прессы',
+    'lang.en.heroBadge': 'Продвинутый американский английский',
+    'lang.en.trainerTitle': 'Тренажёр английского',
     'lang.en.heroDesc':
       'Слова и обороты, которые американские авторы используют в видео-эссе, подкастах и статьях The Wall Street Journal, а также аутентичные тексты для практики чтения.',
 
     'lang.basic.heroTitle': 'Английский с нуля',
+    'lang.basic.heroBadge': 'Базовый английский для начинающих',
+    'lang.basic.trainerTitle': 'Тренажёр базового английского',
     'lang.basic.heroDesc':
       'Самые нужные слова и фразы, чтобы сделать первые шаги в языке: знакомство, числа, повседневные действия и короткие простые тексты с переводом.',
 
@@ -204,6 +208,7 @@ export const languages: Dictionary = {
     'lang.reading.paragraphs': '{count} абзаца',
     'lang.reading.readWithAudio': 'Читать с озвучкой',
     'lang.ka.heroPill': 'Грузинский разговорник',
+    'lang.ka.trainerTitle': 'Тренажёр грузинского',
     'lang.ka.heroTitle': 'Разговорный грузинский с русской транскрипцией',
     'lang.ka.heroNote':
       'Читай транскрипцию по-русски, слушай озвучку фраз и тренируй речь для поездок, ресторанов, такси и душевных бесед.',
@@ -307,10 +312,14 @@ export const languages: Dictionary = {
     'lang.search.clear': 'Clear',
 
     'lang.en.heroTitle': 'English for YouTube & US Press',
+    'lang.en.heroBadge': 'Advanced American English',
+    'lang.en.trainerTitle': 'English Trainer',
     'lang.en.heroDesc':
       'Phrases and vocabulary used in American video essays, top podcasts, Wall Street Journal articles, and authentic reading texts.',
 
     'lang.basic.heroTitle': 'English from scratch',
+    'lang.basic.heroBadge': 'Basic English for Beginners',
+    'lang.basic.trainerTitle': 'Basic English Trainer',
     'lang.basic.heroDesc':
       'The most useful words and phrases for your first steps in the language: introductions, numbers, everyday actions and short simple texts with translation.',
 
@@ -466,6 +475,7 @@ export const languages: Dictionary = {
     'lang.reading.paragraphs': '{count} paragraphs',
     'lang.reading.readWithAudio': 'Read with audio',
     'lang.ka.heroPill': 'Georgian phrasebook',
+    'lang.ka.trainerTitle': 'Georgian Trainer',
     'lang.ka.heroTitle': 'Everyday Georgian with Russian transcription',
     'lang.ka.heroNote':
       'Read the transcription in Russian, listen to the spoken phrases and practise speech for trips, restaurants, taxis and heartfelt chats.',

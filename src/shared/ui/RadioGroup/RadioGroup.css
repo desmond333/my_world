@@ -64,7 +64,7 @@
 
 .ui-radio-label {
   font-size: 0.9rem;
-  color: var(--text);
+  color: var(--fg);
 }
 
 .ui-radio-hint {

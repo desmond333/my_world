@@ -3,6 +3,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Check, ChevronDown, ChevronRight, Copy, GripVertical, Plus, Trash2 } from 'lucide-react'
 import type { Block, BlockType } from './types'
+import { useTranslation } from '../../lib/i18n'
 import { MediaBlock } from './components/MediaBlock'
 import {
   DropdownMenu,
@@ -42,6 +43,7 @@ export const BlockItem = ({
   onOpenSlash,
   isFocused,
 }: BlockItemProps) => {
+  const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id })
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [codeCopied, setCodeCopied] = useState(false)
@@ -169,31 +171,31 @@ export const BlockItem = ({
   return (
     <div ref={setNodeRef} style={style} className={`block-item block-item--${block.type}`}>
       <div className="block-handle-zone">
-        <Tooltip content="Перетащить блок">
-          <button type="button" className="block-drag-handle" {...attributes} {...listeners} aria-label="Перетащить блок">
+        <Tooltip content={t('blocks.item.drag')}>
+          <button type="button" className="block-drag-handle" {...attributes} {...listeners} aria-label={t('blocks.item.drag')}>
             <GripVertical size={14} />
           </button>
         </Tooltip>
 
         <div className="block-menu-wrapper">
-          <Tooltip content="Добавить блок ниже">
-            <button type="button" className="block-add-btn" onClick={() => onAddBelow(block.id)} aria-label="Добавить блок ниже">
+          <Tooltip content={t('blocks.item.addBelow')}>
+            <button type="button" className="block-add-btn" onClick={() => onAddBelow(block.id)} aria-label={t('blocks.item.addBelow')}>
               <Plus size={13} />
             </button>
           </Tooltip>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button type="button" className="block-opts-btn" aria-label="Параметры блока">
+              <button type="button" className="block-opts-btn" aria-label={t('blocks.item.options')}>
                 ···
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" sideOffset={4}>
               <DropdownMenuItem onClick={() => onDuplicate(block.id)}>
-                <Copy size={13} /> Дублировать
+                <Copy size={13} /> {t('blocks.item.duplicate')}
               </DropdownMenuItem>
               <DropdownMenuItem className="is-danger" onClick={() => onDelete(block.id)}>
-                <Trash2 size={13} /> Удалить
+                <Trash2 size={13} /> {t('blocks.item.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -224,7 +226,7 @@ export const BlockItem = ({
         {block.type === 'callout' && (
           <Popover>
             <PopoverTrigger asChild>
-              <button type="button" className="block-callout-emoji" aria-label="Выбрать эмодзи">
+              <button type="button" className="block-callout-emoji" aria-label={t('blocks.item.chooseEmoji')}>
                 {block.emoji || '💡'}
               </button>
             </PopoverTrigger>
@@ -267,18 +269,18 @@ export const BlockItem = ({
             rows={1}
             placeholder={
               block.type === 'h1'
-                ? 'Заголовок 1'
+                ? t('blocks.placeholder.h1')
                 : block.type === 'h2'
-                  ? 'Заголовок 2'
+                  ? t('blocks.placeholder.h2')
                   : block.type === 'h3'
-                    ? 'Заголовок 3'
+                    ? t('blocks.placeholder.h3')
                     : block.type === 'code'
-                      ? 'Введите код...'
+                      ? t('blocks.placeholder.code')
                       : block.type === 'callout'
-                        ? 'Выделенная мысль...'
+                        ? t('blocks.placeholder.callout')
                         : block.type === 'quote'
-                          ? 'Цитата...'
-                          : "Нажмите '/' для команд..."
+                          ? t('blocks.placeholder.quote')
+                          : t('blocks.placeholder.default')
             }
           />
         )}
@@ -286,8 +288,8 @@ export const BlockItem = ({
         {block.type === 'code' && (
           <div className="block-code-actions">
             <span className="block-code-lang">{block.language || 'code'}</span>
-            <Tooltip content="Скопировать код">
-              <button type="button" className="block-code-copy" onClick={handleCopyCode} aria-label="Скопировать код">
+            <Tooltip content={t('blocks.item.copyCode')}>
+              <button type="button" className="block-code-copy" onClick={handleCopyCode} aria-label={t('blocks.item.copyCode')}>
                 {codeCopied ? <Check size={13} /> : <Copy size={13} />}
               </button>
             </Tooltip>

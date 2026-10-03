@@ -15,16 +15,17 @@ export const helpEn: HelpSection[] = [
           {
             type: 'text',
             value:
-              'The app has three main parts: the Day home screen, the Useful section for tracking your life, and the Misc section for shared and playful things. There is also a shop, favorites, settings and an account with cloud sync.',
+              'The application unites all essentials into a single system: the Day home screen, the Useful hub for life tracking, block-based Notes, a customization shop, favorites, settings, and cloud sync.',
           },
           {
             type: 'list',
             items: [
-              'Day (/today) — the entry point: animal of the day, date, weather, a wish, a special day and a workout mark.',
-              'Useful (/extra) — workouts, finance, productivity, journal, reminders and media.',
-              'Misc (/misc) — shared availability windows, language trainers, entertainment and the lottery.',
-              'Shop (/shop) — internal currency, cat skins and visual themes.',
-              'Settings (/settings) — view mode, theme, language, city, backups and data reset.',
+              'Day (/today) — the entry point: animal of the day with detailed traits, date, weather, wish, special day, and workout mark.',
+              'Useful (/useful) — unified center: workouts, finance, productivity, dream & mood journal, reminders, media, soundscapes, languages, leisure, and lottery.',
+              'Notes (/useful/productivity/notes) — full-featured Notion-style block editor with nested pages and snippets.',
+              'Favorites (/favorites) — saved cards of animals of the day with quick links.',
+              'Shop (/shop) — internal currency earned through positive actions, cat skins, visual themes, and premium perks.',
+              'Settings (/settings) — themes, corner style, language, city, section visibility, and backups.',
             ],
           },
           {
@@ -32,7 +33,7 @@ export const helpEn: HelpSection[] = [
             tone: 'info',
             title: 'Where to begin',
             value:
-              'If you are new, open Day and switch to the normal view so you can see all panels at once. Then visit Useful and add what you use every day.',
+              'If you are new, open Day and check the current interface view mode. Then explore Useful to set up the modules you use every day.',
           },
         ],
       },
@@ -87,7 +88,7 @@ export const helpEn: HelpSection[] = [
             type: 'list',
             items: [
               'Simple view — a clean, minimal interface focused on the essentials. Enabled everywhere by default.',
-              'Normal view — all panels, kanban boards, filters, charts and detailed settings.',
+              'Advanced view — all panels, kanban boards, filters, charts and detailed settings.',
               'Each page keeps its own setting, so Day can be simple while Finance is normal.',
               'The virtual cat has a separate toggle: in simple mode it is calmer and takes less space.',
             ],
@@ -144,7 +145,7 @@ export const helpEn: HelpSection[] = [
           {
             type: 'list',
             items: [
-              'Animal of the day — photo, breed, species description and a fun fact. The breed card shows in normal view.',
+              'Animal of the day — photo, breed, species description and a fun fact. The breed card includes an interactive accordion with details and habitat, shown in normal view.',
               'Date and time — day number, month, season and clock.',
               'Weather — current conditions, plus today, tomorrow and the week forecast in normal view.',
               'Wish of the day — a thought to start the day well.',
@@ -185,7 +186,7 @@ export const helpEn: HelpSection[] = [
             tone: 'info',
             title: 'Start page',
             value:
-              'Options include Day, Useful, Misc, shop, favorites, settings and other sections. This way you land exactly where you need.',
+              'Options include Day, Useful, More, shop, favorites, settings and other sections. This way you land exactly where you need.',
           },
         ],
       },
@@ -209,7 +210,7 @@ export const helpEn: HelpSection[] = [
             type: 'list',
             items: [
               'Add your own sports with a colour so the calendar reads better.',
-              'Normal view adds statistics: workouts per period and per sport.',
+              'Advanced view adds statistics: workouts per period and per sport.',
               "You can mark today's workout right on the home screen.",
             ],
           },
@@ -276,7 +277,7 @@ export const helpEn: HelpSection[] = [
               'Tasks support repetition: daily, on chosen weekdays or by due date.',
               'Tasks have priority, deadline and a target completion date.',
               'A streak of completed days and a history of marks are tracked.',
-              'Normal view adds a kanban board and filters by kind and status.',
+              'Advanced view adds a kanban board and filters by kind and status.',
             ],
           },
           {
@@ -343,7 +344,7 @@ export const helpEn: HelpSection[] = [
             type: 'list',
             items: [
               'Rate items, add tags and write a review with a liked or not liked mark.',
-              'Normal view adds filters by tags and periods plus a kanban board.',
+              'Advanced view adds filters by tags and periods plus a kanban board.',
               'Covers are loaded automatically by title.',
             ],
           },
@@ -354,8 +355,8 @@ export const helpEn: HelpSection[] = [
   {
     id: 'misc',
     icon: 'shapes',
-    title: 'Misc section',
-    intro: 'Shared planning with friends, language trainers and entertainment.',
+    title: 'Learning, Leisure & Social',
+    intro: 'Language trainers, ambient soundscapes, entertainment, lottery, and shared scheduling with friends inside the Useful center.',
     subsections: [
       {
         id: 'misc-together',
@@ -424,6 +425,31 @@ export const helpEn: HelpSection[] = [
             title: 'About pronunciation',
             value:
               'Pronunciation uses the speech synthesiser built into your browser. If you hear no Georgian audio, the system has no voice for that language — install the language pack in your device settings.',
+          },
+        ],
+      },
+      {
+        id: 'misc-sounds',
+        title: 'Ambient soundscapes for focus',
+        blocks: [
+          {
+            type: 'text',
+            value:
+              'The "Sounds" section (/useful/sounds) provides relaxing atmospheric audio tracks for deep focus, study, meditation, and rest.',
+          },
+          {
+            type: 'list',
+            items: [
+              'Variety of ambient scenes: rain against the window, crackling fireplace, cozy city cafe, summer thunderstorm, forest breeze, and deep space rumble.',
+              'Smooth looping audio playback with individual volume adjustment.',
+              'Soundscapes play smoothly in the background while you plan, read, or write notes.',
+            ],
+          },
+          {
+            type: 'note',
+            tone: 'info',
+            title: 'Background playback',
+            value: 'Audio continues playing seamlessly as you navigate across different pages of the application.',
           },
         ],
       },
@@ -831,12 +857,13 @@ export const helpEn: HelpSection[] = [
           {
             type: 'list',
             items: [
-              'Themes: a palette (Auto, Spring, Summer, Autumn, Winter) and, for each, a light or dark variant. The global mode is system, light or dark.',
+              'Themes: a palette (Auto, Spring, Summer, Autumn, Winter, Nord, Solarized) and, for each, a light or dark variant. The global mode is system, light or dark.',
+              'Corner Style: choose the interface corner curvature style (Sharp, Smooth, Pill).',
               'Language: Russian or English. Switches instantly.',
               'City: affects weather, time zone and date calculations.',
               'Page views: simple or normal for each page separately, plus a global switch.',
               'Virtual cat: a separate toggle for its view.',
-              'Section visibility: hide sections you do not need from the menu and restore them with "Show all sections".',
+              'Section visibility: hide sections you do not need from Useful navigation, then restore them via settings.',
               'Home page blocks: disable the Day blocks you do not need.',
             ],
           },

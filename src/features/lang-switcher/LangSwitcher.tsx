@@ -1,28 +1,29 @@
 import { useTranslation } from '../../lib/i18n'
+import { ToggleGroup, ToggleGroupItem, Tooltip } from '../../shared/ui'
 
 export const LangSwitcher = () => {
   const { lang, setLang, t } = useTranslation()
 
   return (
-    <div className="lang-pill" role="group" aria-label={t('topbar.lang')}>
-      <button
-        type="button"
-        className={`lang-pill-btn ${lang === 'ru' ? 'active' : ''}`}
-        onClick={() => setLang('ru')}
-        title={t('topbar.langRu')}
-        aria-pressed={lang === 'ru'}
-      >
-        RU
-      </button>
-      <button
-        type="button"
-        className={`lang-pill-btn ${lang === 'en' ? 'active' : ''}`}
-        onClick={() => setLang('en')}
-        title={t('topbar.langEn')}
-        aria-pressed={lang === 'en'}
-      >
-        EN
-      </button>
-    </div>
+    <ToggleGroup
+      type="single"
+      value={lang}
+      onValueChange={(val) => {
+        if (val) setLang(val as typeof lang)
+      }}
+      className="lang-pill"
+      aria-label={t('topbar.lang')}
+    >
+      <Tooltip content={t('topbar.langRu')}>
+        <ToggleGroupItem value="ru" className="lang-pill-btn">
+          RU
+        </ToggleGroupItem>
+      </Tooltip>
+      <Tooltip content={t('topbar.langEn')}>
+        <ToggleGroupItem value="en" className="lang-pill-btn">
+          EN
+        </ToggleGroupItem>
+      </Tooltip>
+    </ToggleGroup>
   )
 }

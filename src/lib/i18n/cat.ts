@@ -17,7 +17,7 @@ export const cat: Dictionary = {
     'cat.mode.title': 'Версия ассистента',
     'cat.mode.tooltip': 'Переключить вид аватара',
 
-    'cat.status.royal': 'Королевский ассистент',
+    'cat.status.royal': 'Ассистент',
     'cat.pet': 'Погладить',
     'cat.petted': 'Мурр! ❤️',
     'cat.happiness': 'Уровень счастья',
@@ -43,6 +43,7 @@ export const cat: Dictionary = {
     'cat.action.oracle': 'Предсказание Кота 🔮',
     'cat.action.oracleAsk': 'Спросить предсказание',
     'cat.action.relax': 'Мур-релакс 🐾',
+    'cat.action.relaxStart': 'Старт',
     'cat.action.relaxing': 'Мягкий вдох... медленный выдох...',
     'cat.action.relaxStop': 'Завершить релакс',
   },
@@ -62,7 +63,7 @@ export const cat: Dictionary = {
     'cat.mode.title': 'Assistant version',
     'cat.mode.tooltip': 'Switch avatar version',
 
-    'cat.status.royal': 'Royal Companion',
+    'cat.status.royal': 'Assistant',
     'cat.pet': 'Pet cat',
     'cat.petted': 'Purr! ❤️',
     'cat.happiness': 'Happiness level',
@@ -88,6 +89,7 @@ export const cat: Dictionary = {
     'cat.action.oracle': 'Cat Oracle 🔮',
     'cat.action.oracleAsk': 'Get prophecy',
     'cat.action.relax': 'Purr-relax 🐾',
+    'cat.action.relaxStart': 'Start',
     'cat.action.relaxing': 'Breathe in calmly... exhale slowly...',
     'cat.action.relaxStop': 'End relax',
   },

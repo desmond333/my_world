@@ -35,7 +35,7 @@
   flex-direction: column;
   overflow: hidden;
   pointer-events: auto;
-  animation: ui-scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: ui-scale-in 0.26s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ui-dialog-content--accent {
@@ -161,7 +161,7 @@
 @keyframes ui-scale-in {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(8px);
+    transform: scale(0.94) translateY(14px);
   }
   to {
     opacity: 1;

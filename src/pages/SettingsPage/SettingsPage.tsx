@@ -18,14 +18,16 @@ import {
   Settings as SettingsIcon,
   Sliders,
   Sparkles,
+  Square,
   Sun,
   Trash2,
   Upload,
   Users,
 } from 'lucide-react'
 import { AppTopbar } from '../../widgets'
+import { ContactButton } from '../../features'
 import { cities, defaultBlocks, type ThemePaletteId } from '../../data'
-import { extraSections } from '../ExtraPage/sections'
+import { usefulSections } from '../../lib/usefulSections'
 import {
   APP_BUILT_AT,
   APP_COMMIT,
@@ -40,7 +42,21 @@ import {
   type StorageStats,
 } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
-import { Card, Switch, ViewModeToggle } from '../../shared/ui'
+import { usePremiumActive } from '../../hooks'
+import {
+  Card,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+  ToggleGroup,
+  ToggleGroupItem,
+  ViewModeToggle,
+} from '../../shared/ui'
 import {
   VIEW_PAGES,
   type ViewMode,
@@ -63,10 +79,12 @@ export const SettingsPage = () => {
   const setPageMode = useViewModeStore((state) => state.setPageMode)
   const setAvatarMode = useViewModeStore((state) => state.setAvatarMode)
   const setAllModes = useViewModeStore((state) => state.setAllModes)
+  const cornerStyle = useViewModeStore((state) => state.cornerStyle ?? 'middle')
+  const setCornerStyle = useViewModeStore((state) => state.setCornerStyle)
 
   const themeMode = useDailyStore((state) => state.themeMode ?? 'system')
   const setThemeMode = useDailyStore((state) => state.setThemeMode)
-  const themePalette = useDailyStore((state) => state.themePalette ?? 'auto')
+  const themePalette = useDailyStore((state) => state.themePalette ?? 'graphite')
   const setThemePalette = useDailyStore((state) => state.setThemePalette)
   const activeThemeSkin = useShopStore((state) => state.activeThemeSkin)
   const equipThemeSkin = useShopStore((state) => state.equipThemeSkin)
@@ -81,6 +99,8 @@ export const SettingsPage = () => {
   const toggleSection = useDailyStore((state) => state.toggleSection)
   const resetHiddenSections = useDailyStore((state) => state.resetHiddenSections)
   const user = useAuthStore((state) => state.user)
+  const premiumActive = usePremiumActive()
+  const coins = useShopStore((state) => state.coins)
   const openFriendsModal = useFriendsStore((state) => state.openModal)
   const friendsCount = useFriendsStore((state) => state.friends.length)
 
@@ -105,8 +125,14 @@ export const SettingsPage = () => {
     }
   }, [])
 
-  const allAreSimple = useMemo(() => VIEW_PAGES.every((p) => (pageModes[p.id] ?? globalMode) === 'simple'), [pageModes, globalMode])
-  const allAreNormal = useMemo(() => VIEW_PAGES.every((p) => (pageModes[p.id] ?? globalMode) === 'normal'), [pageModes, globalMode])
+  const allAreSimple = useMemo(
+    () => VIEW_PAGES.every((p) => (pageModes[p.id] ?? globalMode) === 'simple') && avatarMode === 'simple',
+    [pageModes, globalMode, avatarMode],
+  )
+  const allAreNormal = useMemo(
+    () => VIEW_PAGES.every((p) => (pageModes[p.id] ?? globalMode) === 'normal') && avatarMode === 'normal',
+    [pageModes, globalMode, avatarMode],
+  )
 
   const handleExport = () => {
     downloadBackupFile()
@@ -220,7 +246,7 @@ export const SettingsPage = () => {
               <div className="master-mode-status">
                 {allAreSimple && (
                   <span className="master-mode-active">
-                    <Check size={14} /> {t('common.today') === 'Сегодня' ? 'Активен везде' : 'Active everywhere'}
+                    <Check size={14} /> {t('settings.viewMode.activeEverywhere')}
                   </span>
                 )}
               </div>
@@ -241,12 +267,38 @@ export const SettingsPage = () => {
               <div className="master-mode-status">
                 {allAreNormal && (
                   <span className="master-mode-active">
-                    <Check size={14} /> {t('common.today') === 'Сегодня' ? 'Активен везде' : 'Active everywhere'}
+                    <Check size={14} /> {t('settings.viewMode.activeEverywhere')}
                   </span>
                 )}
               </div>
             </button>
           </div>
+        </section>
+
+        <section className="settings-section">
+          <div className="settings-section-head">
+            <div className="settings-section-title">
+              <Square size={18} className="settings-section-icon" />
+              <h2>{t('settings.corner.title', 'Форма интерфейса')}</h2>
+            </div>
+            <p className="settings-section-desc">{t('settings.corner.desc', 'Выбери скругление углов интерфейса.')}</p>
+          </div>
+
+          <ToggleGroup
+            type="single"
+            value={cornerStyle}
+            onValueChange={(val) => {
+              if (val) setCornerStyle(val as typeof cornerStyle)
+            }}
+            className="settings-pill-group"
+            aria-label={t('settings.corner.title', 'Форма интерфейса')}
+          >
+            {(['round', 'middle', 'square'] as const).map((style) => (
+              <ToggleGroupItem key={style} value={style} className="settings-pill-btn">
+                {t(`settings.corner.${style}`)}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </section>
 
         <section className="settings-section">
@@ -282,26 +334,23 @@ export const SettingsPage = () => {
                 </div>
               )
             })}
-          </div>
-        </section>
 
-        <section className="settings-section">
-          <div className="settings-section-head">
-            <h2>{t('settings.avatar.title')}</h2>
-            <p className="settings-section-desc">{t('settings.avatar.desc')}</p>
-          </div>
-
-          <div className="page-modes-list">
             <div className="page-mode-row">
               <div className="page-mode-info">
-                <span className="page-mode-name">{avatarMode === 'simple' ? t('cat.mode.simple') : t('cat.mode.normal')}</span>
+                <span className="page-mode-name">{t('settings.avatar.title')}</span>
                 <span className="page-mode-hint">
                   {avatarMode === 'simple' ? t('settings.avatar.simpleDesc') : t('settings.avatar.normalDesc')}
                 </span>
               </div>
 
               <div className="page-mode-control">
-                <ViewModeToggle mode={avatarMode} onChange={setAvatarMode} size="sm" variant="segmented" />
+                <ViewModeToggle
+                  mode={avatarMode}
+                  onChange={setAvatarMode}
+                  size="sm"
+                  variant="segmented"
+                  ariaLabel={t('settings.avatar.title')}
+                />
               </div>
             </div>
           </div>
@@ -317,7 +366,7 @@ export const SettingsPage = () => {
           </div>
 
           <div className="page-modes-list">
-            {extraSections.map((section) => {
+            {usefulSections.map((section) => {
               const isVisible = !hiddenSections.includes(section.key)
 
               return (
@@ -532,33 +581,67 @@ export const SettingsPage = () => {
           <div className="settings-grid">
             <Card className="settings-pref-card">
               <span className="settings-pref-label">{t('settings.general.lang')}</span>
-              <div className="settings-pill-group">
-                <button type="button" className={`settings-pill-btn ${lang === 'ru' ? 'is-active' : ''}`} onClick={() => setLang('ru')}>
+              <ToggleGroup
+                type="single"
+                value={lang}
+                onValueChange={(val) => {
+                  if (val) setLang(val as typeof lang)
+                }}
+                className="settings-pill-group"
+                aria-label={t('settings.general.lang')}
+              >
+                <ToggleGroupItem value="ru" className="settings-pill-btn">
                   Русский (RU)
-                </button>
-                <button type="button" className={`settings-pill-btn ${lang === 'en' ? 'is-active' : ''}`} onClick={() => setLang('en')}>
+                </ToggleGroupItem>
+                <ToggleGroupItem value="en" className="settings-pill-btn">
                   English (EN)
-                </button>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             </Card>
 
             <Card className="settings-pref-card">
               <span className="settings-pref-label">{t('settings.general.city')}</span>
-              <select
-                className="settings-select"
+              <Select
                 value={cityId}
-                onChange={(e) => {
-                  const found = cities.find((c) => c.id === e.target.value)
+                onValueChange={(id) => {
+                  const found = cities.find((c) => c.id === id)
                   if (found) setCity(found)
                 }}
               >
-                {cities.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.zone})
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="settings-select" aria-label={t('settings.general.city')}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>{t('settings.cityRu', 'Россия')}</SelectLabel>
+                    {cities
+                      .filter((c) => c.country === 'ru')
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name} ({c.zone})
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>{t('settings.cityWorld', 'Мир')}</SelectLabel>
+                    {cities
+                      .filter((c) => c.country === 'world')
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name} ({c.zone})
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Card>
+
+            {premiumActive && (
+              <Card className="settings-pref-card">
+                <span className="settings-pref-label">{t('settings.coinsBalance', 'Баланс монет')}</span>
+                <span className="settings-about-value">{coins.toLocaleString()} 🪙</span>
+              </Card>
+            )}
           </div>
         </section>
 
@@ -573,28 +656,33 @@ export const SettingsPage = () => {
 
           <div className="theme-mode-row">
             <span className="settings-pref-label">{t('settings.theme.mode')}</span>
-            <div className="settings-pill-group">
-              <button
-                type="button"
-                className={`settings-pill-btn ${themeMode === 'system' ? 'is-active' : ''}`}
-                onClick={() => setThemeMode('system')}
-              >
+            <ToggleGroup
+              type="single"
+              value={themeMode}
+              onValueChange={(val) => {
+                if (val === 'system') setThemeMode('system')
+                else if (val === 'light' || val === 'dark') selectThemeVariant(themePalette, val)
+              }}
+              className="settings-pill-group"
+              aria-label={t('settings.theme.mode')}
+            >
+              <ToggleGroupItem value="system" className="settings-pill-btn">
                 <Monitor size={14} /> {t('theme.system')}
-              </button>
-              <button
-                type="button"
-                className={`settings-pill-btn ${themeMode === 'light' ? 'is-active' : ''}`}
-                onClick={() => selectThemeVariant(themePalette, 'light')}
-              >
+              </ToggleGroupItem>
+              <ToggleGroupItem value="light" className="settings-pill-btn">
                 <Sun size={14} /> {t('theme.light')}
-              </button>
-              <button
-                type="button"
-                className={`settings-pill-btn ${themeMode === 'dark' ? 'is-active' : ''}`}
-                onClick={() => selectThemeVariant(themePalette, 'dark')}
-              >
+              </ToggleGroupItem>
+              <ToggleGroupItem value="dark" className="settings-pill-btn">
                 <Moon size={14} /> {t('theme.dark')}
-              </button>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+
+          <div className="theme-group-head">
+            <Palette size={15} />
+            <div className="theme-group-text">
+              <span>{t('settings.theme.free')}</span>
+              <small>{t('settings.theme.freeHint')}</small>
             </div>
           </div>
 
@@ -622,34 +710,33 @@ export const SettingsPage = () => {
                     {isActive && <Check size={16} className="theme-card-check" />}
                   </button>
 
-                  <div className="theme-card-variants">
-                    <button
-                      type="button"
-                      className={`theme-variant-btn ${isLightVariant(palette.id) ? 'is-on' : ''}`}
-                      onClick={() => selectThemeVariant(palette.id, 'light')}
-                    >
+                  <ToggleGroup
+                    type="single"
+                    value={isLightVariant(palette.id) ? 'light' : isDarkVariant(palette.id) ? 'dark' : ''}
+                    onValueChange={(val) => {
+                      if (val === 'light' || val === 'dark') selectThemeVariant(palette.id, val)
+                    }}
+                    className="theme-card-variants"
+                    aria-label={t(palette.nameKey, palette.fallback)}
+                  >
+                    <ToggleGroupItem value="light" className="theme-variant-btn">
                       <Sun size={14} /> {t('theme.light')}
-                    </button>
-                    <button
-                      type="button"
-                      className={`theme-variant-btn ${isDarkVariant(palette.id) ? 'is-on' : ''}`}
-                      onClick={() => selectThemeVariant(palette.id, 'dark')}
-                    >
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="dark" className="theme-variant-btn">
                       <Moon size={14} /> {t('theme.dark')}
-                    </button>
-                  </div>
+                    </ToggleGroupItem>
+                  </ToggleGroup>
                 </div>
               )
             })}
           </div>
 
-          {activeThemeSkin && activeThemeSkin !== 'default' && (
-            <p className="settings-section-desc theme-vip-note">{t('settings.theme.vipNote')}</p>
-          )}
-
-          <div className="theme-vip-head">
+          <div className="theme-group-head theme-group-head--vip">
             <Crown size={15} />
-            <span>{t('settings.theme.vip')}</span>
+            <div className="theme-group-text">
+              <span>{t('settings.theme.vip')}</span>
+              <small>{t('settings.theme.vipNote')}</small>
+            </div>
           </div>
 
           <div className="theme-cards-grid">
@@ -688,22 +775,22 @@ export const SettingsPage = () => {
                   </button>
 
                   {unlocked ? (
-                    <div className="theme-card-variants">
-                      <button
-                        type="button"
-                        className={`theme-variant-btn ${isActive && themeMode === 'light' ? 'is-on' : ''}`}
-                        onClick={() => selectVipTheme(vip.skin, 'light')}
-                      >
+                    <ToggleGroup
+                      type="single"
+                      value={isActive ? themeMode : ''}
+                      onValueChange={(val) => {
+                        if (val === 'light' || val === 'dark') selectVipTheme(vip.skin, val)
+                      }}
+                      className="theme-card-variants"
+                      aria-label={t(vip.nameKey, vip.fallback)}
+                    >
+                      <ToggleGroupItem value="light" className="theme-variant-btn">
                         <Sun size={14} /> {t('theme.light')}
-                      </button>
-                      <button
-                        type="button"
-                        className={`theme-variant-btn ${isActive && themeMode === 'dark' ? 'is-on' : ''}`}
-                        onClick={() => selectVipTheme(vip.skin, 'dark')}
-                      >
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="dark" className="theme-variant-btn">
                         <Moon size={14} /> {t('theme.dark')}
-                      </button>
-                    </div>
+                      </ToggleGroupItem>
+                    </ToggleGroup>
                   ) : (
                     <Link to="/shop" className="theme-vip-unlock">
                       <Lock size={13} /> {t('settings.theme.locked')}
@@ -721,24 +808,30 @@ export const SettingsPage = () => {
             <p className="settings-section-desc">{t('settings.blocks.desc')}</p>
           </div>
 
-          <div className="blocks-toggle-grid">
+          <ToggleGroup
+            type="multiple"
+            value={(Object.keys(defaultBlocks) as (keyof typeof defaultBlocks)[]).filter((key) => blocks[key] ?? true)}
+            onValueChange={(val) => {
+              const enabled = new Set(val)
+              ;(Object.keys(defaultBlocks) as (keyof typeof defaultBlocks)[]).forEach((key) => {
+                const isOn = enabled.has(key)
+                if (isOn !== (blocks[key] ?? true)) toggleBlock(key)
+              })
+            }}
+            className="blocks-toggle-grid"
+            aria-label={t('settings.blocks.title')}
+          >
             {(Object.keys(defaultBlocks) as (keyof typeof defaultBlocks)[]).map((key) => {
               const isOn = blocks[key] ?? true
 
               return (
-                <button
-                  key={key}
-                  type="button"
-                  className={`block-chip ${isOn ? 'is-on' : 'is-off'}`}
-                  onClick={() => toggleBlock(key)}
-                  aria-pressed={isOn}
-                >
+                <ToggleGroupItem key={key} value={key} className="block-chip">
                   <span className="block-chip-mark">{isOn ? <Check size={13} /> : '✕'}</span>
                   <span className="block-chip-label">{key}</span>
-                </button>
+                </ToggleGroupItem>
               )
             })}
-          </div>
+          </ToggleGroup>
         </section>
 
         <section className="settings-section">
@@ -752,6 +845,10 @@ export const SettingsPage = () => {
                 TAU v{APP_VERSION} · {APP_COMMIT}
                 {APP_BUILT_AT ? ` · ${APP_BUILT_AT}` : ''}
               </span>
+            </Card>
+            <Card className="settings-pref-card">
+              <span className="settings-pref-label">{t('contact.open')}</span>
+              <ContactButton variant="outline" size="sm" />
             </Card>
           </div>
         </section>

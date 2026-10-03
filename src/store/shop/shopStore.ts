@@ -1,24 +1,15 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
-import { ApiError, apiFetch, getAuthToken } from '../../services/api/apiClient'
+import { catSkinToShopKey, PART_PRICES, themeSkinToShopKey } from '../../lib/shop'
+import type { CatSkinId, ShopItemKey, ThemeSkinId } from '../../lib/shop'
+import { ApiError, getAuthToken } from '../../services/api/apiClient'
+import { rpc, rpcError } from '../../services/api/rpcClient'
 
-export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | 'theme_cyberpunk' | 'theme_midnight_gold' | 'sound_lofi'
-
-export type CatSkinId = 'classic' | 'wizard' | 'cyber'
-export type ThemeSkinId = 'default' | 'cyberpunk' | 'midnight_gold'
+export { PART_PRICES }
+export type { CatSkinId, ShopItemKey, ThemeSkinId }
 
 export const SHOP_DEV_UNLOCK_ALL = import.meta.env.DEV || import.meta.env.VITE_SHOP_DEV_UNLOCK_ALL === 'true'
-
-export const PART_PRICES: Record<ShopItemKey, number> = {
-  lottery: 250,
-  statham: 250,
-  cat_wizard: 200,
-  cat_cyber: 200,
-  theme_cyberpunk: 150,
-  theme_midnight_gold: 150,
-  sound_lofi: 200,
-}
 
 export type CoinOp = {
   id: string
@@ -56,6 +47,8 @@ const STORAGE_KEY = STORAGE_KEYS.shop
 
 const createOpId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
+let flushPromise: Promise<void> | null = null
+
 export const useShopStore = create<ShopState>()(
   persist(
     (set, get) => ({
@@ -65,9 +58,20 @@ export const useShopStore = create<ShopState>()(
         statham: false,
         cat_wizard: false,
         cat_cyber: false,
+        theme_spring: false,
+        theme_summer: false,
+        theme_autumn: false,
+        theme_winter: false,
         theme_cyberpunk: false,
         theme_midnight_gold: false,
+        theme_violet: false,
+        theme_anime: false,
         sound_lofi: false,
+        lang_advanced: false,
+        notes_advanced: false,
+        view_normal: false,
+        finance_advice: false,
+        motion_pro: false,
       },
       activeCatSkin: 'classic',
       activeThemeSkin: 'default',
@@ -87,11 +91,10 @@ export const useShopStore = create<ShopState>()(
         if (!getAuthToken()) return { success: false, error: 'offline' }
 
         try {
-          const res = await apiFetch<{ coins: number; unlockedParts: Partial<Record<ShopItemKey, boolean>> }>('/api/shop/buy', {
-            method: 'POST',
-            body: JSON.stringify({ key }),
-          })
-          set({ coins: res.coins, unlockedParts: res.unlockedParts })
+          const res = await rpc.api.shop.buy.$post({ json: { key } })
+          if (!res.ok) throw await rpcError(res, 'Failed to buy item')
+          const data = await res.json()
+          set({ coins: data.coins, unlockedParts: data.unlockedParts })
           return { success: true }
         } catch (err: unknown) {
           if (err instanceof ApiError && err.code === 'INSUFFICIENT_FUNDS') return { success: false, error: 'insufficient' }
@@ -105,8 +108,8 @@ export const useShopStore = create<ShopState>()(
           set({ activeCatSkin: 'classic' })
           return
         }
-        const key: ShopItemKey = skin === 'wizard' ? 'cat_wizard' : 'cat_cyber'
-        if (get().isUnlocked(key)) {
+        const key = catSkinToShopKey(skin)
+        if (key && get().isUnlocked(key)) {
           set({ activeCatSkin: skin })
         }
       },
@@ -116,8 +119,8 @@ export const useShopStore = create<ShopState>()(
           set({ activeThemeSkin: 'default' })
           return
         }
-        const key: ShopItemKey = theme === 'cyberpunk' ? 'theme_cyberpunk' : 'theme_midnight_gold'
-        if (get().isUnlocked(key)) {
+        const key = themeSkinToShopKey(theme)
+        if (key && get().isUnlocked(key)) {
           set({ activeThemeSkin: theme })
         }
       },
@@ -130,25 +133,42 @@ export const useShopStore = create<ShopState>()(
       },
 
       flushOps: async () => {
-        const ops = get().pendingOps
-        if (ops.length === 0 || !getAuthToken()) return
+        if (flushPromise) return flushPromise
 
-        try {
-          const res = await apiFetch<{ coins: number; accepted: string[]; rejected: string[] }>('/api/shop/earn', {
-            method: 'POST',
-            body: JSON.stringify({ ops }),
-          })
-          const settled = new Set([...res.accepted, ...res.rejected])
-          set((state) => ({ coins: res.coins, pendingOps: state.pendingOps.filter((op) => !settled.has(op.id)) }))
-        } catch {
-          void 0
-        }
+        flushPromise = (async () => {
+          for (;;) {
+            const ops = get().pendingOps
+            if (ops.length === 0 || !getAuthToken()) return
+
+            const sent = new Set(ops.map((op) => op.id))
+
+            try {
+              const res = await rpc.api.shop.earn.$post({ json: { ops } })
+              if (!res.ok) throw await rpcError(res, 'Failed to flush coin operations')
+              const data = await res.json()
+              const settled = new Set([...data.accepted, ...data.rejected])
+              set((state) => {
+                const newOpsArrived = state.pendingOps.some((op) => !sent.has(op.id))
+                return {
+                  coins: newOpsArrived ? state.coins : data.coins,
+                  pendingOps: state.pendingOps.filter((op) => !settled.has(op.id)),
+                }
+              })
+            } catch {
+              return
+            }
+          }
+        })().finally(() => {
+          flushPromise = null
+        })
+
+        return flushPromise
       },
 
       sendFriendGreeting: (friendName) => {
         set({
           greetingSent: true,
-          greetingFriendName: friendName.trim() || 'Странник снов',
+          greetingFriendName: friendName.trim(),
           greetingTimestamp: Date.now(),
           hasPendingGreetingReply: true,
           greetingRewardClaimed: false,

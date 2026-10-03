@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { STORAGE_KEYS } from '../../lib/storage'
 import { persist } from 'zustand/middleware'
-import { apiFetch, getAuthToken, setAuthToken } from '../../services/api/apiClient'
+import { ApiError, getAuthToken, setAuthExpiredHandler, setAuthToken } from '../../services/api/apiClient'
+import { rpc, rpcError } from '../../services/api/rpcClient'
 import { pullSync, pushSync } from '../../services/api/syncService'
 
 export type UserProfile = {
@@ -68,18 +69,14 @@ export const useAuthStore = create<AuthState>()(
       login: async (email, password) => {
         set({ status: 'loading', error: null })
         try {
-          const res = await apiFetch<{
-            user: UserProfile
-            accessToken: string
-          }>('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password }),
-          })
+          const res = await rpc.auth.login.$post({ json: { email, password } })
+          if (!res.ok) throw await rpcError(res, 'Login failed')
 
-          setAuthToken(res.accessToken)
+          const data = await res.json()
+          setAuthToken(data.accessToken)
           set({
-            user: res.user,
-            token: res.accessToken,
+            user: data.user,
+            token: data.accessToken,
             status: 'authenticated',
             error: null,
           })
@@ -96,27 +93,22 @@ export const useAuthStore = create<AuthState>()(
       register: async (email, password, referralCode) => {
         set({ status: 'loading', error: null })
         try {
-          const res = await apiFetch<{
-            user: UserProfile
-            accessToken: string
-            referralCode?: string | null
-            referralReward?: number
-            referralStatus?: 'none' | 'applied' | 'invalid'
-          }>('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify({ email, password, referralCode: referralCode?.trim() || undefined }),
+          const res = await rpc.auth.register.$post({
+            json: { email, password, referralCode: referralCode?.trim() || undefined },
           })
+          if (!res.ok) throw await rpcError(res, 'Registration failed')
 
-          setAuthToken(res.accessToken)
-          const reward = res.referralReward ?? 0
+          const data = await res.json()
+          setAuthToken(data.accessToken)
+          const reward = data.referralReward ?? 0
           set({
-            user: res.user,
-            token: res.accessToken,
+            user: data.user,
+            token: data.accessToken,
             status: 'authenticated',
             error: null,
-            referralStats: res.referralCode ? { code: res.referralCode, invited: 0, earned: 0, pending: [], premiumUntil: null } : null,
+            referralStats: data.referralCode ? { code: data.referralCode, invited: 0, earned: 0, pending: [], premiumUntil: null } : null,
             lastReferralReward: reward,
-            referralStatus: res.referralStatus ?? 'none',
+            referralStatus: data.referralStatus ?? 'none',
           })
 
           void get()
@@ -132,7 +124,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          await apiFetch('/auth/logout', { method: 'POST' })
+          await rpc.auth.logout.$post()
         } catch (e) {
           void e
         } finally {
@@ -142,6 +134,10 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             status: 'unauthenticated',
             error: null,
+            referralStats: null,
+            lastReferralReward: 0,
+            referralStatus: 'none',
+            lastSyncedAt: null,
           })
         }
       },
@@ -154,21 +150,28 @@ export const useAuthStore = create<AuthState>()(
         }
 
         try {
-          const user = await apiFetch<UserProfile>('/auth/me')
+          const res = await rpc.auth.me.$get()
+          if (!res.ok) throw await rpcError(res, 'Failed to load profile')
+          const data = await res.json()
           set({
-            user,
+            user: { id: data.id, email: data.email, role: data.role as 'user' | 'admin', createdAt: data.createdAt, premium: data.premium },
             token: getAuthToken(),
             status: 'authenticated',
             error: null,
           })
           return true
-        } catch {
-          setAuthToken(null)
-          set({
-            user: null,
-            token: null,
-            status: 'unauthenticated',
-          })
+        } catch (err: unknown) {
+          if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+            setAuthToken(null)
+            set({
+              user: null,
+              token: null,
+              status: 'unauthenticated',
+            })
+            return false
+          }
+
+          set({ status: 'error', error: err instanceof Error ? err.message : 'Failed to load profile' })
           return false
         }
       },
@@ -185,8 +188,7 @@ export const useAuthStore = create<AuthState>()(
           const now = new Date().toISOString()
           set({ lastSyncedAt: now, isSyncing: false })
           return true
-        } catch (err: unknown) {
-          console.error(err)
+        } catch {
           set({ isSyncing: false })
           return false
         }
@@ -195,7 +197,9 @@ export const useAuthStore = create<AuthState>()(
       fetchReferral: async () => {
         if (!get().user) return
         try {
-          const stats = await apiFetch<ReferralStats>('/auth/referral')
+          const res = await rpc.auth.referral.$get()
+          if (!res.ok) throw await rpcError(res, 'Failed to load referral stats')
+          const stats = await res.json()
           set({ referralStats: stats })
         } catch {
           void 0
@@ -205,11 +209,10 @@ export const useAuthStore = create<AuthState>()(
       claimReferralReward: async (id, type) => {
         if (!get().user) return false
         try {
-          const res = await apiFetch<{ type: 'coins' | 'premium'; stats: ReferralStats }>('/auth/referral/claim', {
-            method: 'POST',
-            body: JSON.stringify({ id, type }),
-          })
-          set({ referralStats: res.stats })
+          const res = await rpc.auth.referral.claim.$post({ json: { id, type } })
+          if (!res.ok) throw await rpcError(res, 'Failed to claim referral reward')
+          const data = await res.json()
+          set({ referralStats: data.stats })
           void get().checkAuth()
           void get().syncData('pull')
           return true
@@ -228,3 +231,17 @@ export const useAuthStore = create<AuthState>()(
     },
   ),
 )
+
+setAuthExpiredHandler(() => {
+  const { user, status } = useAuthStore.getState()
+  if (!user && status !== 'authenticated') return
+  useAuthStore.setState({
+    user: null,
+    token: null,
+    status: 'unauthenticated',
+    error: null,
+    referralStats: null,
+    lastReferralReward: 0,
+    referralStatus: 'none',
+  })
+})

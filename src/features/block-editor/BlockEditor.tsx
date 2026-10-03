@@ -7,6 +7,7 @@ import { SlashMenu } from './SlashMenu'
 import { detectMediaType, optimizeImageIfNeeded, readFileAsDataUrl } from './mediaUtils'
 import { createBlock, parseBlocks, serializeBlocks } from './serialization'
 import type { Block, BlockType } from './types'
+import { useTranslation } from '../../lib/i18n'
 import './BlockEditor.css'
 
 export type BlockEditorProps = {
@@ -16,6 +17,7 @@ export type BlockEditorProps = {
 }
 
 export const BlockEditor = ({ initialContent, onChange, isSimple }: BlockEditorProps) => {
+  const { t } = useTranslation()
   const [blocks, setBlocks] = useState<Block[]>(() => parseBlocks(initialContent))
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const [isDraggingFiles, setIsDraggingFiles] = useState(false)
@@ -258,22 +260,37 @@ export const BlockEditor = ({ initialContent, onChange, isSimple }: BlockEditorP
 
       <div className="block-editor-footer">
         <button type="button" className="block-add-end-btn" onClick={() => handleAppendBlock('p')}>
-          <Plus size={14} /> Добавить блок
+          <Plus size={14} /> {t('blocks.editor.addBlock')}
         </button>
 
         {!isSimple && (
           <div className="block-quick-media-group">
-            <button type="button" className="block-quick-media-btn" onClick={() => handleAppendBlock('image')} title="Добавить изображение">
+            <button
+              type="button"
+              className="block-quick-media-btn"
+              onClick={() => handleAppendBlock('image')}
+              title={t('blocks.editor.addImage')}
+            >
               <ImageIcon size={13} />
-              <span>Картинка</span>
+              <span>{t('blocks.editor.image')}</span>
             </button>
-            <button type="button" className="block-quick-media-btn" onClick={() => handleAppendBlock('audio')} title="Добавить аудиозапись">
+            <button
+              type="button"
+              className="block-quick-media-btn"
+              onClick={() => handleAppendBlock('audio')}
+              title={t('blocks.editor.addAudio')}
+            >
               <Music size={13} />
-              <span>Аудио</span>
+              <span>{t('blocks.editor.audio')}</span>
             </button>
-            <button type="button" className="block-quick-media-btn" onClick={() => handleAppendBlock('pdf')} title="Добавить PDF документ">
+            <button
+              type="button"
+              className="block-quick-media-btn"
+              onClick={() => handleAppendBlock('pdf')}
+              title={t('blocks.editor.addPdf')}
+            >
               <FileText size={13} />
-              <span>PDF</span>
+              <span>{t('blocks.editor.pdf')}</span>
             </button>
           </div>
         )}
@@ -282,7 +299,7 @@ export const BlockEditor = ({ initialContent, onChange, isSimple }: BlockEditorP
       {isDraggingFiles && (
         <div className="block-editor-drag-overlay">
           <Upload size={32} />
-          <span>Отпустите файлы (картинки, аудио или PDF) для добавления</span>
+          <span>{t('blocks.editor.dropFiles')}</span>
         </div>
       )}
 

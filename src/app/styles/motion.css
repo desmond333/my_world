@@ -1,0 +1,344 @@
+@keyframes motion-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes motion-part-in {
+  0% {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-part-in-full {
+  0% {
+    opacity: 0;
+    transform: translateY(38px) scale(0.975);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes motion-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes motion-shimmer {
+  0% {
+    background-position: -160% 0;
+  }
+  100% {
+    background-position: 260% 0;
+  }
+}
+
+@keyframes motion-tab-in {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-shell > *,
+.notes-page-wrapper > *,
+.useful-content > *:first-child > * {
+  animation: motion-part-in var(--motion-slow) var(--motion-ease) both;
+}
+
+.page-shell > *:nth-child(1),
+.notes-page-wrapper > *:nth-child(1),
+.useful-content > *:first-child > *:nth-child(1) {
+  animation-delay: 0.04s;
+}
+
+.page-shell > *:nth-child(2),
+.notes-page-wrapper > *:nth-child(2),
+.useful-content > *:first-child > *:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.page-shell > *:nth-child(3),
+.notes-page-wrapper > *:nth-child(3),
+.useful-content > *:first-child > *:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.page-shell > *:nth-child(4),
+.notes-page-wrapper > *:nth-child(4),
+.useful-content > *:first-child > *:nth-child(4) {
+  animation-delay: 0.28s;
+}
+
+.page-shell > *:nth-child(5),
+.notes-page-wrapper > *:nth-child(5),
+.useful-content > *:first-child > *:nth-child(5) {
+  animation-delay: 0.36s;
+}
+
+.page-shell > *:nth-child(6),
+.notes-page-wrapper > *:nth-child(6),
+.useful-content > *:first-child > *:nth-child(6) {
+  animation-delay: 0.44s;
+}
+
+.page-shell > *:nth-child(7),
+.notes-page-wrapper > *:nth-child(7),
+.useful-content > *:first-child > *:nth-child(7) {
+  animation-delay: 0.52s;
+}
+
+.page-shell > *:nth-child(8),
+.notes-page-wrapper > *:nth-child(8),
+.useful-content > *:first-child > *:nth-child(8) {
+  animation-delay: 0.6s;
+}
+
+.page-shell > *:nth-child(9),
+.notes-page-wrapper > *:nth-child(9),
+.useful-content > *:first-child > *:nth-child(9) {
+  animation-delay: 0.68s;
+}
+
+.page-shell > *:nth-child(10),
+.notes-page-wrapper > *:nth-child(10),
+.useful-content > *:first-child > *:nth-child(10) {
+  animation-delay: 0.76s;
+}
+
+.page-shell > *:nth-child(11),
+.notes-page-wrapper > *:nth-child(11),
+.useful-content > *:first-child > *:nth-child(11) {
+  animation-delay: 0.84s;
+}
+
+.page-shell > *:nth-child(12),
+.notes-page-wrapper > *:nth-child(12),
+.useful-content > *:first-child > *:nth-child(12) {
+  animation-delay: 0.92s;
+}
+
+.page-shell > *:nth-child(n + 13),
+.notes-page-wrapper > *:nth-child(n + 13),
+.useful-content > *:first-child > *:nth-child(n + 13) {
+  animation-delay: 1s;
+}
+
+[role='tabpanel'][data-state='active'],
+.useful-section > * {
+  animation: motion-tab-in var(--motion-base) var(--motion-ease) both;
+}
+
+html[data-motion='full'] .page-shell > *,
+html[data-motion='full'] .notes-page-wrapper > *,
+html[data-motion='full'] .useful-content > *:first-child > * {
+  animation-name: motion-part-in-full;
+  animation-duration: var(--motion-page);
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(1),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(1),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(2),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(2),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(3),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(3),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(3) {
+  animation-delay: 0.25s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(4),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(4),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(4) {
+  animation-delay: 0.35s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(5),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(5),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(5) {
+  animation-delay: 0.45s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(6),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(6),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(6) {
+  animation-delay: 0.55s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(7),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(7),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(7) {
+  animation-delay: 0.65s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(8),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(8),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(8) {
+  animation-delay: 0.75s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(9),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(9),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(9) {
+  animation-delay: 0.85s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(10),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(10),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(10) {
+  animation-delay: 0.95s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(11),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(11),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(11) {
+  animation-delay: 1.05s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(12),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(12),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(12) {
+  animation-delay: 1.15s;
+}
+
+html[data-motion='full'] .page-shell > *:nth-child(n + 13),
+html[data-motion='full'] .notes-page-wrapper > *:nth-child(n + 13),
+html[data-motion='full'] .useful-content > *:first-child > *:nth-child(n + 13) {
+  animation-delay: 1.25s;
+}
+
+html[data-motion='full'] [role='tabpanel'][data-state='active'],
+html[data-motion='full'] .useful-section > * {
+  animation-name: motion-part-in-full;
+  animation-duration: var(--motion-slow);
+}
+
+html[data-motion='full'] .ui-card {
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) ease;
+}
+
+html[data-motion='full'] .ui-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+}
+
+html[data-motion='full'] .pack-card,
+html[data-motion='full'] .pricing-plan {
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) ease,
+    box-shadow var(--motion-base) ease;
+}
+
+html[data-motion='full'] .pack-card:hover,
+html[data-motion='full'] .pricing-plan:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+html[data-motion='full'] .pricing-plan.has-badge,
+html[data-motion='full'] .lang-tab-badge.is-premium {
+  background-size: 220% 100%;
+  animation: motion-shimmer 3.6s linear infinite;
+}
+
+html[data-motion='full'] .shop-link-coins {
+  animation: motion-pulse 2.6s ease-in-out infinite;
+}
+
+html[data-motion='full'] .advice-grid > *,
+html[data-motion='full'] .earn-ways-grid > * {
+  animation: motion-rise var(--motion-slow) var(--motion-ease) both;
+}
+
+html[data-motion='full'] .packs-grid > * {
+  animation: motion-fade var(--motion-slow) ease both;
+}
+
+html[data-motion='full'] .advice-grid > *:nth-child(2),
+html[data-motion='full'] .earn-ways-grid > *:nth-child(2),
+html[data-motion='full'] .packs-grid > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+html[data-motion='full'] .advice-grid > *:nth-child(3),
+html[data-motion='full'] .earn-ways-grid > *:nth-child(3),
+html[data-motion='full'] .packs-grid > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+html[data-motion='full'] .advice-grid > *:nth-child(4),
+html[data-motion='full'] .packs-grid > *:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+html[data-motion='full'] .advice-grid > *:nth-child(5),
+html[data-motion='full'] .packs-grid > *:nth-child(5) {
+  animation-delay: 0.32s;
+}
+
+html[data-motion='full'] .advice-grid > *:nth-child(6),
+html[data-motion='full'] .packs-grid > *:nth-child(6) {
+  animation-delay: 0.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell > *,
+  .notes-page-wrapper > *,
+  .useful-content > *:first-child > *,
+  [role='tabpanel'][data-state='active'],
+  .useful-section > *,
+  html[data-motion='full'] .advice-grid > *,
+  html[data-motion='full'] .earn-ways-grid > *,
+  html[data-motion='full'] .packs-grid > *,
+  html[data-motion='full'] .shop-link-coins,
+  html[data-motion='full'] .pricing-plan.has-badge,
+  html[data-motion='full'] .lang-tab-badge.is-premium {
+    animation: none !important;
+  }
+
+  html[data-motion='full'] .ui-card:hover,
+  html[data-motion='full'] .pack-card:hover,
+  html[data-motion='full'] .pricing-plan:hover {
+    transform: none !important;
+  }
+}

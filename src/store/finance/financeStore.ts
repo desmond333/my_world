@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
 import type { Currency, CurrencyRates, Deposit, FinanceEntry, Loan } from '../../data'
-import { DEFAULT_CURRENCY, DEFAULT_RATES, isCurrency } from '../../lib/finance'
+import { DEFAULT_CURRENCY, DEFAULT_RATES, isCurrency, type RiskProfile } from '../../lib/finance'
 
 const STORAGE_KEY = STORAGE_KEYS.finance
 
@@ -20,6 +20,8 @@ export type FinanceStore = {
   rates: CurrencyRates
   ratesSource: RatesSource
   ratesUpdatedAt: string | null
+  riskProfile: RiskProfile
+  setRiskProfile: (profile: RiskProfile) => void
   addEntry: (entry: Omit<FinanceEntry, 'id' | 'createdAt'>) => void
   updateEntry: (id: string, patch: Partial<Omit<FinanceEntry, 'id' | 'createdAt'>>) => void
   removeEntry: (id: string) => void
@@ -48,6 +50,11 @@ export const useFinanceStore = create<FinanceStore>()(
       rates: { ...DEFAULT_RATES },
       ratesSource: 'default',
       ratesUpdatedAt: null,
+      riskProfile: 'balanced',
+      setRiskProfile: (profile) => {
+        set({ riskProfile: profile })
+        scheduleDebouncedSync()
+      },
       addEntry: (entry) => {
         set((state) => {
           if (!entry.amount || entry.amount <= 0) return state
@@ -137,6 +144,7 @@ export const useFinanceStore = create<FinanceStore>()(
           loans: previous.loans ?? [],
           ratesSource: previous.ratesSource ?? 'default',
           ratesUpdatedAt: previous.ratesUpdatedAt ?? null,
+          riskProfile: previous.riskProfile ?? 'balanced',
         }
       },
     },

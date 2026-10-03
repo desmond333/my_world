@@ -10,13 +10,13 @@
   max-width: 90vw;
   max-height: 85vh;
   outline: none;
-  animation: ui-popover-scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: ui-popover-scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes ui-popover-scale-in {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.93) translateY(8px);
   }
   to {
     opacity: 1;

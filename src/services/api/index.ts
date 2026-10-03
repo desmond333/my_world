@@ -1,4 +1,5 @@
 export * from './apiClient'
-export * from './domainApi'
+export * from './rpcClient'
 export * from './syncService'
 export * from './friendsService'
+export * from './availabilityService'

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertCircle, Calendar, Check, Clock, LogIn, Plus, Send, Trash2, UserCheck, UserPlus, Users, X } from 'lucide-react'
-import { Dialog, DialogContent, DialogTitle, Tabs, TabsList, TabsTrigger } from '../../shared/ui'
+import { ConfirmDialog, Dialog, DialogContent, DialogTitle, Tabs, TabsList, TabsTrigger } from '../../shared/ui'
 import { useTranslation } from '../../lib/i18n'
 import { useAuthStore } from '../../store/auth'
 import { useFriendsStore } from '../../store/friends'
@@ -27,6 +27,7 @@ export const FriendsModal = () => {
   const assignTask = useFriendsStore((state) => state.assignTask)
 
   const [isSimpleMode, setIsSimpleMode] = useState(true)
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchUserResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
@@ -81,12 +82,12 @@ export const FriendsModal = () => {
     }
   }
 
-  const handleRemove = async (friendId: string) => {
-    if (window.confirm(t('friends.action.removeConfirm'))) {
-      const success = await removeFriend(friendId)
-      if (success) {
-        showFeedback('success', t('friends.action.remove'))
-      }
+  const confirmRemove = async () => {
+    if (!pendingRemoveId) return
+    const success = await removeFriend(pendingRemoveId)
+    setPendingRemoveId(null)
+    if (success) {
+      showFeedback('success', t('friends.action.remove'))
     }
   }
 
@@ -127,14 +128,13 @@ export const FriendsModal = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
-              className="icon-button"
+              className="friends-mode-toggle"
               onClick={() => setIsSimpleMode(!isSimpleMode)}
-              style={{ fontSize: '0.8rem', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--line)' }}
               title={isSimpleMode ? t('settings.viewMode.normal') : t('settings.viewMode.simple')}
             >
-              {isSimpleMode ? 'Normal' : 'Simple'}
+              {isSimpleMode ? t('settings.viewMode.normalShort') : t('settings.viewMode.simpleShort')}
             </button>
-            <button type="button" className="icon-button" onClick={closeModal} aria-label="Close">
+            <button type="button" className="icon-button friends-close-btn" onClick={closeModal} aria-label="Close">
               <X size={18} />
             </button>
           </div>
@@ -154,29 +154,31 @@ export const FriendsModal = () => {
         ) : (
           <>
             {!isSimpleMode && (
-              <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as typeof activeTab)}>
-                <TabsList className="friends-tabs" aria-label={t('friends.title')}>
-                  <TabsTrigger value="friends" className={`friends-tab-btn ${activeTab === 'friends' ? 'is-active' : ''}`}>
-                    <Users size={14} />
-                    <span>{t('friends.tab.friends')}</span>
-                    {friends.length > 0 && <span>({friends.length})</span>}
-                  </TabsTrigger>
-                  <TabsTrigger value="search" className={`friends-tab-btn ${activeTab === 'search' ? 'is-active' : ''}`}>
-                    <UserPlus size={14} />
-                    <span>{t('friends.tab.search')}</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="requests" className={`friends-tab-btn ${activeTab === 'requests' ? 'is-active' : ''}`}>
-                    <Clock size={14} />
-                    <span>{t('friends.tab.requests')}</span>
-                    {incoming.length > 0 && <span className="friends-badge friends-badge--coral">{incoming.length}</span>}
-                  </TabsTrigger>
-                  <TabsTrigger value="sent" className={`friends-tab-btn ${activeTab === 'sent' ? 'is-active' : ''}`}>
-                    <Send size={14} />
-                    <span>{t('friends.tab.sent')}</span>
-                    {sentTasks.length > 0 && <span>({sentTasks.length})</span>}
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <div className="friends-tabs-bar">
+                <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as typeof activeTab)}>
+                  <TabsList aria-label={t('friends.title')}>
+                    <TabsTrigger value="friends">
+                      <Users size={14} />
+                      <span>{t('friends.tab.friends')}</span>
+                      {friends.length > 0 && <span>({friends.length})</span>}
+                    </TabsTrigger>
+                    <TabsTrigger value="search">
+                      <UserPlus size={14} />
+                      <span>{t('friends.tab.search')}</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="requests">
+                      <Clock size={14} />
+                      <span>{t('friends.tab.requests')}</span>
+                      {incoming.length > 0 && <span className="friends-badge friends-badge--coral">{incoming.length}</span>}
+                    </TabsTrigger>
+                    <TabsTrigger value="sent">
+                      <Send size={14} />
+                      <span>{t('friends.tab.sent')}</span>
+                      {sentTasks.length > 0 && <span>({sentTasks.length})</span>}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
             )}
 
             <div className="friends-modal-body">
@@ -243,7 +245,13 @@ export const FriendsModal = () => {
 
               {isSimpleMode ? (
                 <div>
-                  <form className="friends-search-bar" onSubmit={handleSearch}>
+                  <form
+                    className="friends-search-bar"
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      if (searchQuery.trim() && !isSearching) handleSendRequest(searchQuery.trim())
+                    }}
+                  >
                     <input
                       type="email"
                       className="friends-search-input"
@@ -251,12 +259,7 @@ export const FriendsModal = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <button
-                      type="submit"
-                      className="add-button"
-                      disabled={!searchQuery.trim() || isSearching}
-                      onClick={() => handleSendRequest(searchQuery.trim())}
-                    >
+                    <button type="submit" className="add-button" disabled={!searchQuery.trim() || isSearching}>
                       <Plus size={15} />
                       <span>{t('friends.action.add')}</span>
                     </button>
@@ -297,7 +300,7 @@ export const FriendsModal = () => {
                             <button
                               type="button"
                               className="icon-button"
-                              onClick={() => handleRemove(friend.id)}
+                              onClick={() => setPendingRemoveId(friend.id)}
                               title={t('friends.action.remove')}
                             >
                               <Trash2 size={14} />
@@ -352,7 +355,7 @@ export const FriendsModal = () => {
                                 <button
                                   type="button"
                                   className="icon-button"
-                                  onClick={() => handleRemove(friend.id)}
+                                  onClick={() => setPendingRemoveId(friend.id)}
                                   title={t('friends.action.remove')}
                                 >
                                   <Trash2 size={14} />
@@ -507,12 +510,7 @@ export const FriendsModal = () => {
                     </select>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                    <button
-                      type="button"
-                      className="icon-button"
-                      style={{ fontSize: '0.85rem' }}
-                      onClick={() => setAssigningToFriend(null)}
-                    >
+                    <button type="button" className="friends-ghost-btn" onClick={() => setAssigningToFriend(null)}>
                       {t('common.cancel')}
                     </button>
                     <button type="submit" className="add-button" disabled={isSubmittingTask || !taskTitle.trim()}>
@@ -526,6 +524,16 @@ export const FriendsModal = () => {
           </>
         )}
       </DialogContent>
+
+      <ConfirmDialog
+        open={pendingRemoveId !== null}
+        title={t('friends.action.removeConfirm')}
+        confirmLabel={t('friends.action.remove')}
+        cancelLabel={t('common.cancel')}
+        danger
+        onConfirm={() => void confirmRemove()}
+        onCancel={() => setPendingRemoveId(null)}
+      />
     </Dialog>
   )
 }

@@ -5,6 +5,7 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSo
 import { GripVertical, Inbox } from 'lucide-react'
 import type { CollectionListKey } from '../../data'
 import { useTranslation } from '../../lib/i18n'
+import { Tabs, TabsList, TabsTrigger } from '../../shared/ui'
 import { CollectionFilters } from './CollectionFilters'
 import { SortableItemRow } from './SortableItemRow'
 import type { CollectionBoardProps } from './types'
@@ -55,21 +56,22 @@ export const CollectionBoard = memo(
           <h2>{listLabel(list)}</h2>
         </div>
 
-        <div className="list-switch" role="group" aria-label={t('collection.listSwitchAria')}>
-          {lists.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              aria-pressed={list === option.key}
-              className={`list-tab${list === option.key ? ' is-on' : ''}`}
-              onClick={() => onList(option.key)}
-              title={option.hint}
-            >
-              {listLabel(option.key)}
-              {counts[option.key] > 0 && <span className="list-count">{counts[option.key]}</span>}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          value={list}
+          onValueChange={(value) => {
+            if (value) onList(value as CollectionListKey)
+          }}
+          className="collection-tabs"
+        >
+          <TabsList aria-label={t('collection.listSwitchAria')}>
+            {lists.map((option) => (
+              <TabsTrigger key={option.key} value={option.key} title={option.hint}>
+                <span>{listLabel(option.key)}</span>
+                {counts[option.key] > 0 && <span className="list-count">{counts[option.key]}</span>}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
         {counts[list] === 0 ? (
           <p className="list-empty">

@@ -1,4 +1,4 @@
-import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, primaryKey, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -51,14 +51,18 @@ export const settings = sqliteTable('settings', {
   allowFriendTasks: integer('allow_friend_tasks').notNull().default(1),
 })
 
-export const trainingDays = sqliteTable('training_days', {
-  id: text('id').primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  date: text('date').notNull(),
-  sportsJson: text('sports_json').notNull().default('[]'),
-})
+export const trainingDays = sqliteTable(
+  'training_days',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    date: text('date').notNull(),
+    sportsJson: text('sports_json').notNull().default('[]'),
+  },
+  (table) => [uniqueIndex('training_days_user_date').on(table.userId, table.date)],
+)
 
 export const trainingSports = sqliteTable('training_sports', {
   id: text('id').primaryKey(),
@@ -265,20 +269,25 @@ export const viewModes = sqliteTable('view_modes', {
   globalMode: text('global_mode').notNull().default('simple'),
   pageModesJson: text('page_modes_json').notNull().default('{}'),
   avatarMode: text('avatar_mode').notNull().default('simple'),
+  cornerStyle: text('corner_style').notNull().default('middle'),
 })
 
-export const friendships = sqliteTable('friendships', {
-  id: text('id').primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  friendId: text('friend_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  status: text('status').notNull().default('pending'),
-  createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull(),
-})
+export const friendships = sqliteTable(
+  'friendships',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    friendId: text('friend_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: text('status').notNull().default('pending'),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (table) => [uniqueIndex('friendships_user_friend').on(table.userId, table.friendId)],
+)
 
 export const availabilityWindows = sqliteTable('availability_windows', {
   id: text('id').primaryKey(),
@@ -293,4 +302,14 @@ export const availabilityWindows = sqliteTable('availability_windows', {
   note: text('note').notNull().default(''),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
+})
+
+export const contactMessages = sqliteTable('contact_messages', {
+  id: text('id').primaryKey(),
+  userId: text('user_id'),
+  email: text('email').notNull().default(''),
+  topic: text('topic').notNull().default('support'),
+  body: text('body').notNull(),
+  status: text('status').notNull().default('new'),
+  createdAt: text('created_at').notNull(),
 })

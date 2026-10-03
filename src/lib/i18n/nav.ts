@@ -5,7 +5,6 @@ export const nav: Dictionary = {
     'nav.today': 'Сегодня',
     'nav.favorites': 'Избранное',
     'nav.useful': 'Полезное',
-    'nav.misc': 'Разное',
     'nav.notes': 'Заметки',
     'nav.shop': 'Магазин',
 
@@ -53,6 +52,7 @@ export const nav: Dictionary = {
     'notes.tree.allPages': 'Все страницы',
     'notes.tree.subpages': 'Вложенные страницы',
     'notes.tree.subpagesCount': 'вложенных',
+    'notes.tree.subpage': 'Подстраница',
     'notes.tree.addSubpage': 'Добавить подстраницу',
     'notes.tree.noSubpages': 'Вложенных страниц пока нет',
     'notes.tree.noSubpagesHint': 'Создайте первую подстраницу для древовидной структуры документа.',
@@ -68,7 +68,7 @@ export const nav: Dictionary = {
     'notes.tree.expandAll': 'Развернуть всё',
     'notes.tree.deleteConfirm': 'Удалить эту страницу и все её вложенные страницы?',
 
-    'brand.title': 'животное дня',
+    'brand.title': 'TAU',
 
     'topbar.settings': 'Настроить',
     'topbar.lang': 'Язык',
@@ -100,7 +100,7 @@ export const nav: Dictionary = {
     'nav.section.hideConfirmDesc': 'Раздел «{name}» исчезнет из меню. Вернуть его можно в настройках.',
 
     'mind.title': 'Дневник',
-    'mind.kicker': 'дополнительно · дневник',
+    'mind.kicker': 'полезное · дневник',
     'mind.intro': 'Дневник снов и трекер настроения. Записывай сюжеты ночных сновидений и следи за эмоциональным состоянием.',
     'mind.tabsAria': 'Вкладки дневника',
     'mind.tab.dreams': 'Дневник снов',
@@ -109,7 +109,7 @@ export const nav: Dictionary = {
     'mind.tab.moodHint': 'трекер дня',
 
     'remind.title': 'Напомнить',
-    'remind.kicker': 'дополнительно · напомнить',
+    'remind.kicker': 'полезное · напомнить',
     'remind.intro': 'Дни рождения друзей и близких, важные даты и памятные события. Ни один праздник не останется забытым.',
     'remind.tabsAria': 'Вкладки напоминаний',
     'remind.tab.birthdays': 'Дни рождения',
@@ -129,17 +129,35 @@ export const nav: Dictionary = {
     'section.lottery.hint': 'испытай удачу',
     'section.together': 'Вместе',
     'section.together.hint': 'общие окна времени',
+    'section.sounds': 'Звуки',
+    'section.sounds.hint': 'фоновые сцены для работы',
 
-    'extraNav.label': 'Разделы «Дополнительно»',
-    'extraNav.title': 'разделы',
+    'sounds.kicker': 'Полезное',
+    'sounds.title': 'Звуки',
+    'sounds.intro': 'Фоновые звуковые сцены для работы, чтения и отдыха. Работают прямо в браузере.',
+    'sounds.rain': 'Дождь',
+    'sounds.rain.hint': 'мягкий ливень за окном',
+    'sounds.fire': 'Камин',
+    'sounds.fire.hint': 'треск дров и тепло',
+    'sounds.drone': 'Медитация',
+    'sounds.drone.hint': 'глубокий низкий гул',
+    'sounds.stop': 'Остановить звук',
+
+    'usefulNav.label': 'Разделы «Полезное»',
+    'usefulNav.title': 'Полезное',
+
+    'usefulGroup.planning': 'Планирование',
+    'usefulGroup.money': 'Финансы и обучение',
+    'usefulGroup.leisure': 'Досуг',
+    'usefulGroup.misc': 'Разное',
 
     'sectionOff.title': 'Раздел выключен',
     'sectionOff.useful': '«Полезное» включается ползунком в настройках на главной — там же, где блоки дня.',
-    'sectionOff.misc': '«Разное» включается ползунком в настройках на главной — там же, где блоки дня.',
     'sectionOff.enable': 'Включить раздел',
 
     'common.save': 'Сохранить',
     'common.home': 'На главную',
+    'common.done': 'Готово',
     'common.failed': 'Не получилось',
     'notFound.title': 'Такой страницы нет',
     'notFound.note': 'Зато есть животное дня, которое ждёт тебя сегодня.',
@@ -183,12 +201,15 @@ export const nav: Dictionary = {
       'Если приложение оказалось полезным и хочется сказать спасибо — это всегда приятно. Можно написать лично, а можно просто отправить благодарность на карту: автору будет приятно независимо от способа.',
     'creator.writeTelegram': 'Написать в Telegram',
     'creator.thanks': 'Спасибо, что пользуешься.',
-    'creator.back': 'Вернуться к животному дня',
+    'creator.back': 'Вернуться на главную',
     'common.cancel': 'Отмена',
     'common.dismiss': 'Скрыть',
     'common.send': 'Отправить',
     'topbar.shopTitle': 'Магазин и казна',
     'topbar.authTitle': 'Вход и синхронизация',
+    'topbar.account.admin': 'Админ',
+    'topbar.account.user': 'Пользователь',
+    'topbar.account.label': 'Аккаунт',
     'common.roleAdmin': 'Администратор',
     'common.roleUser': 'Пользователь',
 
@@ -226,14 +247,11 @@ export const nav: Dictionary = {
 
     'page.notFoundTitle': 'Такой страницы нет',
     'page.notFoundDesc': 'Зато есть животное дня, которое ждёт тебя сегодня.',
-
-    'comingSoon.note': 'Раздел пустой. Функциональность появится позже, вкладка уже на месте.',
   },
   en: {
     'nav.today': 'Today',
     'nav.favorites': 'Favorites',
     'nav.useful': 'Useful',
-    'nav.misc': 'Misc',
     'nav.notes': 'Notes',
     'nav.shop': 'Shop',
 
@@ -281,6 +299,7 @@ export const nav: Dictionary = {
     'notes.tree.allPages': 'All pages',
     'notes.tree.subpages': 'Subpages',
     'notes.tree.subpagesCount': 'subpages',
+    'notes.tree.subpage': 'Subpage',
     'notes.tree.addSubpage': 'Add subpage',
     'notes.tree.noSubpages': 'No subpages yet',
     'notes.tree.noSubpagesHint': 'Create the first subpage to structure your document.',
@@ -296,7 +315,7 @@ export const nav: Dictionary = {
     'notes.tree.expandAll': 'Expand all',
     'notes.tree.deleteConfirm': 'Delete this page and all of its subpages?',
 
-    'brand.title': 'animal of the day',
+    'brand.title': 'TAU',
 
     'topbar.settings': 'Settings',
     'topbar.lang': 'Language',
@@ -328,7 +347,7 @@ export const nav: Dictionary = {
     'nav.section.hideConfirmDesc': '“{name}” will disappear from the menu. You can bring it back in Settings.',
 
     'mind.title': 'Journal',
-    'mind.kicker': 'extra · journal',
+    'mind.kicker': 'useful · journal',
     'mind.intro': 'Dream journal and daily mood tracker. Record night dreams and observe your well-being.',
     'mind.tabsAria': 'Journal tabs',
     'mind.tab.dreams': 'Dream Diary',
@@ -337,7 +356,7 @@ export const nav: Dictionary = {
     'mind.tab.moodHint': 'daily check-in',
 
     'remind.title': 'Remind',
-    'remind.kicker': 'extra · remind',
+    'remind.kicker': 'useful · remind',
     'remind.intro': 'Birthdays of friends and family, important dates and reminders.',
     'remind.tabsAria': 'Reminder tabs',
     'remind.tab.birthdays': 'Birthdays',
@@ -357,17 +376,35 @@ export const nav: Dictionary = {
     'section.lottery.hint': 'try your luck',
     'section.together': 'Together',
     'section.together.hint': 'shared time windows',
+    'section.sounds': 'Sounds',
+    'section.sounds.hint': 'background scenes for focus',
 
-    'extraNav.label': 'Extra sections',
-    'extraNav.title': 'sections',
+    'sounds.kicker': 'Useful',
+    'sounds.title': 'Sounds',
+    'sounds.intro': 'Background sound scenes for work, reading and rest. Runs right in the browser.',
+    'sounds.rain': 'Rain',
+    'sounds.rain.hint': 'soft downpour outside the window',
+    'sounds.fire': 'Fireplace',
+    'sounds.fire.hint': 'crackling wood and warmth',
+    'sounds.drone': 'Meditation',
+    'sounds.drone.hint': 'deep low hum',
+    'sounds.stop': 'Stop sound',
+
+    'usefulNav.label': 'Useful sections',
+    'usefulNav.title': 'Useful',
+
+    'usefulGroup.planning': 'Planning',
+    'usefulGroup.money': 'Finance & Learning',
+    'usefulGroup.leisure': 'Leisure',
+    'usefulGroup.misc': 'Misc',
 
     'sectionOff.title': 'This section is off',
     'sectionOff.useful': '“Useful” is switched on with a toggle in the home page settings — right where the day widgets live.',
-    'sectionOff.misc': '“Misc” is switched on with a toggle in the home page settings — right where the day widgets live.',
     'sectionOff.enable': 'Turn on the section',
 
     'common.save': 'Save',
     'common.home': 'Home',
+    'common.done': 'Done',
     'common.failed': 'It did not work',
     'notFound.title': 'Page not found',
     'notFound.note': 'However, an animal of the day is waiting for you today.',
@@ -411,12 +448,15 @@ export const nav: Dictionary = {
       'If the app turned out to be useful and you feel like saying thanks, that is always nice. You can write personally, or just send a thank-you card: the author will be glad either way.',
     'creator.writeTelegram': 'Message on Telegram',
     'creator.thanks': 'Thanks for using it.',
-    'creator.back': 'Back to the animal of the day',
+    'creator.back': 'Back to home',
     'common.cancel': 'Cancel',
     'common.dismiss': 'Dismiss',
     'common.send': 'Send',
-    'topbar.shopTitle': 'Royal Shop & Treasury',
+    'topbar.shopTitle': 'Shop & Treasury',
     'topbar.authTitle': 'Cloud Sync & Sign In',
+    'topbar.account.admin': 'Admin',
+    'topbar.account.user': 'User',
+    'topbar.account.label': 'Account',
     'common.roleAdmin': 'Administrator',
     'common.roleUser': 'User',
 
@@ -454,7 +494,5 @@ export const nav: Dictionary = {
 
     'page.notFoundTitle': 'Page not found',
     'page.notFoundDesc': 'However, an animal of the day is waiting for you today.',
-
-    'comingSoon.note': 'This section is empty. The feature will come later — the tab is already here.',
   },
 }

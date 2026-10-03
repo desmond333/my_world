@@ -2,27 +2,31 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { hybridPersistStorage, STORAGE_KEYS } from '../../lib/storage'
 import { scheduleDebouncedSync } from '../../services/api/syncDebounce'
+import type { CornerStyle } from '../../data/types'
+
+export type { CornerStyle } from '../../data/types'
 
 export type ViewMode = 'simple' | 'normal'
 
 export const VIEW_PAGES = [
-  { id: 'today', titleKey: 'settings.page.today', defaultMode: 'simple' },
-  { id: 'productivity', titleKey: 'settings.page.productivity', defaultMode: 'simple' },
-  { id: 'finance', titleKey: 'settings.page.finance', defaultMode: 'simple' },
-  { id: 'training', titleKey: 'settings.page.training', defaultMode: 'simple' },
-  { id: 'media', titleKey: 'settings.page.media', defaultMode: 'simple' },
-  { id: 'mind', titleKey: 'settings.page.mind', defaultMode: 'simple' },
-  { id: 'notes', titleKey: 'settings.page.notes', defaultMode: 'simple' },
-  { id: 'languages', titleKey: 'settings.page.languages', defaultMode: 'simple' },
-  { id: 'favorites', titleKey: 'settings.page.favorites', defaultMode: 'simple' },
+  { id: 'today', titleKey: 'settings.page.today', defaultMode: 'simple', hasModes: true },
+  { id: 'productivity', titleKey: 'settings.page.productivity', defaultMode: 'simple', hasModes: true },
+  { id: 'finance', titleKey: 'settings.page.finance', defaultMode: 'simple', hasModes: true },
+  { id: 'training', titleKey: 'settings.page.training', defaultMode: 'simple', hasModes: true },
+  { id: 'media', titleKey: 'settings.page.media', defaultMode: 'simple', hasModes: true },
+  { id: 'notes', titleKey: 'settings.page.notes', defaultMode: 'simple', hasModes: true },
 ] as const
 
 export type ViewPageId = (typeof VIEW_PAGES)[number]['id']
+
+export const pageHasModes = (pageId: ViewPageId) => VIEW_PAGES.find((page) => page.id === pageId)?.hasModes ?? false
 
 export type ViewModeState = {
   globalMode: ViewMode
   pageModes: Partial<Record<ViewPageId, ViewMode>>
   avatarMode: ViewMode
+  cornerStyle: CornerStyle
+  setCornerStyle: (style: CornerStyle) => void
   setAvatarMode: (mode: ViewMode) => void
   toggleAvatarMode: () => void
   setPageMode: (pageId: ViewPageId | string, mode: ViewMode) => void
@@ -38,6 +42,11 @@ export const useViewModeStore = create<ViewModeState>()(
       globalMode: 'simple',
       pageModes: {},
       avatarMode: 'simple',
+      cornerStyle: 'middle',
+      setCornerStyle: (style) => {
+        set({ cornerStyle: style })
+        scheduleDebouncedSync()
+      },
       setAvatarMode: (mode) => {
         set({ avatarMode: mode })
         scheduleDebouncedSync()
@@ -82,7 +91,13 @@ export const useViewModeStore = create<ViewModeState>()(
     {
       name: STORAGE_KEY,
       storage: hybridPersistStorage,
-      version: 1,
+      version: 2,
+      migrate: (persisted) => {
+        const state = persisted as Partial<ViewModeState> | undefined
+        if (!state) return persisted as ViewModeState
+        const valid = state.cornerStyle === 'round' || state.cornerStyle === 'middle' || state.cornerStyle === 'square'
+        return { ...state, cornerStyle: valid ? state.cornerStyle : 'middle' } as ViewModeState
+      },
     },
   ),
 )

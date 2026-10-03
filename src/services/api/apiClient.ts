@@ -40,6 +40,12 @@ export class ApiError extends Error {
   }
 }
 
+let onAuthExpired: (() => void) | null = null
+
+export const setAuthExpiredHandler = (handler: (() => void) | null): void => {
+  onAuthExpired = handler
+}
+
 let isRefreshing = false
 let refreshPromise: Promise<string | null> | null = null
 
@@ -60,6 +66,7 @@ const performTokenRefresh = async (): Promise<string | null> => {
 
       if (!res.ok) {
         setAuthToken(null)
+        onAuthExpired?.()
         return null
       }
 
@@ -70,6 +77,7 @@ const performTokenRefresh = async (): Promise<string | null> => {
       }
 
       setAuthToken(null)
+      onAuthExpired?.()
       return null
     } catch {
       return null
@@ -82,49 +90,36 @@ const performTokenRefresh = async (): Promise<string | null> => {
   return refreshPromise
 }
 
-export const apiFetch = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
-  const base = getApiBaseUrl()
-  const url = path.startsWith('http') ? path : `${base}${path}`
-  const token = getAuthToken()
+export const authorizedFetch = async (input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> => {
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+  const headers = new Headers(init.headers || {})
 
-  const headers = new Headers(options.headers || {})
-  if (!headers.has('Content-Type') && options.body && typeof options.body === 'string') {
+  if (!headers.has('Content-Type') && init.body && typeof init.body === 'string') {
     headers.set('Content-Type', 'application/json')
   }
 
+  const token = getAuthToken()
   if (token && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`)
   }
 
-  const response = await fetch(url, {
-    ...options,
+  let response = await fetch(url, {
+    ...init,
     headers,
     credentials: 'include',
   })
 
-  if (response.status === 401 && !path.includes('/auth/login') && !path.includes('/auth/refresh') && !path.includes('/auth/register')) {
+  if (response.status === 401 && !url.includes('/auth/login') && !url.includes('/auth/refresh') && !url.includes('/auth/register')) {
     const newToken = await performTokenRefresh()
     if (newToken) {
       headers.set('Authorization', `Bearer ${newToken}`)
-      const retryResponse = await fetch(url, {
-        ...options,
+      response = await fetch(url, {
+        ...init,
         headers,
         credentials: 'include',
       })
-
-      if (!retryResponse.ok) {
-        const errorData = (await retryResponse.json().catch(() => ({}))) as { error?: string; code?: string }
-        throw new ApiError(errorData.error || `Request failed with status ${retryResponse.status}`, retryResponse.status, errorData.code)
-      }
-
-      return (await retryResponse.json()) as T
     }
   }
 
-  if (!response.ok) {
-    const errorData = (await response.json().catch(() => ({}))) as { error?: string; code?: string }
-    throw new ApiError(errorData.error || `Request failed with status ${response.status}`, response.status, errorData.code)
-  }
-
-  return (await response.json()) as T
+  return response
 }

@@ -26,7 +26,7 @@ export const useDailyStore = create<DailyState>()(
       cityId: 'moscow',
       scope: 'all',
       themeMode: 'system',
-      themePalette: 'auto',
+      themePalette: 'graphite',
       lang: 'ru',
       blocks: defaultBlocks,
       extraTab: false,
@@ -118,6 +118,18 @@ export const useDailyStore = create<DailyState>()(
         scheduleDebouncedSync()
       },
     }),
-    { name: STORAGE_KEYS.daily, storage: hybridPersistStorage },
+    {
+      name: STORAGE_KEYS.daily,
+      storage: hybridPersistStorage,
+      version: 2,
+      migrate: (persisted) => {
+        const state = persisted as Partial<DailyState> | undefined
+        if (!state) return persisted as DailyState
+        const palette = state.themePalette as string | undefined
+        const legacySeason =
+          palette === 'auto' || palette === 'spring' || palette === 'summer' || palette === 'autumn' || palette === 'winter'
+        return { ...state, themePalette: legacySeason ? 'graphite' : (palette ?? 'graphite') } as DailyState
+      },
+    },
   ),
 )

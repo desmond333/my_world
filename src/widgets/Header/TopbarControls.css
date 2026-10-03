@@ -4,17 +4,63 @@
   gap: 8px;
 }
 
-.lang-pill {
+.topbar-prefs-pill {
   display: inline-flex;
   align-items: center;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: var(--radius);
   padding: 2px;
+  min-height: 34px;
+  box-sizing: border-box;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-.lang-pill-btn {
+.topbar-prefs-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--line);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.topbar-prefs-pill .ui-toggle-group.lang-pill {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.topbar-prefs-pill .theme-cycle-btn {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: max(0px, calc(var(--radius) - 2px));
+  transform: none;
+}
+
+.topbar-prefs-pill .theme-cycle-btn:hover {
+  background: var(--line);
+  color: var(--fg);
+  border-color: transparent;
+  transform: none;
+}
+
+.ui-toggle-group.lang-pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 2px;
+  gap: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.ui-toggle-group-item.lang-pill-btn {
   border: none;
   background: transparent;
   color: var(--muted);
@@ -22,17 +68,17 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   padding: 5px 9px;
-  border-radius: 16px;
+  border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.18s ease;
   line-height: 1;
 }
 
-.lang-pill-btn:hover {
+.ui-toggle-group-item.lang-pill-btn:hover {
   color: var(--fg);
 }
 
-.lang-pill-btn.active {
+.ui-toggle-group-item.lang-pill-btn[data-state='on'] {
   background: var(--accent);
   color: var(--on-accent);
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
@@ -47,7 +93,7 @@
   color: var(--fg);
   padding: 0 12px;
   min-height: 34px;
-  border-radius: 20px;
+  border-radius: var(--radius);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -86,7 +132,7 @@
   color: var(--fg);
   padding: 0 10px;
   min-height: 34px;
-  border-radius: 20px;
+  border-radius: var(--radius);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -157,7 +203,16 @@
     gap: 6px;
   }
 
-  .lang-pill-btn {
+  .topbar-prefs-pill {
+    min-height: 32px;
+  }
+
+  .topbar-prefs-pill .theme-cycle-btn {
+    min-height: 26px;
+    padding: 0 7px;
+  }
+
+  .ui-toggle-group-item.lang-pill-btn {
     padding: 5px 8px;
     font-size: 10px;
   }
@@ -187,8 +242,18 @@
     gap: 5px;
   }
 
-  .lang-pill {
-    display: none;
+  .topbar-prefs-pill {
+    min-height: 30px;
+  }
+
+  .topbar-prefs-pill .ui-toggle-group-item.lang-pill-btn {
+    padding: 4px 6px;
+    font-size: 9.5px;
+  }
+
+  .topbar-prefs-pill .theme-cycle-btn {
+    min-height: 24px;
+    padding: 0 5px;
   }
 
   .theme-cycle-btn {

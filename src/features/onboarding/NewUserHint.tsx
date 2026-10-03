@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { Check, Sparkles, X } from 'lucide-react'
 import { storage } from '../../lib'
 import { useTranslation } from '../../lib/i18n'
+import { Dialog, DialogContent, DialogTitle } from '../../shared/ui'
 import './NewUserHint.css'
 
 const ONBOARDING_KEY = STORAGE_KEYS.onboardingHint
@@ -30,12 +31,14 @@ export const NewUserHint = () => {
   if (!visible) return null
 
   return (
-    <aside className="new-user-hint-overlay" aria-label={t('hint.aria')}>
-      <div className="new-user-hint-card">
+    <Dialog open={visible} onOpenChange={(open) => !open && handleDismiss()} modal={false}>
+      <DialogContent className="new-user-hint-card" showCloseButton={false} aria-describedby={undefined}>
         <div className="hint-header">
           <div className="hint-badge-row">
             <Sparkles size={18} className="hint-sparkle-icon" />
-            <h3 className="hint-title">{t('hint.title')}</h3>
+            <DialogTitle asChild>
+              <h3 className="hint-title">{t('hint.title')}</h3>
+            </DialogTitle>
           </div>
           <button type="button" className="hint-close-btn" onClick={handleDismiss} aria-label={t('hint.close')}>
             <X size={16} />
@@ -58,7 +61,7 @@ export const NewUserHint = () => {
             {t('hint.goSettings')}
           </Link>
         </div>
-      </div>
-    </aside>
+      </DialogContent>
+    </Dialog>
   )
 }

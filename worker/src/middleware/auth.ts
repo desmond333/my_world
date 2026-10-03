@@ -1,5 +1,5 @@
 import type { Context, Next } from 'hono'
-import { verifyAccessToken } from '../lib/jwt'
+import { resolveJwtSecret, verifyAccessToken } from '../lib/jwt'
 import type { Env } from '../types'
 
 export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) => {
@@ -8,8 +8,12 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
     return c.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, 401)
   }
 
+  const secret = resolveJwtSecret(c.env)
+  if (!secret) {
+    return c.json({ error: 'Server misconfigured: JWT_SECRET is required', code: 'SERVER_MISCONFIGURED' }, 500)
+  }
+
   const token = authHeader.slice(7).trim()
-  const secret = c.env.JWT_SECRET || 'fallback-secret-key-replace-in-production'
   const user = await verifyAccessToken(token, secret)
 
   if (!user) {

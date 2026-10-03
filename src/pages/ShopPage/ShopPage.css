@@ -14,7 +14,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: 24px;
+  border-radius: var(--radius);
   background: rgba(18, 20, 24, 0.94);
   border: 1px solid rgba(52, 211, 153, 0.45);
   color: #34d399;
@@ -54,7 +54,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 18px;
-  border-radius: 20px;
+  border-radius: var(--radius);
   border: 1px solid rgba(244, 184, 73, 0.4);
   background: var(--panel);
   font-size: 13px;
@@ -137,7 +137,7 @@
   display: flex;
   flex-direction: column;
   padding: 22px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--panel);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -164,7 +164,7 @@
     700 12px 'DM Mono',
     monospace;
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: rgba(244, 184, 73, 0.15);
   border: 1px solid rgba(244, 184, 73, 0.35);
   color: var(--accent);
@@ -178,7 +178,7 @@
     600 11px 'DM Mono',
     monospace;
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: rgba(52, 211, 153, 0.15);
   border: 1px solid rgba(52, 211, 153, 0.35);
   color: #34d399;
@@ -194,7 +194,7 @@
 .shop-item-icon-box {
   width: 54px;
   height: 54px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   display: grid;
   place-items: center;
   border: 1px solid var(--line);
@@ -243,7 +243,7 @@
   justify-content: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   border: 1px solid var(--accent);
   background: var(--accent);
   color: #121316;
@@ -274,7 +274,7 @@
   justify-content: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--bg);
   color: var(--fg);
@@ -300,7 +300,7 @@
   display: flex;
   gap: 14px;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--panel);
 }
@@ -308,7 +308,7 @@
 .earn-way-icon {
   width: 42px;
   height: 42px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: rgba(244, 184, 73, 0.1);
   border: 1px solid rgba(244, 184, 73, 0.25);
   color: var(--accent);
@@ -356,7 +356,7 @@
   align-items: center;
   text-align: center;
   padding: 24px 18px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--panel);
   transition: all 0.2s ease;
@@ -376,7 +376,7 @@
   position: absolute;
   top: -10px;
   padding: 2px 10px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--accent);
   color: #121316;
   font:
@@ -412,7 +412,7 @@
   justify-content: center;
   gap: 6px;
   padding: 8px 14px;
-  border-radius: 5px;
+  border-radius: var(--radius);
   border: 1px solid rgba(244, 184, 73, 0.4);
   background: rgba(244, 184, 73, 0.12);
   color: var(--accent);
@@ -456,7 +456,7 @@
   position: relative;
   width: min(400px, calc(100vw - 32px));
   padding: 28px 24px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--panel);
   border: 1px solid var(--line);
   color: var(--fg);
@@ -512,7 +512,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--bg);
   border: 1px solid var(--line);
   margin-bottom: 22px;
@@ -540,7 +540,7 @@
   justify-content: center;
   gap: 8px;
   padding: 12px 20px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   border: 1px solid var(--accent);
   background: var(--accent);
   color: #121316;
@@ -563,7 +563,7 @@
 .shop-item-preview-cat {
   width: 58px;
   height: 58px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   display: grid;
   place-items: center;
   background: rgba(255, 255, 255, 0.03);
@@ -575,6 +575,48 @@
   background: rgba(244, 184, 73, 0.12);
   color: #ffd700;
   border-color: rgba(244, 184, 73, 0.35);
+}
+
+.box-cyber {
+  background: rgba(0, 242, 254, 0.12);
+  color: #00c2d1;
+  border-color: rgba(0, 242, 254, 0.35);
+}
+
+.box-spring {
+  background: rgba(51, 122, 40, 0.14);
+  color: #4a9e3a;
+  border-color: rgba(51, 122, 40, 0.35);
+}
+
+.box-summer {
+  background: rgba(180, 107, 10, 0.14);
+  color: #d98a1f;
+  border-color: rgba(180, 107, 10, 0.35);
+}
+
+.box-autumn {
+  background: rgba(184, 98, 8, 0.14);
+  color: #d1781a;
+  border-color: rgba(184, 98, 8, 0.35);
+}
+
+.box-winter {
+  background: rgba(47, 111, 189, 0.14);
+  color: #4b8fd6;
+  border-color: rgba(47, 111, 189, 0.35);
+}
+
+.box-violet {
+  background: rgba(109, 40, 217, 0.16);
+  color: #8b5cf6;
+  border-color: rgba(109, 40, 217, 0.4);
+}
+
+.box-anime {
+  background: rgba(214, 51, 138, 0.16);
+  color: #e056a0;
+  border-color: rgba(214, 51, 138, 0.4);
 }
 
 .box-sound {
@@ -610,7 +652,7 @@
   justify-content: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--bg);
   color: var(--fg);
@@ -649,7 +691,7 @@
   align-items: center;
   gap: 6px;
   padding: 7px 12px;
-  border-radius: 16px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--fg);

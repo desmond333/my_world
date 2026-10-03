@@ -1,13 +1,4 @@
-.modal-backdrop {
-  position: fixed;
-  z-index: 10;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: #101313b8;
-}
-.birthday-modal {
+.ui-dialog-content.birthday-modal {
   width: min(650px, 100%);
   max-height: min(760px, 92vh);
   overflow-y: auto;
@@ -181,7 +172,7 @@
 }
 
 @media (max-width: 760px) {
-  .birthday-modal {
+  .ui-dialog-content.birthday-modal {
     padding: 20px 16px;
     width: 100%;
     max-width: 100%;
@@ -206,7 +197,7 @@
 }
 
 @media (max-width: 760px) {
-  .birthday-modal {
+  .ui-dialog-content.birthday-modal {
     max-height: 94vh;
     -webkit-overflow-scrolling: touch;
   }

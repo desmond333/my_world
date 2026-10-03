@@ -21,10 +21,10 @@
 
 .error-boundary__retry {
   padding: 0.5rem 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--text);
+  color: var(--fg);
   font: 500 0.875rem var(--font-mono, monospace);
   cursor: pointer;
   transition: opacity 0.15s;

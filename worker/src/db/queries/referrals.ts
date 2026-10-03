@@ -127,15 +127,26 @@ export const claimReferralReward = async (d1: D1Database, userId: string, referr
   const now = new Date().toISOString()
 
   if (type === 'coins') {
+    const claim = await d1
+      .prepare('UPDATE referrals SET claimed = 1, reward_type = ?, referrer_reward = ? WHERE id = ? AND referrer_id = ? AND claimed = 0')
+      .bind('coins', REFERRAL_COINS, referralId, userId)
+      .run()
+
+    if ((claim.meta?.changes ?? 0) === 0) return { ok: false, error: 'ALREADY_CLAIMED' }
+
+    await d1
+      .prepare(
+        `INSERT INTO shop_state (
+          user_id, coins, unlocked_parts_json, active_cat_skin, active_theme_skin,
+          greeting_sent, greeting_friend_name, greeting_timestamp, greeting_reward_claimed, has_pending_greeting_reply
+        ) VALUES (?, ?, '{}', 'classic', 'default', 0, '', NULL, 0, 0)
+        ON CONFLICT(user_id) DO UPDATE SET coins = coins + ?`,
+      )
+      .bind(userId, 1000 + REFERRAL_COINS, REFERRAL_COINS)
+      .run()
+
     const shop = await getShopState(d1, userId)
-    const coins = (shop.coins ?? 0) + REFERRAL_COINS
-    await d1.batch([
-      d1
-        .prepare('UPDATE referrals SET claimed = 1, reward_type = ?, referrer_reward = ? WHERE id = ?')
-        .bind('coins', REFERRAL_COINS, referralId),
-      d1.prepare(SHOP_UPSERT_COINS_SQL).bind(userId, coins),
-    ])
-    return { ok: true, type: 'coins', coins, premiumUntil: null }
+    return { ok: true, type: 'coins', coins: shop.coins, premiumUntil: null }
   }
 
   const user = await db
@@ -146,10 +157,14 @@ export const claimReferralReward = async (d1: D1Database, userId: string, referr
   const base = isPremiumActive({ isPremium: user?.isPremium, premiumUntil: user?.premiumUntil }, now) ? (user?.premiumUntil ?? now) : now
   const premiumUntil = addMonths(base > now ? base : now, REFERRAL_PREMIUM_MONTHS)
 
-  await d1.batch([
-    d1.prepare('UPDATE referrals SET claimed = 1, reward_type = ?, referrer_reward = 0 WHERE id = ?').bind('premium', referralId),
-    d1.prepare('UPDATE users SET premium_until = ? WHERE id = ?').bind(premiumUntil, userId),
-  ])
+  const claim = await d1
+    .prepare('UPDATE referrals SET claimed = 1, reward_type = ?, referrer_reward = 0 WHERE id = ? AND referrer_id = ? AND claimed = 0')
+    .bind('premium', referralId, userId)
+    .run()
+
+  if ((claim.meta?.changes ?? 0) === 0) return { ok: false, error: 'ALREADY_CLAIMED' }
+
+  await d1.prepare('UPDATE users SET premium_until = ? WHERE id = ?').bind(premiumUntil, userId).run()
 
   return { ok: true, type: 'premium', premiumUntil }
 }

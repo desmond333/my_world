@@ -6,6 +6,7 @@ import { authRouter } from './routes/auth'
 import { availabilityRouter } from './routes/availability'
 import { birthdaysRouter } from './routes/birthdays'
 import { collectionRouter } from './routes/collection'
+import { contactRouter } from './routes/contact'
 import { favoritesRouter } from './routes/favorites'
 import { financeRouter } from './routes/finance'
 import { friendsRouter } from './routes/friends'
@@ -65,7 +66,6 @@ app.use(
       if (!origin) return '*'
       if (allowed === '*') return origin
       const list = [...allowed.split(','), ...frontend.split(',')].map((s) => s.trim()).filter(Boolean)
-      // В продакшене без явно настроенных доменов блокируем CORS, а не открываем всем.
       if (list.length === 0) return isProduction ? null : origin
       if (list.includes('*') || list.includes(origin)) return origin
       return list[0] || null
@@ -92,6 +92,7 @@ const routes = app
   .route('/api/lottery', lotteryRouter)
   .route('/api/notes', notesRouter)
   .route('/api/shop', shopRouter)
+  .route('/api/contact', contactRouter)
   .route('/api/view-modes', viewModesRouter)
   .route('/api/sync', syncRouter)
   .route('/api/realtime', realtimeRouter)

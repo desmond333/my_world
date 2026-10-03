@@ -1,0 +1,66 @@
+.useful-head {
+  padding: 40px 3.5% 30px;
+}
+.useful-content .training-head {
+  padding: 40px 0 30px;
+}
+.useful-head h1 {
+  margin: 24px 0 20px;
+}
+.useful-head .intro {
+  max-width: 470px;
+}
+.useful-off {
+  margin-top: 44px;
+}
+
+.useful-section {
+  display: block;
+}
+
+.placeholder-card {
+  margin: 26px 0 14px;
+  padding: 40px 34px 42px;
+  border: 1px dashed var(--line);
+  background: var(--panel);
+}
+.placeholder-card h2 {
+  margin: 20px 0 14px;
+  font:
+    500 30px 'Fraunces',
+    serif;
+  letter-spacing: -0.04em;
+}
+.placeholder-text {
+  max-width: 520px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.placeholder-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 26px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.placeholder-note svg {
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .useful-head {
+    padding: 30px 0 22px;
+  }
+  .placeholder-card {
+    padding: 28px 20px 30px;
+  }
+}
+
+@media (max-width: 760px) {
+  .useful-content .training-head {
+    padding: 30px 0 24px;
+  }
+}

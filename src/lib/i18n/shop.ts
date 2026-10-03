@@ -12,7 +12,7 @@ export const shop: Dictionary = {
     'shop.wizard-cat-costume-unlocked': 'Костюм Кота-Чародея открыт!',
     'shop.cyber-cat-costume-unlocked': 'Костюм Кибер-Кота открыт!',
     'shop.cyberpunk-vip-theme-unlocked': 'VIP-тема Киберпанк активирована!',
-    'shop.midnight-gold-vip-theme-unlocked': 'VIP-тема Королевское Золото активирована!',
+    'shop.midnight-gold-vip-theme-unlocked': 'VIP-тема «Полночное золото» активирована!',
     'shop.lo-fi-ambient-sound-box-unlocked': 'Lo-Fi Шкатулка звуков открыта!',
     'shop.coins': 'монет',
     'shop.price': 'Стоимость:',
@@ -21,9 +21,9 @@ export const shop: Dictionary = {
     'shop.security': 'Безопасность:',
     'shop.256-bit-encrypted-simulation': 'Защищённый шлюз',
     'shop.processing': 'Обработка платежа...',
-    'shop.royal-marketplace': 'королевская ярмарка',
+    'shop.royal-marketplace': 'магазин',
     'shop.treasury': 'В казне:',
-    'shop.royal-market-shop': 'Королевский Магазин',
+    'shop.royal-market-shop': 'Магазин',
     'shop.unlock-special-sections-unique-virtual-cat-costu':
       'Разблокируй разделы сайта, уникальные образы кота, VIP-темы оформления и расслабляющий Lo-Fi звук за золотые монеты.',
     'shop.unlockable-sections': 'Разделы сайта',
@@ -62,7 +62,7 @@ export const shop: Dictionary = {
       'Двойная тема (адаптируется к светлому и тёмному режимам). Ледяной кибер-фон со светящимся цианом в светлом режиме и глубокий сапфир с неоном в тёмном.',
     'shop.theme-active': 'Тема активна',
     'shop.apply-cyberpunk': 'Применить тему',
-    'shop.midnight-gold': 'Королевское Золото',
+    'shop.midnight-gold': 'Полночное золото',
     'shop.gold-accent': 'Золото',
     'shop.amber-accent': 'Янтарь',
     'shop.dual-theme-adapts-to-light-dark-modes-regal-cham':
@@ -94,9 +94,9 @@ export const shop: Dictionary = {
     'shop.to-the-arena': 'На арену →',
     'shop.invite-a-friend': 'Пригласи друга',
     'shop.share-your-referral-code-when-a-friend-signs-up-':
-      'Поделись своим реферальным кодом. Когда друг зарегистрируется, ты получишь +250 🪙, а он +100 🪙.',
+      'Поделись реферальным кодом. За каждого друга — на выбор +1000 🪙 или +2 месяца премиума, а друг сразу получает +100 🪙.',
     'shop.get-my-code': 'Мой код →',
-    'shop.royal-treasury-vault': 'Королевская сокровищница',
+    'shop.royal-treasury-vault': 'Казна',
     'shop.need-instant-resources-support-the-development-a':
       'Нужно больше золота? Поддержи развитие проекта и пополни запасы монет премиальными наборами.',
   },
@@ -120,9 +120,9 @@ export const shop: Dictionary = {
     'shop.security': 'Security:',
     'shop.256-bit-encrypted-simulation': '256-bit encrypted simulation',
     'shop.processing': 'Processing...',
-    'shop.royal-marketplace': 'royal marketplace',
+    'shop.royal-marketplace': 'shop',
     'shop.treasury': 'Treasury:',
-    'shop.royal-market-shop': 'Royal Market & Shop',
+    'shop.royal-market-shop': 'Shop',
     'shop.unlock-special-sections-unique-virtual-cat-costu':
       'Unlock special sections, unique virtual cat costumes, VIP themes, and ambient audio with your treasury coins.',
     'shop.unlockable-sections': 'Unlockable Sections',
@@ -194,9 +194,9 @@ export const shop: Dictionary = {
     'shop.to-the-arena': 'To the arena →',
     'shop.invite-a-friend': 'Invite a Friend',
     'shop.share-your-referral-code-when-a-friend-signs-up-':
-      'Share your referral code. When a friend signs up, you get +250 🪙 and they get +100 🪙.',
+      'Share your referral code. For every friend you choose +1000 🪙 or +2 months of premium, and they get +100 🪙 right away.',
     'shop.get-my-code': 'Get my code →',
-    'shop.royal-treasury-vault': 'Royal Treasury Vault',
+    'shop.royal-treasury-vault': 'Treasury',
     'shop.need-instant-resources-support-the-development-a':
       'Need instant resources? Support the development and expand your coin reserve with luxury bundles.',
   },

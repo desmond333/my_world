@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
-import * as Dialog from '@radix-ui/react-dialog'
 import { Cake, Trash2, X } from 'lucide-react'
 import { findCity } from '../../data'
 import { birthdayInfo, birthdayStatusLabel, displayBirthday } from '../../lib'
 import { countText, useTranslation } from '../../lib/i18n'
+import { Dialog, DialogClose, DialogContent, DialogTitle } from '../../shared/ui'
 import { useBirthdayStore, useDailyStore } from '../../store'
 import type { BirthdayModalProps, SortedBirthday } from './types'
 import './BirthdayModal.css'
@@ -39,78 +39,74 @@ export const BirthdayModal = ({ onClose }: BirthdayModalProps) => {
   }
 
   return (
-    <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
-      <Dialog.Portal>
-        <div className="modal-backdrop">
-          <Dialog.Content className="birthday-modal" aria-describedby={undefined}>
-            <div className="settings-heading">
-              <div>
-                <span className="card-kicker">{t('birthday.kicker')}</span>
-                <Dialog.Title asChild>
-                  <h2 id="birthday-title">{t('birthday.title')}</h2>
-                </Dialog.Title>
-              </div>
-              <Dialog.Close asChild>
-                <button className="close-button" aria-label={t('birthday.close')}>
-                  <X size={18} />
-                </button>
-              </Dialog.Close>
-            </div>
-            <div className="own-birthday">
-              <div>
-                <span className="birthday-label">
-                  <Cake size={14} /> {t('birthday.yourDay')}
-                </span>
-                <strong>{ownBirthday ? displayBirthday(ownBirthday, lang) : t('birthday.notAdded')}</strong>
-              </div>
-              <label className="birthday-date-input">
-                <span>{ownBirthday ? t('birthday.change') : t('common.add')}</span>
-                <input type="date" value={ownBirthday} onChange={(event) => setOwnBirthday(event.target.value)} />
-              </label>
-            </div>
-            <div className="birthday-add">
-              <label>
-                <span>{t('birthday.name')}</span>
-                <input value={name} onChange={(event) => setName(event.target.value)} placeholder={t('birthday.namePlaceholder')} />
-              </label>
-              <label>
-                <span>{t('birthday.date')}</span>
-                <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
-              </label>
-              <button className="add-button" onClick={saveBirthday}>
-                {t('common.add')}
-              </button>
-            </div>
-            {formError && <p className="form-error">{formError}</p>}
-            <div className="reminder-list">
-              <div className="list-heading">
-                <span>{t('birthday.listHeading')}</span>
-                <small>{countText('birthday.form', birthdays.length, lang)}</small>
-              </div>
-              {sortedBirthdays.length ? (
-                sortedBirthdays.map(({ id, name: birthdayName, date: birthdayDate, status }) => (
-                  <div className="birthday-row" key={id}>
-                    <div>
-                      <strong>{birthdayName}</strong>
-                      <span>{birthdayStatusLabel(status, lang)}</span>
-                    </div>
-                    <time>{displayBirthday(birthdayDate, lang)}</time>
-                    <button
-                      className="delete-button"
-                      onClick={() => removeBirthday(id)}
-                      aria-label={t('birthday.deleteAria', undefined, { name: birthdayName })}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="empty-birthdays">{t('birthday.empty')}</p>
-              )}
-            </div>
-          </Dialog.Content>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="birthday-modal" variant="accent" showCloseButton={false} aria-describedby={undefined}>
+        <div className="settings-heading">
+          <div>
+            <span className="card-kicker">{t('birthday.kicker')}</span>
+            <DialogTitle asChild>
+              <h2 id="birthday-title">{t('birthday.title')}</h2>
+            </DialogTitle>
+          </div>
+          <DialogClose asChild>
+            <button className="close-button" aria-label={t('birthday.close')}>
+              <X size={18} />
+            </button>
+          </DialogClose>
         </div>
-      </Dialog.Portal>
-    </Dialog.Root>
+        <div className="own-birthday">
+          <div>
+            <span className="birthday-label">
+              <Cake size={14} /> {t('birthday.yourDay')}
+            </span>
+            <strong>{ownBirthday ? displayBirthday(ownBirthday, lang) : t('birthday.notAdded')}</strong>
+          </div>
+          <label className="birthday-date-input">
+            <span>{ownBirthday ? t('birthday.change') : t('common.add')}</span>
+            <input type="date" value={ownBirthday} onChange={(event) => setOwnBirthday(event.target.value)} />
+          </label>
+        </div>
+        <div className="birthday-add">
+          <label>
+            <span>{t('birthday.name')}</span>
+            <input value={name} onChange={(event) => setName(event.target.value)} placeholder={t('birthday.namePlaceholder')} />
+          </label>
+          <label>
+            <span>{t('birthday.date')}</span>
+            <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+          </label>
+          <button className="add-button" onClick={saveBirthday}>
+            {t('common.add')}
+          </button>
+        </div>
+        {formError && <p className="form-error">{formError}</p>}
+        <div className="reminder-list">
+          <div className="list-heading">
+            <span>{t('birthday.listHeading')}</span>
+            <small>{countText('birthday.form', birthdays.length, lang)}</small>
+          </div>
+          {sortedBirthdays.length ? (
+            sortedBirthdays.map(({ id, name: birthdayName, date: birthdayDate, status }) => (
+              <div className="birthday-row" key={id}>
+                <div>
+                  <strong>{birthdayName}</strong>
+                  <span>{birthdayStatusLabel(status, lang)}</span>
+                </div>
+                <time>{displayBirthday(birthdayDate, lang)}</time>
+                <button
+                  className="delete-button"
+                  onClick={() => removeBirthday(id)}
+                  aria-label={t('birthday.deleteAria', undefined, { name: birthdayName })}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="empty-birthdays">{t('birthday.empty')}</p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -2,7 +2,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--line);
   padding: 8px 0 20px;
   gap: 20px;
 }
@@ -68,7 +67,7 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  border-radius: 20px;
+  border-radius: var(--radius);
   transition:
     background 0.2s ease,
     color 0.2s ease,
@@ -127,7 +126,7 @@
   .settings-button {
     min-height: 36px;
     padding: 0 12px;
-    border-radius: 18px;
+    border-radius: var(--radius);
     font-size: 11px;
   }
 

@@ -1,5 +1,5 @@
 .ui-tabs-list {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
   background: var(--bg);
@@ -7,35 +7,73 @@
   border-radius: var(--radius, 10px);
   border: 1px solid var(--line);
   user-select: none;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ui-tabs-list::-webkit-scrollbar {
+  display: none;
 }
 
 .ui-tabs-trigger {
   all: unset;
-  display: flex;
+  position: relative;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 6px 14px;
   font-size: 0.88rem;
   font-weight: 500;
+  line-height: 1;
   color: var(--muted);
-  border-radius: calc(var(--radius, 10px) - 4px);
+  border-radius: max(0px, calc(var(--radius) - 4px));
   cursor: pointer;
-  transition: all 0.15s ease;
+  text-decoration: none;
+  box-sizing: border-box;
+  white-space: nowrap;
+  transition: color var(--motion-fast) ease;
+}
+
+.ui-tabs-indicator {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: max(0px, calc(var(--radius) - 4px));
+  background: var(--panel);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.ui-tabs-trigger-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.ui-tabs-trigger-content svg {
+  flex-shrink: 0;
+  display: block;
 }
 
 .ui-tabs-trigger:hover {
   color: var(--fg);
 }
 
-.ui-tabs-trigger[data-state='active'] {
-  background: var(--panel);
+.ui-tabs-trigger[data-state='active'],
+.ui-tabs-trigger.is-active {
   color: var(--accent);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  font-weight: 600;
 }
 
 .ui-tabs-content {
   outline: none;
   margin-top: 12px;
+}
+
+.section-tabs-nav {
+  margin: 16px 0 20px;
 }

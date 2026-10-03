@@ -11,9 +11,20 @@ const DEFAULT_SHOP_STATE: ShopStateData = {
     statham: false,
     cat_wizard: false,
     cat_cyber: false,
+    theme_spring: false,
+    theme_summer: false,
+    theme_autumn: false,
+    theme_winter: false,
     theme_cyberpunk: false,
     theme_midnight_gold: false,
+    theme_violet: false,
+    theme_anime: false,
     sound_lofi: false,
+    lang_advanced: false,
+    notes_advanced: false,
+    view_normal: false,
+    finance_advice: false,
+    motion_pro: false,
   },
   activeCatSkin: 'classic',
   activeThemeSkin: 'default',
@@ -99,14 +110,8 @@ export type CoinOpResult = {
 }
 
 export const applyCoinOps = async (d1: D1Database, userId: string, ops: CoinOp[]): Promise<CoinOpResult> => {
-  const today = new Date().toISOString().slice(0, 10)
-
-  const spentRows = await d1
-    .prepare('SELECT reason, SUM(amount) AS total FROM shop_coin_ops WHERE user_id = ? AND substr(created_at, 1, 10) = ? GROUP BY reason')
-    .bind(userId, today)
-    .all<{ reason: string; total: number }>()
-
-  const spent = new Map<string, number>((spentRows.results ?? []).map((row) => [row.reason, row.total ?? 0]))
+  const now = new Date().toISOString()
+  const today = now.slice(0, 10)
   const accepted: string[] = []
   const rejected: string[] = []
   let credited = 0
@@ -118,15 +123,16 @@ export const applyCoinOps = async (d1: D1Database, userId: string, ops: CoinOp[]
     }
 
     const rule = EARN_RULES[op.reason]
-    const used = spent.get(op.reason) ?? 0
-    if (used + op.amount > rule.dailyCap) {
-      rejected.push(op.id)
-      continue
-    }
-
     const insert = await d1
-      .prepare('INSERT INTO shop_coin_ops (id, user_id, reason, amount, created_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING')
-      .bind(op.id, userId, op.reason, op.amount, new Date().toISOString())
+      .prepare(
+        `INSERT OR IGNORE INTO shop_coin_ops (id, user_id, reason, amount, created_at)
+         SELECT ?, ?, ?, ?, ?
+         WHERE (
+           SELECT COALESCE(SUM(amount), 0) FROM shop_coin_ops
+           WHERE user_id = ? AND reason = ? AND substr(created_at, 1, 10) = ?
+         ) + ? <= ?`,
+      )
+      .bind(op.id, userId, op.reason, op.amount, now, userId, op.reason, today, op.amount, rule.dailyCap)
       .run()
 
     if ((insert.meta?.changes ?? 0) === 0) {
@@ -134,7 +140,6 @@ export const applyCoinOps = async (d1: D1Database, userId: string, ops: CoinOp[]
       continue
     }
 
-    spent.set(op.reason, used + op.amount)
     credited += op.amount
     accepted.push(op.id)
   }

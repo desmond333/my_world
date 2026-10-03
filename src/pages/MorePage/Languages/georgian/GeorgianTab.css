@@ -1,0 +1,792 @@
+.georgian-page {
+  margin: 0 0 30px;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+.georgian-hero-banner {
+  background: linear-gradient(135deg, rgba(244, 184, 73, 0.08) 0%, rgba(229, 116, 80, 0.04) 100%);
+  border: 1px solid rgba(244, 184, 73, 0.25);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.georgian-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.georgian-hero-content {
+  min-width: 0;
+}
+
+.georgian-hero-content h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--fg);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.georgian-hero-content p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.georgian-mode-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  min-width: 0;
+  width: 100%;
+}
+
+.georgian-fav-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font:
+    600 12px 'DM Mono',
+    monospace;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.georgian-fav-filter-btn:not(.is-active):hover {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+.georgian-fav-filter-btn.is-active {
+  border-color: var(--accent);
+  background: rgba(244, 184, 73, 0.15);
+  color: var(--accent);
+}
+
+.georgian-rules-card {
+  margin: 0 0 24px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+.georgian-rules-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.georgian-rules-toggle:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+.georgian-rules-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.georgian-rules-head h3 {
+  margin: 0;
+  font:
+    500 18px 'Fraunces',
+    serif;
+  letter-spacing: -0.02em;
+}
+.georgian-rules-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  background: rgba(244, 184, 73, 0.15);
+  border: 1px solid rgba(244, 184, 73, 0.4);
+  color: var(--accent);
+  font:
+    600 10px 'DM Mono',
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.georgian-rules-body {
+  padding: 0 24px 22px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+.georgian-rules-lead {
+  margin: 16px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 680px;
+}
+.georgian-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.georgian-rule-item {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.georgian-rule-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.georgian-rule-top strong {
+  font-size: 14px;
+  color: var(--accent);
+}
+.georgian-rule-sound {
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  color: var(--muted);
+}
+.georgian-rule-example {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--fg);
+}
+.georgian-rule-example em {
+  font-style: normal;
+  color: var(--accent);
+}
+.georgian-rule-tip {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.mode-btn-short {
+  display: none;
+}
+
+.georgian-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 0 26px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.georgian-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+.georgian-search-icon {
+  position: absolute;
+  left: 16px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.georgian-search-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 44px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--fg);
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  border-radius: var(--radius);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.georgian-search-box input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(244, 184, 73, 0.2);
+}
+.georgian-search-clear {
+  position: absolute;
+  right: 14px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.georgian-cats-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.georgian-cats-scroll::-webkit-scrollbar {
+  display: none;
+}
+.georgian-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  border-radius: var(--radius);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.georgian-cat-chip:hover {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+.georgian-cat-chip.is-selected {
+  border-color: var(--accent);
+  background: rgba(244, 184, 73, 0.16);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.georgian-phrases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
+}
+.georgian-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 22px 18px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  min-width: 0;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+.georgian-card:hover {
+  border-color: rgba(244, 184, 73, 0.4);
+  transform: translateY(-2px);
+}
+.georgian-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.georgian-card-ru {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  line-height: 1.3;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
+  flex: 1;
+}
+.georgian-card-star {
+  border: none;
+  background: transparent;
+  color: var(--line);
+  cursor: pointer;
+  padding: 3px;
+  flex-shrink: 0;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+.georgian-card-star:hover {
+  color: var(--accent);
+  transform: scale(1.15);
+}
+.georgian-card-star.is-fav {
+  color: var(--accent);
+}
+
+.georgian-transcription-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  border: 1px solid rgba(244, 184, 73, 0.35);
+  background: rgba(244, 184, 73, 0.08);
+  border-radius: var(--radius);
+  min-width: 0;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.georgian-transcription-label {
+  font:
+    600 10px 'DM Mono',
+    monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.georgian-transcription-text {
+  font:
+    700 clamp(16px, 4.5vw, 20px) 'DM Mono',
+    monospace;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+}
+
+.georgian-ka-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  min-width: 0;
+}
+.georgian-ka-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: 0.02em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.georgian-card-tip {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.georgian-card-tip strong {
+  color: var(--fg);
+}
+.georgian-card-literal {
+  margin: 0;
+  font:
+    11px 'DM Mono',
+    monospace;
+  color: rgba(244, 184, 73, 0.85);
+  font-style: italic;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.georgian-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: 0;
+}
+.georgian-btn-sound,
+.georgian-btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.georgian-btn-sound:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(244, 184, 73, 0.12);
+}
+.georgian-btn-sound.is-playing {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.georgian-btn-copy:hover {
+  border-color: var(--line);
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.georgian-trainer-section {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+.georgian-trainer-card {
+  width: 100%;
+  max-width: 580px;
+  padding: 34px 32px 36px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  max-width: 100%;
+}
+.georgian-trainer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+  min-width: 0;
+}
+.georgian-trainer-score {
+  color: var(--accent);
+}
+.georgian-trainer-prompt {
+  text-align: center;
+  padding: 16px 0;
+  min-width: 0;
+}
+.georgian-trainer-label {
+  display: block;
+  font:
+    600 12px 'DM Mono',
+    monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+.georgian-trainer-ru {
+  margin: 0;
+  font:
+    500 clamp(22px, 6vw, 32px) 'Fraunces',
+    serif;
+  letter-spacing: -0.03em;
+  color: var(--fg);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.georgian-trainer-reveal-box {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+  min-width: 0;
+}
+.georgian-reveal-btn {
+  width: 100%;
+  max-width: 320px;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 0;
+}
+
+.georgian-trainer-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line);
+  animation: fadeIn 0.25s ease;
+  min-width: 0;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.georgian-trainer-main-result {
+  text-align: center;
+  padding: 14px 18px;
+  border: 1px solid rgba(244, 184, 73, 0.4);
+  background: rgba(244, 184, 73, 0.1);
+  border-radius: var(--radius);
+  min-width: 0;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.georgian-trainer-transcription {
+  margin: 0;
+  font:
+    700 clamp(18px, 5.5vw, 28px) 'DM Mono',
+    monospace;
+  color: var(--accent);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.3;
+}
+.georgian-trainer-ka {
+  margin: 6px 0 0;
+  font-size: clamp(16px, 4.5vw, 22px);
+  color: var(--fg);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.georgian-trainer-tip {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  text-align: center;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.georgian-trainer-literal {
+  margin: 0;
+  font:
+    12px 'DM Mono',
+    monospace;
+  color: var(--accent);
+  text-align: center;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.georgian-trainer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  min-width: 0;
+  width: 100%;
+}
+.georgian-listen-btn,
+.georgian-repeat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    600 12px 'DM Mono',
+    monospace;
+  border-radius: var(--radius);
+  cursor: pointer;
+  min-width: 0;
+}
+.georgian-listen-btn:hover,
+.georgian-repeat-btn:hover {
+  border-color: var(--accent);
+}
+.georgian-next-btn.is-success {
+  background: #3eb574;
+  border-color: #3eb574;
+  color: #fff;
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.georgian-next-btn.is-success:hover {
+  background: #47cc83;
+}
+
+.georgian-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 20px;
+  border: 1px solid var(--accent);
+  background: var(--ink);
+  color: var(--accent);
+  font:
+    700 13px 'DM Mono',
+    monospace;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  animation: slideUp 0.2s ease;
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.georgian-empty {
+  text-align: center;
+  padding: 50px 20px;
+  border: 1px dashed var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: var(--muted);
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .georgian-hero-banner {
+    padding: 16px 14px;
+    border-radius: var(--radius);
+  }
+  .georgian-rules-toggle {
+    padding: 14px 16px;
+  }
+  .georgian-rules-body {
+    padding: 0 16px 18px;
+  }
+  .georgian-rules-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .georgian-mode-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .georgian-mode-switch {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px;
+  }
+  .georgian-mode-switch::-webkit-scrollbar {
+    display: none;
+  }
+  .georgian-mode-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    font-size: 11.5px;
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+  .mode-btn-full {
+    display: none;
+  }
+  .mode-btn-short {
+    display: inline;
+  }
+  .georgian-fav-filter-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 40px;
+  }
+  .georgian-phrases-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .georgian-card {
+    padding: 16px 14px;
+    border-radius: var(--radius);
+  }
+  .georgian-transcription-box {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    padding: 10px 12px;
+  }
+  .georgian-card-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .georgian-btn-sound,
+  .georgian-btn-copy {
+    flex: 1;
+    justify-content: center;
+    min-height: 38px;
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+  .georgian-trainer-card {
+    padding: 20px 16px;
+    border-radius: var(--radius);
+  }
+  .georgian-trainer-ru {
+    font-size: clamp(20px, 5.5vw, 26px);
+  }
+  .georgian-trainer-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .georgian-trainer-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  .georgian-toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    justify-content: center;
+  }
+}

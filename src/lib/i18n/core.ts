@@ -26,6 +26,13 @@ import { lottery } from './lottery'
 import { season } from './season'
 import { notifications } from './notifications'
 import { premium } from './premium'
+import { features } from './features'
+import { pricing } from './pricing'
+import { contact } from './contact'
+import { birthday } from './birthday'
+import { notes } from './notes'
+import { notesDream } from './notesDream'
+import { blocks } from './blocks'
 import { pluralForm } from '../plural'
 
 const DICTIONARIES: Dictionary[] = [
@@ -52,6 +59,13 @@ const DICTIONARIES: Dictionary[] = [
   lottery,
   season,
   notifications,
+  features,
+  pricing,
+  contact,
+  birthday,
+  notes,
+  notesDream,
+  blocks,
 ]
 
 const merge = (lang: Lang): Translations => Object.assign({}, ...DICTIONARIES.map((item) => item[lang] ?? {}))

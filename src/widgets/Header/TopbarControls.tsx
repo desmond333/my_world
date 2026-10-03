@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import { Coins, Crown, Settings, User, Users } from 'lucide-react'
 import { useTranslation } from '../../lib/i18n'
+import { usePremiumActive } from '../../hooks'
 import { useAuthStore, useFriendsStore, useShopStore } from '../../store'
 import { LangSwitcher } from '../../features/lang-switcher'
 import { ThemeSwitcher } from '../../features/theme-switcher'
 import { NotificationsBell } from '../../features/notifications'
-import { Tooltip } from '../../shared/ui'
+import { AnimatedNumber, Tooltip } from '../../shared/ui'
 import './TopbarControls.css'
 
 export const TopbarControls = () => {
@@ -13,18 +14,26 @@ export const TopbarControls = () => {
   const { t } = useTranslation()
   const coins = useShopStore((state) => state.coins)
   const user = useAuthStore((state) => state.user)
+  const premiumActive = usePremiumActive()
   const openFriendsModal = useFriendsStore((state) => state.openModal)
   const incomingRequestsCount = useFriendsStore((state) => state.incoming.length)
 
   return (
     <div className="topbar-controls">
-      <LangSwitcher />
-      <ThemeSwitcher />
+      <div className="topbar-prefs-pill">
+        <LangSwitcher />
+        <span className="topbar-prefs-divider" aria-hidden="true" />
+        <ThemeSwitcher />
+      </div>
 
       <Tooltip content={t('topbar.shopTitle')}>
         <Link to="/shop" className={`shop-link-btn ${location.pathname === '/shop' ? 'is-active' : ''}`} aria-label={t('nav.shop')}>
           <Coins size={14} className="shop-link-icon" />
-          <span className="shop-link-coins">{coins.toLocaleString()}</span>
+          {!premiumActive && (
+            <span className="shop-link-coins">
+              <AnimatedNumber value={coins} format={(n) => Math.round(n).toLocaleString()} />
+            </span>
+          )}
         </Link>
       </Tooltip>
 
@@ -65,11 +74,17 @@ export const TopbarControls = () => {
         </Link>
       </Tooltip>
 
-      <Tooltip content={user ? `${user.role === 'admin' ? '👑 Admin: ' : '👤 '}${user.email}` : t('topbar.authTitle')}>
+      <Tooltip
+        content={
+          user
+            ? `${user.role === 'admin' ? `👑 ${t('topbar.account.admin')}: ` : `👤 ${t('topbar.account.user')}: `}${user.email}`
+            : t('topbar.authTitle')
+        }
+      >
         <Link
           to={user?.role === 'admin' ? '/admin' : '/auth'}
           className={`settings-link-btn ${location.pathname === '/auth' || location.pathname === '/admin' ? 'is-active' : ''}`}
-          aria-label="Account"
+          aria-label={t('topbar.account.label')}
         >
           {user?.role === 'admin' ? <Crown size={15} color="var(--accent)" /> : <User size={15} />}
         </Link>

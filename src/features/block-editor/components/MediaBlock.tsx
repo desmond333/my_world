@@ -14,6 +14,8 @@ import {
   X,
 } from 'lucide-react'
 import { formatFileSize, optimizeImageIfNeeded, readFileAsDataUrl } from '../mediaUtils'
+import { Dialog, DialogContent, DialogTitle, Tabs, TabsList, TabsTrigger } from '../../../shared/ui'
+import { useTranslation } from '../../../lib/i18n'
 import type { Block } from '../types'
 
 export type MediaBlockProps = {
@@ -22,13 +24,20 @@ export type MediaBlockProps = {
   onDelete: (id: string) => void
 }
 
-const isSafeMediaUrl = (url?: string): boolean => {
+const isSafeMediaUrl = (url: string | undefined, kind: Block['type']): boolean => {
   if (!url) return false
-  const lower = url.trim().toLowerCase()
-  return lower.startsWith('https://') || lower.startsWith('http://') || lower.startsWith('data:')
+  const value = url.trim()
+  const lower = value.toLowerCase()
+  if (lower.startsWith('https://')) return true
+  if (!lower.startsWith('data:')) return false
+  if (kind === 'image') return /^data:image\//i.test(value)
+  if (kind === 'audio') return /^data:audio\//i.test(value)
+  if (kind === 'pdf') return /^data:application\/pdf/i.test(value)
+  return false
 }
 
 export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<'upload' | 'url'>('upload')
   const [urlInput, setUrlInput] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
@@ -85,7 +94,7 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
   const handleApplyUrl = (e: React.FormEvent) => {
     e.preventDefault()
     const trimmed = urlInput.trim()
-    if (!trimmed || !isSafeMediaUrl(trimmed)) return
+    if (!trimmed || !isSafeMediaUrl(trimmed, block.type)) return
     const inferredName = trimmed.split('/').pop()?.split('?')[0] || 'media'
     onChange(block.id, {
       url: trimmed,
@@ -103,21 +112,23 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
     const isAudio = block.type === 'audio'
 
     const accept = isImage ? 'image/*' : isAudio ? 'audio/*' : 'application/pdf'
-    const title = isImage ? 'Изображение' : isAudio ? 'Аудиозапись' : 'PDF Документ'
-    const formatsHint = isImage ? 'PNG, JPG, SVG, WebP, GIF' : isAudio ? 'MP3, WAV, OGG, M4A, AAC' : 'PDF файлы до 25 МБ'
+    const dropLabel = isImage ? t('blocks.media.dropImage') : isAudio ? t('blocks.media.dropAudio') : t('blocks.media.dropPdf')
+    const formatsHint = isImage ? t('blocks.media.hint.image') : isAudio ? t('blocks.media.hint.audio') : t('blocks.media.hint.pdf')
 
     const Icon = isImage ? ImageIcon : isAudio ? Music : FileText
 
     return (
       <div className="block-media-empty">
-        <div className="block-media-tabs">
-          <button type="button" className={`block-media-tab ${tab === 'upload' ? 'is-active' : ''}`} onClick={() => setTab('upload')}>
-            <Upload size={12} /> Загрузить файл
-          </button>
-          <button type="button" className={`block-media-tab ${tab === 'url' ? 'is-active' : ''}`} onClick={() => setTab('url')}>
-            <ExternalLink size={12} /> Вставить ссылку
-          </button>
-        </div>
+        <Tabs value={tab} onValueChange={(val) => setTab(val as 'upload' | 'url')}>
+          <TabsList aria-label={t('blocks.media.uploadFile')}>
+            <TabsTrigger value="upload">
+              <Upload size={12} /> {t('blocks.media.uploadFile')}
+            </TabsTrigger>
+            <TabsTrigger value="url">
+              <ExternalLink size={12} /> {t('blocks.media.pasteLink')}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {tab === 'upload' ? (
           <div
@@ -144,9 +155,7 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
               <Icon size={24} />
             </div>
             <div className="block-media-dropzone-text">
-              <span className="block-media-dropzone-main">
-                {isLoading ? 'Загрузка...' : `Нажмите или перетащите ${title.toLowerCase()} сюда`}
-              </span>
+              <span className="block-media-dropzone-main">{isLoading ? t('blocks.media.loading') : dropLabel}</span>
               <span className="block-media-dropzone-sub">{formatsHint}</span>
             </div>
           </div>
@@ -157,11 +166,11 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
               className="block-media-url-input"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="Вставьте ссылку https://..."
+              placeholder={t('blocks.media.urlPlaceholder')}
               autoFocus
             />
             <button type="submit" className="block-media-url-btn" disabled={!urlInput.trim()}>
-              Встроить
+              {t('blocks.media.embed')}
             </button>
           </form>
         )}
@@ -178,31 +187,41 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
       <div className="block-media-container block-media--image">
         <div className="block-image-view">
           <div className="block-media-toolbar">
-            <button type="button" className="block-media-tool-btn" onClick={() => setIsImageModalOpen(true)} title="Открыть на весь экран">
+            <button
+              type="button"
+              className="block-media-tool-btn"
+              onClick={() => setIsImageModalOpen(true)}
+              title={t('blocks.media.fullscreen')}
+            >
               <Maximize2 size={13} />
             </button>
-            {block.url && isSafeMediaUrl(block.url) && (
+            {block.url && isSafeMediaUrl(block.url, block.type) && (
               <a
                 href={block.url}
                 download={block.fileName || 'image.png'}
                 rel="noopener noreferrer"
                 className="block-media-tool-btn"
-                title="Скачать"
+                title={t('blocks.media.download')}
               >
                 <Download size={13} />
               </a>
             )}
-            <button type="button" className="block-media-tool-btn" onClick={handleReplace} title="Заменить">
+            <button type="button" className="block-media-tool-btn" onClick={handleReplace} title={t('blocks.media.replace')}>
               <RefreshCw size={13} />
             </button>
-            <button type="button" className="block-media-tool-btn is-danger" onClick={() => onDelete(block.id)} title="Удалить">
+            <button
+              type="button"
+              className="block-media-tool-btn is-danger"
+              onClick={() => onDelete(block.id)}
+              title={t('blocks.media.delete')}
+            >
               <Trash2 size={13} />
             </button>
           </div>
 
           <img
             src={block.url}
-            alt={block.caption || block.fileName || 'Изображение'}
+            alt={block.caption || block.fileName || t('blocks.media.imageAlt')}
             className="block-image-element"
             loading="lazy"
             onClick={() => setIsImageModalOpen(true)}
@@ -214,20 +233,24 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
           className="block-image-caption"
           value={block.caption || ''}
           onChange={(e) => onChange(block.id, { caption: e.target.value })}
-          placeholder="Добавить подпись..."
+          placeholder={t('blocks.media.addCaption')}
         />
 
-        {isImageModalOpen && (
-          <div className="block-media-modal-backdrop" onClick={() => setIsImageModalOpen(false)}>
-            <div className="block-media-modal-content" onClick={(e) => e.stopPropagation()}>
-              <button type="button" className="block-media-modal-close" onClick={() => setIsImageModalOpen(false)} title="Закрыть">
-                <X size={18} />
-              </button>
-              <img src={block.url} alt={block.caption || block.fileName || 'Изображение'} className="block-media-modal-img" />
-              {block.caption && <p className="block-media-modal-caption">{block.caption}</p>}
-            </div>
-          </div>
-        )}
+        <Dialog open={isImageModalOpen} onOpenChange={setIsImageModalOpen}>
+          <DialogContent className="block-media-modal-content" showCloseButton={false} aria-describedby={undefined}>
+            <DialogTitle className="block-media-modal-title">{block.caption || block.fileName || t('blocks.media.imageAlt')}</DialogTitle>
+            <button
+              type="button"
+              className="block-media-modal-close"
+              onClick={() => setIsImageModalOpen(false)}
+              title={t('blocks.media.close')}
+            >
+              <X size={18} />
+            </button>
+            <img src={block.url} alt={block.caption || block.fileName || t('blocks.media.imageAlt')} className="block-media-modal-img" />
+            {block.caption && <p className="block-media-modal-caption">{block.caption}</p>}
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
@@ -241,32 +264,42 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
               <Music size={18} />
             </div>
             <div className="block-audio-info">
-              <span className="block-audio-name">{block.fileName || 'Аудиозапись'}</span>
+              <span className="block-audio-name">{block.fileName || t('blocks.media.audioTitle')}</span>
               {block.fileSize && <span className="block-audio-size">{formatFileSize(block.fileSize)}</span>}
             </div>
             <div className="block-media-toolbar is-static">
-              {block.url && isSafeMediaUrl(block.url) && (
+              {block.url && isSafeMediaUrl(block.url, block.type) && (
                 <a
                   href={block.url}
                   download={block.fileName || 'audio.mp3'}
                   rel="noopener noreferrer"
                   className="block-media-tool-btn"
-                  title="Скачать"
+                  title={t('blocks.media.download')}
                 >
                   <Download size={13} />
                 </a>
               )}
-              <button type="button" className="block-media-tool-btn" onClick={handleReplace} title="Заменить">
+              <button type="button" className="block-media-tool-btn" onClick={handleReplace} title={t('blocks.media.replace')}>
                 <RefreshCw size={13} />
               </button>
-              <button type="button" className="block-media-tool-btn is-danger" onClick={() => onDelete(block.id)} title="Удалить">
+              <button
+                type="button"
+                className="block-media-tool-btn is-danger"
+                onClick={() => onDelete(block.id)}
+                title={t('blocks.media.delete')}
+              >
                 <Trash2 size={13} />
               </button>
             </div>
           </div>
 
           <div className="block-audio-player-wrap">
-            <audio controls src={isSafeMediaUrl(block.url) ? block.url : undefined} preload="metadata" className="block-audio-element" />
+            <audio
+              controls
+              src={isSafeMediaUrl(block.url, block.type) ? block.url : undefined}
+              preload="metadata"
+              className="block-audio-element"
+            />
           </div>
         </div>
       </div>
@@ -282,7 +315,7 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
               <FileText size={18} />
             </div>
             <div className="block-pdf-info">
-              <span className="block-pdf-name">{block.fileName || 'Документ PDF'}</span>
+              <span className="block-pdf-name">{block.fileName || t('blocks.media.pdfTitle')}</span>
               {block.fileSize && <span className="block-pdf-size">{formatFileSize(block.fileSize)}</span>}
             </div>
             <div className="block-media-toolbar is-static">
@@ -290,7 +323,7 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
                 type="button"
                 className="block-media-tool-btn"
                 onClick={() => setIsPdfExpanded((v) => !v)}
-                title={isPdfExpanded ? 'Свернуть предпросмотр' : 'Развернуть предпросмотр'}
+                title={isPdfExpanded ? t('blocks.media.collapsePreview') : t('blocks.media.expandPreview')}
               >
                 {isPdfExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
@@ -298,42 +331,47 @@ export const MediaBlock = ({ block, onChange, onDelete }: MediaBlockProps) => {
                 type="button"
                 className="block-media-tool-btn"
                 onClick={() => {
-                  if (isSafeMediaUrl(block.url)) {
+                  if (isSafeMediaUrl(block.url, block.type)) {
                     window.open(block.url, '_blank', 'noopener,noreferrer')
                   }
                 }}
-                title="Открыть в новой вкладке"
+                title={t('blocks.media.openNewTab')}
               >
                 <ExternalLink size={13} />
               </button>
-              {block.url && isSafeMediaUrl(block.url) && (
+              {block.url && isSafeMediaUrl(block.url, block.type) && (
                 <a
                   href={block.url}
                   download={block.fileName || 'document.pdf'}
                   rel="noopener noreferrer"
                   className="block-media-tool-btn"
-                  title="Скачать"
+                  title={t('blocks.media.download')}
                 >
                   <Download size={13} />
                 </a>
               )}
-              <button type="button" className="block-media-tool-btn" onClick={handleReplace} title="Заменить">
+              <button type="button" className="block-media-tool-btn" onClick={handleReplace} title={t('blocks.media.replace')}>
                 <RefreshCw size={13} />
               </button>
-              <button type="button" className="block-media-tool-btn is-danger" onClick={() => onDelete(block.id)} title="Удалить">
+              <button
+                type="button"
+                className="block-media-tool-btn is-danger"
+                onClick={() => onDelete(block.id)}
+                title={t('blocks.media.delete')}
+              >
                 <Trash2 size={13} />
               </button>
             </div>
           </div>
 
-          {isPdfExpanded && isSafeMediaUrl(block.url) && (
+          {isPdfExpanded && isSafeMediaUrl(block.url, block.type) && (
             <div className="block-pdf-preview-wrap">
               <object data={block.url} type="application/pdf" className="block-pdf-object">
                 <iframe src={block.url} title={block.fileName || 'PDF Document'} className="block-pdf-iframe">
                   <div className="block-pdf-fallback">
-                    <p>Предпросмотр PDF недоступен в вашем браузере.</p>
+                    <p>{t('blocks.media.pdfUnsupported')}</p>
                     <a href={block.url} target="_blank" rel="noopener noreferrer" className="block-media-url-btn">
-                      Открыть файл
+                      {t('blocks.media.openFile')}
                     </a>
                   </div>
                 </iframe>

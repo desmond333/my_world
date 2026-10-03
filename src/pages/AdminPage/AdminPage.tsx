@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { AlertTriangle, Crown, Database, Eye, Lock, RefreshCw, Search, Shield, Trash2, User, Users, X } from 'lucide-react'
 import { AppTopbar } from '../../widgets'
 import { useTranslation } from '../../lib/i18n'
-import { apiFetch } from '../../services/api/apiClient'
+import { rpc, rpcError } from '../../services/api/rpcClient'
 import { ViewModeToggle } from '../../shared/ui/ViewModeToggle/ViewModeToggle'
+import { Dialog, DialogContent, DialogTitle } from '../../shared/ui'
 import { useAuthStore, usePageViewMode } from '../../store'
 import type { SyncSnapshot } from '../../store/types'
 import './AdminPage.css'
@@ -13,8 +14,18 @@ type AdminUser = {
   id: string
   email: string
   role: 'user' | 'admin'
-  created_at: string
-  premium?: boolean
+  createdAt: string
+  isPremium?: boolean | number
+  premiumUntil?: string | null
+}
+
+type AdminMessage = {
+  id: string
+  email: string
+  topic: string
+  body: string
+  status: string
+  createdAt: string
 }
 
 export const AdminPage = () => {
@@ -36,13 +47,47 @@ export const AdminPage = () => {
   const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
+  const [messages, setMessages] = useState<AdminMessage[]>([])
+
+  const fetchMessages = useCallback(async () => {
+    if (!currentUser || currentUser.role !== 'admin') return
+    try {
+      const res = await rpc.admin.messages.$get()
+      if (!res.ok) return rpcError(res, 'Failed to fetch messages')
+      setMessages(await res.json())
+    } catch {
+      void 0
+    }
+  }, [currentUser])
+
+  const setMessageStatus = async (id: string, status: 'new' | 'read') => {
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, status } : m)))
+    try {
+      const res = await rpc.admin.messages[':messageId'].status.$post({ param: { messageId: id }, json: { status } })
+      if (!res.ok) throw await rpcError(res, 'Failed to update message status')
+    } catch {
+      void fetchMessages()
+    }
+  }
+
+  const removeMessage = async (id: string) => {
+    setMessages((prev) => prev.filter((m) => m.id !== id))
+    try {
+      const res = await rpc.admin.messages[':messageId'].$delete({ param: { messageId: id } })
+      if (!res.ok) throw await rpcError(res, 'Failed to delete message')
+    } catch {
+      void fetchMessages()
+    }
+  }
+
   const fetchUsers = useCallback(async () => {
     if (!currentUser || currentUser.role !== 'admin') return
     setLoading(true)
     setError(null)
     try {
-      const data = await apiFetch<AdminUser[]>('/admin/users')
-      setUsers(data)
+      const res = await rpc.admin.users.$get()
+      if (!res.ok) throw await rpcError(res, 'Failed to fetch users')
+      setUsers((await res.json()) as AdminUser[])
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to fetch users')
     } finally {
@@ -52,18 +97,43 @@ export const AdminPage = () => {
 
   useEffect(() => {
     if (!currentUser || currentUser.role !== 'admin') return
-    const controller = new AbortController()
-    void apiFetch<AdminUser[]>('/admin/users', { signal: controller.signal })
+    let active = true
+    void rpc.admin.users
+      .$get()
+      .then(async (res) => {
+        if (!res.ok) throw await rpcError(res, 'Failed to fetch users')
+        return res.json()
+      })
       .then((data) => {
-        setUsers(data)
+        if (!active) return
+        setUsers(data as AdminUser[])
         setError(null)
       })
       .catch((err: unknown) => {
-        if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : 'Failed to fetch users')
-        }
+        if (!active) return
+        setError(err instanceof Error ? err.message : 'Failed to fetch users')
       })
-    return () => controller.abort()
+    return () => {
+      active = false
+    }
+  }, [currentUser])
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== 'admin') return
+    let active = true
+    void rpc.admin.messages
+      .$get()
+      .then(async (res) => {
+        if (!res.ok) throw await rpcError(res, 'Failed to fetch messages')
+        return res.json()
+      })
+      .then((data) => {
+        if (active) setMessages(data)
+      })
+      .catch(() => void 0)
+    return () => {
+      active = false
+    }
   }, [currentUser])
 
   const handleInspect = async (user: AdminUser) => {
@@ -71,7 +141,9 @@ export const AdminPage = () => {
     setUserSnapshot(null)
     setInspectLoading(true)
     try {
-      const snapshot = await apiFetch<SyncSnapshot>(`/admin/users/${user.id}/sync`)
+      const res = await rpc.admin.users[':userId'].sync.$get({ param: { userId: user.id } })
+      if (!res.ok) throw await rpcError(res, 'Failed to load snapshot')
+      const snapshot = (await res.json()) as SyncSnapshot
       setUserSnapshot(snapshot)
     } catch {
       setUserSnapshot(null)
@@ -82,10 +154,11 @@ export const AdminPage = () => {
 
   const togglePremium = async (target: AdminUser) => {
     try {
-      await apiFetch(`/admin/users/${target.id}/premium`, {
-        method: 'POST',
-        body: JSON.stringify({ premium: !target.premium }),
+      const res = await rpc.admin.users[':userId'].premium.$post({
+        param: { userId: target.id },
+        json: { premium: !target.isPremium },
       })
+      if (!res.ok) throw await rpcError(res, 'Failed to update premium')
       await fetchUsers()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to update premium')
@@ -96,7 +169,8 @@ export const AdminPage = () => {
     if (!deletingUser) return
     setDeleteLoading(true)
     try {
-      await apiFetch(`/admin/users/${deletingUser.id}`, { method: 'DELETE' })
+      const res = await rpc.admin.users[':userId'].$delete({ param: { userId: deletingUser.id } })
+      if (!res.ok) throw await rpcError(res, 'Failed to delete user')
       setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id))
       setDeletingUser(null)
     } catch (err: unknown) {
@@ -202,8 +276,8 @@ export const AdminPage = () => {
               <Database size={22} />
             </div>
             <div className="admin-metric-data">
-              <span className="admin-metric-value" style={{ fontSize: 16, color: '#10b981' }}>
-                ONLINE
+              <span className="admin-metric-value" style={{ fontSize: 16, color: 'var(--accent)' }}>
+                {t('admin.metric.online')}
               </span>
               <span className="admin-metric-label">{t('admin.metric.db')}</span>
             </div>
@@ -286,7 +360,7 @@ export const AdminPage = () => {
                             {u.role.toUpperCase()}
                           </span>
                         </td>
-                        <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                        <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                         <td style={{ textAlign: 'right' }}>
                           <div className="admin-action-btn-group" style={{ justifyContent: 'flex-end' }}>
                             <button
@@ -301,10 +375,10 @@ export const AdminPage = () => {
 
                             <button
                               type="button"
-                              className={`admin-premium-btn${u.premium ? ' is-on' : ''}`}
+                              className={`admin-premium-btn${u.isPremium ? ' is-on' : ''}`}
                               onClick={() => void togglePremium(u)}
-                              title={u.premium ? t('admin.premium.revoke') : t('admin.premium.grant')}
-                              aria-pressed={Boolean(u.premium)}
+                              title={u.isPremium ? t('admin.premium.revoke') : t('admin.premium.grant')}
+                              aria-pressed={Boolean(u.isPremium)}
                             >
                               <Crown size={14} />
                             </button>
@@ -350,7 +424,7 @@ export const AdminPage = () => {
 
                     <div className="admin-user-card-meta">
                       <span>
-                        {t('admin.created')} {new Date(u.created_at).toLocaleString()}
+                        {t('admin.created')} {new Date(u.createdAt).toLocaleString()}
                       </span>
                     </div>
 
@@ -367,13 +441,13 @@ export const AdminPage = () => {
 
                       <button
                         type="button"
-                        className={`admin-premium-btn${u.premium ? ' is-on' : ''}`}
+                        className={`admin-premium-btn${u.isPremium ? ' is-on' : ''}`}
                         onClick={() => void togglePremium(u)}
-                        title={u.premium ? t('admin.premium.revoke') : t('admin.premium.grant')}
-                        aria-pressed={Boolean(u.premium)}
+                        title={u.isPremium ? t('admin.premium.revoke') : t('admin.premium.grant')}
+                        aria-pressed={Boolean(u.isPremium)}
                       >
                         <Crown size={14} />
-                        <span>{u.premium ? t('admin.premium.active') : t('admin.premium.grant')}</span>
+                        <span>{u.isPremium ? t('admin.premium.active') : t('admin.premium.grant')}</span>
                       </button>
 
                       {u.id !== currentUser.id && (
@@ -389,15 +463,54 @@ export const AdminPage = () => {
             </div>
           )}
         </div>
+
+        <div className="admin-users-panel admin-messages-panel">
+          <div className="admin-panel-head">
+            <h3>{t('admin.messages.title')}</h3>
+            <span className="admin-panel-count">{messages.length}</span>
+          </div>
+
+          {messages.length === 0 ? (
+            <p className="admin-empty">{t('admin.messages.empty')}</p>
+          ) : (
+            <ul className="admin-messages-list">
+              {messages.map((message) => (
+                <li key={message.id} className={`admin-message${message.status === 'new' ? ' is-new' : ''}`}>
+                  <div className="admin-message-head">
+                    <span className="admin-message-topic">{t(`admin.messages.topic.${message.topic}`, message.topic)}</span>
+                    <span className="admin-message-email">{message.email}</span>
+                    <span className="admin-message-date">{new Date(message.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p className="admin-message-body">{message.body}</p>
+                  <div className="admin-message-actions">
+                    <button
+                      type="button"
+                      className="admin-refresh-btn"
+                      onClick={() => void setMessageStatus(message.id, message.status === 'new' ? 'read' : 'new')}
+                    >
+                      {message.status === 'new' ? t('admin.messages.markRead') : t('admin.messages.markNew')}
+                    </button>
+                    <button type="button" className="admin-delete-btn" onClick={() => void removeMessage(message.id)}>
+                      <Trash2 size={14} />
+                      <span>{t('admin.messages.delete')}</span>
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
-      {inspectingUser && (
-        <div className="admin-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="admin-modal">
+      <Dialog open={inspectingUser !== null} onOpenChange={(open) => !open && setInspectingUser(null)}>
+        {inspectingUser && (
+          <DialogContent className="admin-modal" showCloseButton={false} aria-describedby={undefined}>
             <div className="admin-modal-head">
-              <h3>
-                {t('admin.snapshot.title')} {inspectingUser.email}
-              </h3>
+              <DialogTitle asChild>
+                <h3>
+                  {t('admin.snapshot.title')} {inspectingUser.email}
+                </h3>
+              </DialogTitle>
               <button type="button" className="admin-modal-close" onClick={() => setInspectingUser(null)}>
                 <X size={18} />
               </button>
@@ -457,15 +570,17 @@ export const AdminPage = () => {
                 <div style={{ textAlign: 'center', padding: '30px', color: 'var(--muted)' }}>{t('admin.snapshot.failed')}</div>
               )}
             </div>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
 
-      {deletingUser && (
-        <div className="admin-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="admin-modal" style={{ maxWidth: 440 }}>
+      <Dialog open={deletingUser !== null} onOpenChange={(open) => !open && setDeletingUser(null)}>
+        {deletingUser && (
+          <DialogContent className="admin-modal" style={{ maxWidth: 440 }} showCloseButton={false} aria-describedby={undefined}>
             <div className="admin-modal-head">
-              <h3>{t('admin.deleteConfirm.title')}</h3>
+              <DialogTitle asChild>
+                <h3>{t('admin.deleteConfirm.title')}</h3>
+              </DialogTitle>
               <button type="button" className="admin-modal-close" onClick={() => setDeletingUser(null)}>
                 <X size={18} />
               </button>
@@ -473,7 +588,7 @@ export const AdminPage = () => {
 
             <div className="admin-modal-body">
               <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                <div style={{ color: '#ef4444' }}>
+                <div style={{ color: 'var(--coral)' }}>
                   <AlertTriangle size={32} />
                 </div>
                 <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
@@ -491,9 +606,9 @@ export const AdminPage = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
     </main>
   )
 }

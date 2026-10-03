@@ -1,5 +1,6 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTranslation } from '../../lib/i18n'
+import { Tooltip } from '../../shared/ui'
 import { useDailyStore } from '../../store'
 
 export const ThemeSwitcher = () => {
@@ -42,15 +43,11 @@ export const ThemeSwitcher = () => {
   }
 
   return (
-    <button
-      type="button"
-      className="theme-cycle-btn"
-      onClick={cycleTheme}
-      title={`${t('topbar.theme')}: ${getThemeLabel()} (${t('topbar.themeCycle')})`}
-      aria-label={`${t('topbar.theme')}: ${getThemeLabel()}`}
-    >
-      <span className="theme-cycle-icon">{getThemeIcon()}</span>
-      <span className="theme-cycle-label">{getThemeLabel()}</span>
-    </button>
+    <Tooltip content={`${t('topbar.theme')}: ${getThemeLabel()} (${t('topbar.themeCycle')})`}>
+      <button type="button" className="theme-cycle-btn" onClick={cycleTheme} aria-label={`${t('topbar.theme')}: ${getThemeLabel()}`}>
+        <span className="theme-cycle-icon">{getThemeIcon()}</span>
+        <span className="theme-cycle-label">{getThemeLabel()}</span>
+      </button>
+    </Tooltip>
   )
 }

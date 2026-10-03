@@ -65,14 +65,21 @@
   font-size: 12px;
   opacity: 0.72;
 }
-.today-sports {
+.today-sports.ui-toggle-group,
+.calendar-picker-sports.ui-toggle-group {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+.today-sports.ui-toggle-group {
   margin-left: auto;
 }
-.sport-button,
-.sport-chip {
+.ui-toggle-group-item.sport-button,
+.ui-toggle-group-item.sport-chip {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -84,13 +91,18 @@
   white-space: nowrap;
   font-size: 13px;
   font-weight: 600;
+  border-radius: 0;
   transition:
     background-color 0.18s ease,
     color 0.18s ease;
 }
-.sport-button:hover:not(.is-on),
-.sport-chip:hover:not(.is-on) {
+.ui-toggle-group-item.sport-button:hover:not([data-state='on']),
+.ui-toggle-group-item.sport-chip:hover:not([data-state='on']) {
   background: #1517171f;
+}
+.ui-toggle-group-item.sport-button[data-state='on'],
+.ui-toggle-group-item.sport-chip[data-state='on'] {
+  box-shadow: none;
 }
 
 .calendar {
@@ -522,7 +534,7 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.calendar-picker-sports .sport-chip {
+.calendar-picker-sports .ui-toggle-group-item.sport-chip {
   padding: 8px 13px;
   font-size: 12px;
 }

@@ -1,0 +1,960 @@
+.medieval-battle-page {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 24px 20px 54px;
+  position: relative;
+}
+
+.lottery-head h1 {
+  margin: 6px 0 8px;
+  font-size: clamp(24px, 3.2vw, 36px);
+  letter-spacing: -0.02em;
+}
+
+.lottery-head .intro {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.lottery-locked-page {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lottery-locked-card {
+  width: min(480px, calc(100vw - 32px));
+  padding: 36px 28px;
+  border-radius: var(--radius);
+  background: radial-gradient(circle at 50% 15%, rgba(244, 184, 73, 0.15) 0%, rgba(20, 19, 24, 0.95) 80%);
+  border: 1px solid rgba(244, 184, 73, 0.35);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.7),
+    0 0 40px rgba(244, 184, 73, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.lottery-locked-icon {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(244, 184, 73, 0.12);
+  border: 1px solid rgba(244, 184, 73, 0.4);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+}
+
+.lottery-shield-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  color: #ffd700;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.lottery-locked-intro {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 40ch;
+}
+
+.lottery-locked-pricing {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.locked-balance-pill,
+.locked-cost-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 12px;
+}
+
+.locked-balance-pill strong,
+.locked-cost-pill strong {
+  color: var(--accent);
+  font-family: 'DM Mono', monospace;
+}
+
+.lottery-locked-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.lottery-unlock-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #121316;
+  font:
+    700 13px 'DM Mono',
+    monospace;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 16px rgba(244, 184, 73, 0.3);
+}
+
+.lottery-unlock-btn:hover {
+  background: #ffc45e;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(244, 184, 73, 0.45);
+}
+
+.lottery-shop-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fg);
+  font-size: 12px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.lottery-shop-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lottery-no-coins {
+  margin: 0;
+  color: var(--coral);
+  font-size: 12px;
+}
+
+.battle-presets-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.presets-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.presets-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--fg);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-btn:hover {
+  border-color: var(--accent);
+  background: rgba(244, 184, 73, 0.1);
+  transform: translateY(-1px);
+}
+
+.preset-btn.btn-reset {
+  color: var(--muted);
+}
+
+.preset-btn.btn-reset:hover {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+
+.balance-tug-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  margin-bottom: 24px;
+}
+
+.balance-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.balance-side-badge {
+  font:
+    600 12px 'DM Mono',
+    monospace;
+}
+
+.balance-side-badge.green-badge {
+  color: #34d399;
+}
+
+.balance-side-badge.purple-badge {
+  color: #c084fc;
+}
+
+.balance-indicator-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.tug-of-war-track {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  border: 1px solid var(--line);
+}
+
+.tug-bar-green {
+  height: 100%;
+  background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tug-bar-purple {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7 0%, #7e22ce 100%);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tug-divider {
+  width: 2px;
+  height: 100%;
+  background: #ffd700;
+  box-shadow: 0 0 8px #ffd700;
+  z-index: 2;
+}
+
+.armies-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.army-card {
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.army-green {
+  border-color: rgba(52, 211, 153, 0.3);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.06);
+}
+
+.army-purple {
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 8px 30px rgba(168, 85, 247, 0.06);
+}
+
+.army-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.army-crest {
+  font-size: 26px;
+}
+
+.army-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.army-green .army-name {
+  color: #a7f3d0;
+}
+
+.army-purple .army-name {
+  color: #e9d5ff;
+}
+
+.army-motto {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.troops-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.troop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.troop-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.troop-icon {
+  font-size: 18px;
+}
+
+.troop-name {
+  display: block;
+  font-size: 12px;
+  color: var(--fg);
+}
+
+.troop-desc {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.troop-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.troop-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fg);
+  font:
+    600 11px 'DM Mono',
+    monospace;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.troop-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(244, 184, 73, 0.15);
+}
+
+.troop-btn-bulk {
+  width: 28px;
+  font-size: 10px;
+}
+
+.troop-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.troop-count {
+  min-width: 24px;
+  text-align: center;
+  font:
+    700 12px 'DM Mono',
+    monospace;
+  color: var(--fg);
+}
+
+.battle-action-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-top: 30px;
+}
+
+.start-clash-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 2px solid #ffd700;
+  background: radial-gradient(circle at 35% 35%, #854d0e 0%, #1c1917 100%);
+  color: #fef08a;
+  font:
+    700 13px 'DM Mono',
+    monospace;
+  cursor: pointer;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 0 24px rgba(234, 179, 8, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  padding: 12px;
+}
+
+.start-clash-btn:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.7),
+    0 0 36px rgba(234, 179, 8, 0.45);
+}
+
+.start-clash-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--line);
+}
+
+.start-clash-btn.is-fighting {
+  animation: clashShake 0.15s ease-in-out infinite alternate;
+  border-color: #ef4444;
+}
+
+@keyframes clashShake {
+  from {
+    transform: rotate(-3deg) scale(1.03);
+  }
+  to {
+    transform: rotate(3deg) scale(1.06);
+  }
+}
+
+.battle-score-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  font:
+    600 11px 'DM Mono',
+    monospace;
+}
+
+.score-badge {
+  padding: 1px 6px;
+  border-radius: var(--radius);
+}
+
+.ui-dialog-content.battle-result-card {
+  position: relative;
+  width: min(500px, calc(100vw - 32px));
+  padding: 32px 28px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.battle-result-card.winner-green {
+  background: radial-gradient(circle at 50% 15%, rgba(16, 185, 129, 0.22) 0%, rgba(15, 23, 20, 0.96) 80%);
+  border-color: rgba(52, 211, 153, 0.45);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(52, 211, 153, 0.25);
+}
+
+.battle-result-card.winner-purple {
+  background: radial-gradient(circle at 50% 15%, rgba(168, 85, 247, 0.22) 0%, rgba(20, 16, 32, 0.96) 80%);
+  border-color: rgba(192, 132, 252, 0.45);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(192, 132, 252, 0.25);
+}
+
+.battle-result-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.battle-result-close:hover {
+  color: var(--fg);
+}
+
+.battle-result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    700 12px 'DM Mono',
+    monospace;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.winner-green .battle-result-badge {
+  color: #34d399;
+}
+
+.winner-purple .battle-result-badge {
+  color: #c084fc;
+}
+
+.battle-result-title {
+  margin: 0 0 10px;
+  font:
+    700 24px 'Playfair Display',
+    Georgia,
+    serif;
+  color: #fff;
+}
+
+.battle-result-story {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 44ch;
+}
+
+.battle-reward-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  background: rgba(244, 184, 73, 0.15);
+  border: 1px solid rgba(244, 184, 73, 0.4);
+  color: #f4b849;
+  font:
+    700 15px 'DM Mono',
+    monospace;
+  margin-bottom: 16px;
+}
+
+.battle-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    600 14px 'DM Mono',
+    monospace;
+  margin-bottom: 20px;
+}
+
+.score-green {
+  color: #34d399;
+}
+
+.score-purple {
+  color: #c084fc;
+}
+
+.battle-next-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 24px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #121316;
+  font:
+    600 13px 'DM Mono',
+    monospace;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.battle-next-btn:hover {
+  background: #ffc45e;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 860px) {
+  .armies-grid {
+    grid-template-columns: 1fr;
+  }
+  .battle-action-center {
+    order: -1;
+    padding-top: 0;
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .lottery-odds dt,
+  .lottery-stat-label,
+  .lottery-variant-hint,
+  .lottery-expect,
+  .lottery-wheel-core {
+    font-size: 11px;
+  }
+}
+
+.lottery-variants {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 26px 0 14px;
+}
+.lottery-variant {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.22s ease,
+    background-color 0.22s ease,
+    transform 0.22s ease;
+}
+.lottery-variant:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.lottery-variant.is-on {
+  border-color: var(--accent);
+  background: linear-gradient(160deg, var(--panel) 0%, var(--bg) 100%);
+}
+.lottery-variant-label {
+  font-size: 15px;
+  font-weight: 600;
+}
+.lottery-variant-hint {
+  color: var(--accent);
+  font:
+    600 10px 'DM Mono',
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lottery-variant-prize {
+  color: var(--muted);
+  font:
+    500 19px 'Fraunces',
+    serif;
+  letter-spacing: -0.03em;
+}
+
+.lottery-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 30px 32px 32px;
+}
+.lottery-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.lottery-wheel-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 320px;
+  user-select: none;
+}
+.lottery-pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  margin-left: -11px;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-top: 18px solid var(--coral);
+  pointer-events: none;
+}
+.lottery-wheel-frame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 6px var(--bg),
+    0 14px 34px rgba(0, 0, 0, 0.22);
+  transition: box-shadow 0.3s ease;
+}
+.lottery-wheel-frame.is-flash {
+  box-shadow:
+    0 0 0 6px var(--bg),
+    0 0 34px var(--accent);
+}
+.lottery-wheel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  transition: transform 3.2s cubic-bezier(0.18, 0.86, 0.16, 1);
+}
+.lottery-wheel::after {
+  content: '';
+  position: absolute;
+  inset: 22px;
+  border-radius: 50%;
+  border: 1px dashed var(--line);
+  opacity: 0.7;
+  pointer-events: none;
+}
+.lottery-wheel-core {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 96px;
+  height: 96px;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font:
+    600 9px 'DM Mono',
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lottery-spin {
+  width: 100%;
+}
+
+.lottery-result {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+  animation: panel-in 0.3s ease;
+}
+.lottery-result.is-win {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.lottery-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.lottery-odds {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.lottery-odds dt {
+  color: var(--muted);
+  font:
+    10px 'DM Mono',
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lottery-odds dd {
+  margin: 5px 0 0;
+  color: var(--accent);
+  font:
+    500 24px 'Fraunces',
+    serif;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+.lottery-comment {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.lottery-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 16px 0;
+}
+.lottery-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.lottery-stat-value {
+  color: var(--fg);
+  font:
+    500 21px 'Fraunces',
+    serif;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+.lottery-stat-label {
+  color: var(--muted);
+  font:
+    10px 'DM Mono',
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lottery-expect {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.lottery-expect svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--coral);
+}
+.lottery-expect.is-lucky {
+  color: var(--accent);
+}
+
+.lottery-actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+@media (max-width: 900px) {
+  .lottery-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .lottery-variants {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lottery-panel {
+    padding: 20px 15px 22px;
+  }
+  .lottery-wheel-wrap {
+    max-width: min(280px, 100%);
+  }
+  .lottery-odds {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lottery-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .lottery-actions {
+    flex-direction: column;
+  }
+  .lottery-actions .mini-button {
+    justify-content: center;
+  }
+}
+
+.lottery-tabs {
+  margin-top: 18px;
+}
+
+.lottery-tabs-list {
+  margin-bottom: 18px;
+  width: fit-content;
+}

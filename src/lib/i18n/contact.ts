@@ -1,0 +1,36 @@
+import type { Dictionary } from './types'
+
+export const contact: Dictionary = {
+  ru: {
+    'contact.open': 'Написать создателю',
+    'contact.title': 'Написать создателю',
+    'contact.desc': 'Идея, баг или просто привет — сообщение попадёт прямо создателю приложения.',
+    'contact.topic.support': 'Поддержка',
+    'contact.topic.idea': 'Идея',
+    'contact.topic.bug': 'Баг',
+    'contact.topicLabel': 'Тема',
+    'contact.placeholder': 'Твоё сообщение…',
+    'contact.send': 'Отправить',
+    'contact.sending': 'Отправляем…',
+    'contact.sent': 'Отправлено! Спасибо, что написал.',
+    'contact.error': 'Не удалось отправить. Попробуй позже.',
+    'contact.tooShort': 'Слишком коротко — минимум 5 символов.',
+    'contact.replyNote': 'Ответ прилетит на {email}',
+  },
+  en: {
+    'contact.open': 'Message the creator',
+    'contact.title': 'Message the creator',
+    'contact.desc': 'An idea, a bug or just a hello — your message goes straight to the app creator.',
+    'contact.topic.support': 'Support',
+    'contact.topic.idea': 'Idea',
+    'contact.topic.bug': 'Bug',
+    'contact.topicLabel': 'Topic',
+    'contact.placeholder': 'Your message…',
+    'contact.send': 'Send',
+    'contact.sending': 'Sending…',
+    'contact.sent': 'Sent! Thanks for reaching out.',
+    'contact.error': 'Could not send. Try again later.',
+    'contact.tooShort': 'Too short — at least 5 characters.',
+    'contact.replyNote': 'We will reply to {email}',
+  },
+}

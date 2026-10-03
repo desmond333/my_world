@@ -166,6 +166,46 @@ export const AvailabilitySchema = v.looseObject({
   windows: v.optional(v.array(AvailabilityWindowSchema)),
 })
 
+export const FavoriteItemSchema = v.looseObject({
+  id: v.string(),
+  name: v.optional(v.string()),
+  breed: v.optional(v.string()),
+  image: v.optional(v.string()),
+  addedAt: v.optional(v.string()),
+})
+
+export const LotteryStatsSchema = v.record(
+  v.string(),
+  v.looseObject({
+    spins: v.optional(v.number()),
+    wins: v.optional(v.number()),
+    earned: v.optional(v.number()),
+  }),
+)
+
+export const ShopSchema = v.looseObject({
+  coins: v.optional(v.number()),
+  unlockedParts: v.optional(v.record(v.string(), v.boolean())),
+  activeCatSkin: v.optional(v.picklist(['classic', 'wizard', 'cyber'])),
+  activeThemeSkin: v.optional(
+    v.picklist(['default', 'spring', 'summer', 'autumn', 'winter', 'cyberpunk', 'midnight_gold', 'violet', 'anime']),
+  ),
+  greetingSent: v.optional(v.boolean()),
+  greetingFriendName: v.optional(v.string()),
+  greetingTimestamp: v.optional(v.nullable(v.number())),
+  greetingRewardClaimed: v.optional(v.boolean()),
+  hasPendingGreetingReply: v.optional(v.boolean()),
+})
+
+export const ViewModeSchema = v.picklist(['simple', 'normal'])
+
+export const ViewModesSchema = v.looseObject({
+  globalMode: v.optional(ViewModeSchema),
+  pageModes: v.optional(v.record(v.string(), ViewModeSchema)),
+  avatarMode: v.optional(ViewModeSchema),
+  cornerStyle: v.optional(v.picklist(['round', 'middle', 'square'])),
+})
+
 export const SyncSnapshotSchema = v.looseObject({
   settings: v.optional(SettingSchema),
   training: v.optional(TrainingSchema),
@@ -174,11 +214,11 @@ export const SyncSnapshotSchema = v.looseObject({
   subscriptions: v.optional(SubscriptionsSchema),
   birthdays: v.optional(BirthdaysSchema),
   collection: v.optional(CollectionSchema),
-  favorites: v.optional(v.array(v.any())),
-  lottery: v.optional(v.record(v.string(), v.any())),
+  favorites: v.optional(v.array(FavoriteItemSchema)),
+  lottery: v.optional(LotteryStatsSchema),
   notes: v.optional(v.array(NoteItemSchema)),
-  shop: v.optional(v.any()),
-  viewModes: v.optional(v.any()),
+  shop: v.optional(ShopSchema),
+  viewModes: v.optional(ViewModesSchema),
   availability: v.optional(AvailabilitySchema),
 })
 

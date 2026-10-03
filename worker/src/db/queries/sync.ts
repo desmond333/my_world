@@ -10,7 +10,7 @@ import { getFavorites } from './favorites'
 import { getLotteryStats } from './lottery'
 import { getNotes } from './notes'
 import { getShopState } from './shop'
-import { getViewModes } from './viewModes'
+import { getViewModes, sanitizeCornerStyle, sanitizePageModes, sanitizeViewMode } from './viewModes'
 import type { CollectionItem, SyncSnapshot } from '../../types'
 import { MINUTES_IN_DAY } from '../../types'
 
@@ -254,7 +254,8 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
                  priority = excluded.priority,
                  note = excluded.note,
                  sender_id = COALESCE(excluded.sender_id, productivity_items.sender_id),
-                 sender_name = COALESCE(excluded.sender_name, productivity_items.sender_name)`,
+                 sender_name = COALESCE(excluded.sender_name, productivity_items.sender_name)
+               WHERE productivity_items.user_id = excluded.user_id`,
             )
             .bind(
               item.id || crypto.randomUUID(),
@@ -454,8 +455,6 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
   }
 
   if (snapshot.shop) {
-    // coins и unlockedParts — серверные (начисление через /api/shop/earn и /api/shop/buy),
-    // из клиентского снимка синхронизируется только косметика и приветствия.
     statements.push(
       db
         .prepare(
@@ -490,18 +489,20 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
     statements.push(
       db
         .prepare(
-          `INSERT INTO view_modes (user_id, global_mode, page_modes_json, avatar_mode)
-           VALUES (?, ?, ?, ?)
+          `INSERT INTO view_modes (user_id, global_mode, page_modes_json, avatar_mode, corner_style)
+           VALUES (?, ?, ?, ?, ?)
            ON CONFLICT(user_id) DO UPDATE SET
              global_mode = excluded.global_mode,
              page_modes_json = excluded.page_modes_json,
-             avatar_mode = excluded.avatar_mode`,
+             avatar_mode = excluded.avatar_mode,
+             corner_style = excluded.corner_style`,
         )
         .bind(
           userId,
-          snapshot.viewModes.globalMode || 'simple',
-          JSON.stringify(snapshot.viewModes.pageModes || {}),
-          snapshot.viewModes.avatarMode || 'simple',
+          sanitizeViewMode(snapshot.viewModes.globalMode),
+          JSON.stringify(sanitizePageModes(snapshot.viewModes.pageModes)),
+          sanitizeViewMode(snapshot.viewModes.avatarMode),
+          sanitizeCornerStyle(snapshot.viewModes.cornerStyle),
         ),
     )
   }
@@ -548,9 +549,7 @@ export const applySyncSnapshot = async (db: D1Database, userId: string, snapshot
     }
   }
 
-  const BATCH_SIZE = 100
-  for (let i = 0; i < statements.length; i += BATCH_SIZE) {
-    const chunk = statements.slice(i, i + BATCH_SIZE)
-    await db.batch(chunk)
+  if (statements.length > 0) {
+    await db.batch(statements)
   }
 }

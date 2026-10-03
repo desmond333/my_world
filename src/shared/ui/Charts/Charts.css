@@ -88,7 +88,6 @@
   pointer-events: all;
 }
 
-/* Progress Ring */
 .ui-progress-ring {
   display: inline-flex;
   align-items: center;
@@ -129,7 +128,6 @@
   margin-top: 3px;
 }
 
-/* Donut Chart */
 .ui-donut-chart {
   display: flex;
   align-items: center;
@@ -176,6 +174,6 @@
 .ui-chart-legend-dot {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: var(--radius);
   flex-shrink: 0;
 }

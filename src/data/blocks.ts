@@ -12,15 +12,16 @@ export const blockOptions: { key: BlockKey; label: string; hint: string }[] = [
 export const defaultBlocks: Blocks = { animal: true, today: true, weather: true, wish: true, occasion: true, training: true }
 
 export const startPageOptions: { path: string; key: string; fallback: string }[] = [
-  { path: '/today', key: 'settings.start.today', fallback: 'Животное дня' },
-  { path: '/extra/productivity/task', key: 'settings.start.tasks', fallback: 'Продуктивность — задачи' },
-  { path: '/extra/productivity/goal', key: 'settings.start.goals', fallback: 'Продуктивность — цели' },
-  { path: '/extra/productivity/status', key: 'settings.start.status', fallback: 'Продуктивность — статус' },
-  { path: '/extra/training', key: 'settings.start.training', fallback: 'Тренировки' },
-  { path: '/extra/finance', key: 'settings.start.finance', fallback: 'Финансы' },
-  { path: '/extra/media/movies', key: 'settings.start.media', fallback: 'Медиа' },
-  { path: '/extra/finance/subscriptions', key: 'settings.start.subscriptions', fallback: 'Подписки' },
-  { path: '/misc/languages', key: 'settings.start.languages', fallback: 'Языки' },
-  { path: '/misc/fun', key: 'settings.start.fun', fallback: 'Веселье' },
+  { path: '/today', key: 'settings.start.today', fallback: 'Сегодня' },
+  { path: '/useful/productivity/task', key: 'settings.start.tasks', fallback: 'Продуктивность — задачи' },
+  { path: '/useful/productivity/goal', key: 'settings.start.goals', fallback: 'Продуктивность — цели' },
+  { path: '/useful/productivity/status', key: 'settings.start.status', fallback: 'Продуктивность — статус' },
+  { path: '/useful/training', key: 'settings.start.training', fallback: 'Тренировки' },
+  { path: '/useful/finance', key: 'settings.start.finance', fallback: 'Финансы' },
+  { path: '/useful/media/movies', key: 'settings.start.media', fallback: 'Медиа' },
+  { path: '/useful/finance/subscriptions', key: 'settings.start.subscriptions', fallback: 'Подписки' },
+  { path: '/useful/languages', key: 'settings.start.languages', fallback: 'Языки' },
+  { path: '/useful/sounds', key: 'settings.start.sounds', fallback: 'Звуки' },
+  { path: '/useful/fun', key: 'settings.start.fun', fallback: 'Веселье' },
   { path: '/favorites', key: 'settings.start.favorites', fallback: 'Избранное' },
 ]

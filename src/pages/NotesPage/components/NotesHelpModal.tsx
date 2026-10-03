@@ -18,7 +18,7 @@ import {
   Quote,
   Sparkles,
 } from 'lucide-react'
-import { Button, Modal } from '../../../shared/ui'
+import { Button, Modal, Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui'
 import { useTranslation } from '../../../lib/i18n'
 import './NotesHelpModal.css'
 
@@ -126,52 +126,32 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
 
   return (
     <Modal open={isOpen} onClose={onClose} title={t('notes.help.title')} description={t('notes.help.subtitle')} maxWidth={720}>
-      <div className="notes-help-modal">
-        <div className="notes-help-tabs" role="tablist">
-          <button
-            type="button"
-            className={`notes-help-tab-btn ${activeTab === 'slash' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('slash')}
-          >
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabKey)} className="notes-help-modal">
+        <TabsList aria-label={t('notes.help.title')}>
+          <TabsTrigger value="slash">
             <Command size={14} />
             <span>{t('notesHelp.slash-commands', 'Команды (/)')}</span>
-          </button>
-          <button
-            type="button"
-            className={`notes-help-tab-btn ${activeTab === 'blocks' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('blocks')}
-          >
+          </TabsTrigger>
+          <TabsTrigger value="blocks">
             <GripVertical size={14} />
             <span>{t('notesHelp.drag-drop', 'Управление блоками')}</span>
-          </button>
-          <button
-            type="button"
-            className={`notes-help-tab-btn ${activeTab === 'keys' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('keys')}
-          >
+          </TabsTrigger>
+          <TabsTrigger value="keys">
             <Keyboard size={14} />
             <span>{t('notesHelp.shortcuts')}</span>
-          </button>
-          <button
-            type="button"
-            className={`notes-help-tab-btn ${activeTab === 'media' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('media')}
-          >
+          </TabsTrigger>
+          <TabsTrigger value="media">
             <Image size={14} />
             <span>{t('notesHelp.media')}</span>
-          </button>
-          <button
-            type="button"
-            className={`notes-help-tab-btn ${activeTab === 'tree' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('tree')}
-          >
+          </TabsTrigger>
+          <TabsTrigger value="tree">
             <FolderTree size={14} />
             <span>{t('notesHelp.page-tree', 'Дерево страниц')}</span>
-          </button>
-        </div>
+          </TabsTrigger>
+        </TabsList>
 
         <div className="notes-help-content">
-          {activeTab === 'slash' && (
+          <TabsContent value="slash">
             <>
               <p className="notes-help-lead">
                 {t(
@@ -195,9 +175,9 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                 })}
               </div>
             </>
-          )}
+          </TabsContent>
 
-          {activeTab === 'blocks' && (
+          <TabsContent value="blocks">
             <div className="notes-help-feature-list">
               <div className="notes-help-feature-item">
                 <span className="notes-help-feature-icon">
@@ -229,9 +209,9 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                 </div>
               </div>
             </div>
-          )}
+          </TabsContent>
 
-          {activeTab === 'keys' && (
+          <TabsContent value="keys">
             <div className="notes-help-feature-list">
               {shortcuts.map((sc) => (
                 <div key={sc.key} className="notes-help-shortcut-row">
@@ -240,9 +220,9 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                 </div>
               ))}
             </div>
-          )}
+          </TabsContent>
 
-          {activeTab === 'media' && (
+          <TabsContent value="media">
             <div className="notes-help-feature-list">
               <div className="notes-help-feature-item">
                 <span className="notes-help-feature-icon">
@@ -289,9 +269,9 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                 </div>
               </div>
             </div>
-          )}
+          </TabsContent>
 
-          {activeTab === 'tree' && (
+          <TabsContent value="tree">
             <div className="notes-help-feature-list">
               <div className="notes-help-feature-item">
                 <span className="notes-help-feature-icon">
@@ -323,7 +303,7 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
                 </div>
               </div>
             </div>
-          )}
+          </TabsContent>
         </div>
 
         <div className="notes-help-footer">
@@ -331,7 +311,7 @@ export const NotesHelpModal = ({ isOpen, onClose }: NotesHelpModalProps) => {
             {t('notesHelp.got-it', 'Понятно')}
           </Button>
         </div>
-      </div>
+      </Tabs>
     </Modal>
   )
 }

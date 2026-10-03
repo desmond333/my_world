@@ -13,7 +13,6 @@ export const addMonths = (fromIso: string, months: number): string => {
   const date = new Date(fromIso)
   const day = date.getUTCDate()
   date.setUTCMonth(date.getUTCMonth() + months)
-  // если день «перескочил» из-за короткого месяца — откатываем к последнему дню
   if (date.getUTCDate() < day) date.setUTCDate(0)
   return date.toISOString()
 }

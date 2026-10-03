@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Bike, ChevronLeft, ChevronRight, ClipboardCopy, Dumbbell, Flame, PieChart, Plus, Settings2, Trash2, Check } from 'lucide-react'
 import { findCity } from '../../data'
 import { useCopyFeedback } from '../../hooks'
-import { DonutChart, Switch, ViewModeToggle } from '../../shared/ui'
+import { DonutChart, Switch, ToggleGroup, ToggleGroupItem, ViewModeToggle } from '../../shared/ui'
 import {
   activeSports,
   daySports,
@@ -54,6 +54,14 @@ export const TrainingPage = () => {
   const totals = sportTotals(days, sports).filter((item) => item.count > 0)
   const enabled = activeSports(sports)
   const todayKinds = daySports(days, today)
+  const pickedKinds = useMemo(() => (picked ? daySports(days, picked) : []), [days, picked])
+
+  const toggleSportFromGroup = (date: string, current: string[], next: string[]) => {
+    const added = next.find((id) => !current.includes(id))
+    const removed = current.find((id) => !next.includes(id))
+    const changed = added ?? removed
+    if (changed) toggleSport(date, changed)
+  }
 
   const shift = (delta: number) =>
     setCursor(({ year, month }) => {
@@ -124,22 +132,27 @@ export const TrainingPage = () => {
               : t('training.today.empty')}
           </p>
         </div>
-        <div className="today-sports">
+        <ToggleGroup
+          type="multiple"
+          value={todayKinds}
+          onValueChange={(next) => toggleSportFromGroup(today, todayKinds, next)}
+          className="today-sports"
+          aria-label={t('training.today.kicker')}
+        >
           {enabled.map((sport) => {
             const on = todayKinds.includes(sport.id)
             return (
-              <button
+              <ToggleGroupItem
                 key={sport.id}
-                className={`sport-button${on ? ' is-on' : ''}`}
-                style={on ? { background: sport.color, borderColor: sport.color, color: '#151717' } : { borderColor: sport.color }}
-                onClick={() => toggleSport(today, sport.id)}
-                aria-pressed={on}
+                value={sport.id}
+                className="sport-button"
+                style={on ? { background: sport.color, borderColor: sport.color, color: 'var(--ink)' } : { borderColor: sport.color }}
               >
                 {sportIcon(sport.id)} {sportLabel(sport, lang)}
-              </button>
+              </ToggleGroupItem>
             )
           })}
-        </div>
+        </ToggleGroup>
       </section>
 
       {isNormal && (
@@ -256,22 +269,29 @@ export const TrainingPage = () => {
             {picked && (
               <div className="calendar-picker">
                 <span className="calendar-picker-date">{formatShortDate(picked, locale)}</span>
-                <div className="calendar-picker-sports">
+                <ToggleGroup
+                  type="multiple"
+                  value={pickedKinds}
+                  onValueChange={(next) => toggleSportFromGroup(picked, pickedKinds, next)}
+                  className="calendar-picker-sports"
+                  aria-label={t('training.calendarAria')}
+                >
                   {sports.map((sport) => {
-                    const on = daySports(days, picked).includes(sport.id)
+                    const on = pickedKinds.includes(sport.id)
                     return (
-                      <button
+                      <ToggleGroupItem
                         key={sport.id}
-                        className={`sport-chip${on ? ' is-on' : ''}`}
-                        style={on ? { background: sport.color, borderColor: sport.color, color: '#151717' } : { borderColor: sport.color }}
-                        onClick={() => toggleSport(picked, sport.id)}
-                        aria-pressed={on}
+                        value={sport.id}
+                        className="sport-chip"
+                        style={
+                          on ? { background: sport.color, borderColor: sport.color, color: 'var(--ink)' } : { borderColor: sport.color }
+                        }
                       >
                         {sportIcon(sport.id)} {sportLabel(sport, lang)}
-                      </button>
+                      </ToggleGroupItem>
                     )
                   })}
-                </div>
+                </ToggleGroup>
               </div>
             )}
             <p className="calendar-note">

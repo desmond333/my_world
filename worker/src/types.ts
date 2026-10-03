@@ -206,9 +206,27 @@ export type NoteItem = {
   updatedAt: string
 }
 
-export type ShopItemKey = 'lottery' | 'statham' | 'cat_wizard' | 'cat_cyber' | 'theme_cyberpunk' | 'theme_midnight_gold' | 'sound_lofi'
+export type ShopItemKey =
+  | 'lottery'
+  | 'statham'
+  | 'cat_wizard'
+  | 'cat_cyber'
+  | 'theme_spring'
+  | 'theme_summer'
+  | 'theme_autumn'
+  | 'theme_winter'
+  | 'theme_cyberpunk'
+  | 'theme_midnight_gold'
+  | 'theme_violet'
+  | 'theme_anime'
+  | 'sound_lofi'
+  | 'lang_advanced'
+  | 'notes_advanced'
+  | 'view_normal'
+  | 'finance_advice'
+  | 'motion_pro'
 export type CatSkinId = 'classic' | 'wizard' | 'cyber'
-export type ThemeSkinId = 'default' | 'cyberpunk' | 'midnight_gold'
+export type ThemeSkinId = 'default' | 'spring' | 'summer' | 'autumn' | 'winter' | 'cyberpunk' | 'midnight_gold' | 'violet' | 'anime'
 
 export type ShopStateData = {
   coins: number
@@ -224,10 +242,13 @@ export type ShopStateData = {
 
 export type ViewMode = 'simple' | 'normal'
 
+export type CornerStyle = 'round' | 'middle' | 'square'
+
 export type ViewModesData = {
   globalMode: ViewMode
   pageModes: Record<string, ViewMode>
   avatarMode: ViewMode
+  cornerStyle: CornerStyle
 }
 
 export type SyncSnapshot = {
@@ -267,4 +288,17 @@ export type SyncSnapshot = {
   notes: NoteItem[]
   shop: ShopStateData
   viewModes: ViewModesData
+}
+
+export const CONTACT_TOPICS = ['support', 'idea', 'bug'] as const
+export type ContactTopic = (typeof CONTACT_TOPICS)[number]
+
+export type ContactMessage = {
+  id: string
+  userId: string | null
+  email: string
+  topic: string
+  body: string
+  status: string
+  createdAt: string
 }
